@@ -1,0 +1,56 @@
+.dashboard-container {
+  padding: 2rem;
+  max-width: 900px;
+  margin: auto;
+  background-color: #fff5f7;
+  border-radius: 10px;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.06);
+}
+
+.dashboard-container h2 {
+  color: #c2185b;
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.dashboard-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.dashboard-table th,
+.dashboard-table td {
+  padding: 0.75rem;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+}
+
+.dashboard-table th {
+  background-color: #fce4ec;
+  color: #c2185b;
+}
+
+.dashboard-table select,
+.dashboard-table button {
+  padding: 0.4rem 0.6rem;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 0.9rem;
+}
+
+.dashboard-table button {
+  background-color: #c2185b;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+.dashboard-table button:hover {
+  background-color: #ad1457;
+}
+
+.success {
+  text-align: center;
+  margin-bottom: 1rem;
+  color: green;
+}
