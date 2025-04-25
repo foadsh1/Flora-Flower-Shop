@@ -24,8 +24,11 @@ app.use(
     name: "session",
     keys: ["super-secret-key"],
     maxAge: 24 * 60 * 60 * 1000,
+    httpOnly: true,
+    sameSite: "lax" // or "none" + secure: true if using HTTPS
   })
 );
+app.use("/admin", require("./routes/admin.routes")); // ✅ Admin routes
 
 // ✅ Static image folder
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));

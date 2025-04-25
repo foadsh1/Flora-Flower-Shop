@@ -1,0 +1,76 @@
+.profile-container {
+  max-width: 600px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background-color: #fff5f8;
+  border: 1px solid #f8bbd0;
+  border-radius: 12px;
+  box-shadow: 0 8px 16px rgba(194, 24, 91, 0.1);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.profile-container h2 {
+  text-align: center;
+  color: #c2185b;
+  margin-bottom: 1.5rem;
+}
+
+.profile-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.profile-form label {
+  font-weight: 600;
+  color: #444;
+}
+
+.profile-form input,
+.profile-form textarea {
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  transition: border 0.3s ease;
+}
+
+.profile-form textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.profile-form input:disabled,
+.profile-form textarea:disabled {
+  background-color: #f7f7f7;
+  color: #888;
+}
+
+.profile-form button {
+  background-color: #c2185b;
+  color: #fff;
+  padding: 0.75rem;
+  font-weight: bold;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.profile-form button:hover {
+  background-color: #ad1457;
+}
+
+.success {
+  text-align: center;
+  color: green;
+  font-weight: bold;
+  margin-bottom: 1rem;
+}
+
+.loading {
+  text-align: center;
+  font-size: 1.2rem;
+  color: #777;
+  padding: 2rem;
+}

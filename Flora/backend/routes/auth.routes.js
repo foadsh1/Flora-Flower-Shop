@@ -69,10 +69,20 @@ router.post("/signin", (req, res) => {
 
       const user = results[0];
       console.log("✅ Found user:", user);
+      if (user.status === "unactive") {
+        return res
+          .status(401)
+          .json({ error: "Account is inactive. Contact admin." });
+      }
 
       try {
         const match = await bcrypt.compare(password, user.password);
         console.log("🔍 Password match:", match);
+        const hashedPassword = await bcrypt.hash(password, 10);
+        console.log(hashedPassword);
+
+        console.log(user.password);
+        console.log(hashedPassword === user.password);
 
         if (!match) {
           return res.status(401).json({ error: "Invalid credentials." });
@@ -110,8 +120,6 @@ router.post("/signin", (req, res) => {
     }
   );
 });
-
-
 
 // ✅ SIGN OUT
 router.post("/signout", (req, res) => {

@@ -10,9 +10,34 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     axios
       .get("http://localhost:5000/auth/me", { withCredentials: true })
-      .then((res) => setUser(res.data.user))
-      .catch(() => setUser(null))
-      .finally(() => setLoading(false));
+      .then((res) => {
+        const u = res.data.user;
+
+        // 🏪 shopowner — check for shop existence
+        if (u.role === "shopowner") {
+          axios
+            .get("http://localhost:5000/shop/mine", { withCredentials: true })
+            .then((res2) => {
+              setUser({ ...u, hasShop: !!res2.data.shop });
+            })
+            .catch(() => setUser({ ...u, hasShop: false }))
+            .finally(() => setLoading(false));
+        }
+        // 👑 admin — just set user
+        else if (u.role === "admin") {
+          setUser(u);
+          setLoading(false);
+        }
+        // 👤 client — just set user
+        else {
+          setUser(u);
+          setLoading(false);
+        }
+      })
+      .catch(() => {
+        setUser(null);
+        setLoading(false);
+      });
   }, []);
 
   const logout = async () => {

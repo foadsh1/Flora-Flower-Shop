@@ -40,22 +40,25 @@ router.post("/create", upload.single("shop_image"), (req, res) => {
 
 // ✅ GET /shop/mine
 router.get("/mine", (req, res) => {
-  if (!req.session.user || req.session.user.role !== "shopowner") {
-    return res.status(403).json({ error: "Unauthorized" });
-  }
+  const user_id = req.session?.user?.user_id;
 
-  const user_id = req.session.user.user_id;
+  if (!user_id) return res.status(403).json({ error: "Unauthorized" });
 
   db.query(
     "SELECT * FROM shops WHERE user_id = ?",
     [user_id],
     (err, results) => {
       if (err) return res.status(500).json({ error: "DB error" });
-      if (results.length === 0) return res.json({ shop: null });
-      res.json({ shop: results[0] });
+
+      if (results.length > 0) {
+        res.json({ shop: results[0] }); // ✅ required for hasShop = true
+      } else {
+        res.json({ shop: null });
+      }
     }
   );
 });
+
 
 // ✅ NEW: GET /shop/my-orders
 router.get("/my-orders", (req, res) => {
@@ -83,5 +86,30 @@ router.get("/my-orders", (req, res) => {
     res.json({ orders: results });
   });
 });
+// ✅ PATCH /shop/update
+router.patch("/update", upload.single("shop_image"), (req, res) => {
+  const { shop_name, location, description } = req.body;
+  const shop_image = req.file ? req.file.filename : null;
+  const user_id = req.session?.user?.user_id;
+
+  if (!user_id) return res.status(403).json({ error: "Unauthorized" });
+
+  let sql = `
+    UPDATE shops
+    SET shop_name = ?, location = ?, description = ?
+    ${shop_image ? ", shop_image = ?" : ""}
+    WHERE user_id = ?
+  `;
+
+  const values = shop_image
+    ? [shop_name, location, description, shop_image, user_id]
+    : [shop_name, location, description, user_id];
+
+  db.query(sql, values, (err) => {
+    if (err) return res.status(500).json({ error: "Update failed" });
+    return res.json({ message: "Shop updated successfully" });
+  });
+});
+
 
 module.exports = router;

@@ -5,6 +5,8 @@ import ForgotPassword from "./components/auth/ForgotPassword"; // optional place
 import ClientProfile from "./components/client/ClientProfile";
 import CreateShop from "./components/owner/CreateShop";
 import ShopOwnerDashboard from "./components/owner/ShopOwnerDashboard";
+import ShopOwnerProfile from "./components/owner/ShopOwnerProfile";
+import AdminUsers from "./components/admin/AdminUsers";
 
 const routes = [
   { path: "/", element: <Home /> },
@@ -14,6 +16,8 @@ const routes = [
   { path: "/profile", element: <ClientProfile /> },
   { path: "/create-shop", element: <CreateShop /> },
   { path: "/owner/dashboard", element: <ShopOwnerDashboard /> },
+  { path: "/owner/profile", element: <ShopOwnerProfile /> },
+  { path: "/admin", element: <AdminUsers /> },
   { path: "*", element: <h2>404 - Page Not Found</h2> },
 ];
 
