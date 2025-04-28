@@ -1,13 +1,19 @@
+// src/components/owner/ShopOwnerDashboard.jsx
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { toast } from "react-toastify";
 import "../../assets/css/dashboard.css";
 
 const ShopOwnerDashboard = () => {
   const [orders, setOrders] = useState([]);
   const [statusMap, setStatusMap] = useState({});
-  const [message, setMessage] = useState("");
+  
 
   useEffect(() => {
+    fetchOrders();
+  }, []);
+
+  const fetchOrders = () => {
     axios
       .get("http://localhost:5000/shop/my-orders", { withCredentials: true })
       .then((res) => {
@@ -19,7 +25,7 @@ const ShopOwnerDashboard = () => {
         setStatusMap(map);
       })
       .catch((err) => console.error(err));
-  }, []);
+  };
 
   const handleStatusChange = (orderId, newStatus) => {
     setStatusMap((prev) => ({ ...prev, [orderId]: newStatus }));
@@ -29,21 +35,21 @@ const ShopOwnerDashboard = () => {
     try {
       await axios.patch(
         `http://localhost:5000/orders/${orderId}/status`,
-        {
-          status: statusMap[orderId],
-        },
+        { status: statusMap[orderId] },
         { withCredentials: true }
       );
-      setMessage(`Order ${orderId} status updated!`);
+
+      toast.success(`Order ${orderId} status updated! 🌸`);
+      fetchOrders(); // Refetch orders
     } catch (err) {
       console.error(err);
+      toast.error("Failed to update order status.");
     }
   };
 
   return (
     <div className="dashboard-container">
       <h2>Shop Orders</h2>
-      {message && <div className="success">{message}</div>}
       <table className="dashboard-table">
         <thead>
           <tr>
@@ -66,6 +72,13 @@ const ShopOwnerDashboard = () => {
                 <td>{order.client_name}</td>
                 <td>{new Date(order.order_date).toLocaleDateString()}</td>
                 <td>
+                  <span
+                    className={`status-badge status-${order.status.toLowerCase()}`}
+                  >
+                    {order.status}
+                  </span>
+                </td>
+                <td>
                   <select
                     value={statusMap[order.order_id]}
                     onChange={(e) =>
@@ -77,8 +90,6 @@ const ShopOwnerDashboard = () => {
                     <option value="Shipped">Shipped</option>
                     <option value="Delivered">Delivered</option>
                   </select>
-                </td>
-                <td>
                   <button onClick={() => updateStatus(order.order_id)}>
                     Update
                   </button>

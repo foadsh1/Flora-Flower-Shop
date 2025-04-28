@@ -8,7 +8,7 @@ const App = () => {
   return (
     <>
       <Navbar />
-      <ToastContainer />
+      <ToastContainer position="bottom-right" />
       <Routes>
         {routes.map((r, i) => (
           <Route key={i} path={r.path} element={r.element} />

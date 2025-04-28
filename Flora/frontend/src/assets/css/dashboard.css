@@ -54,3 +54,30 @@
   margin-bottom: 1rem;
   color: green;
 }
+/* Status badges */
+.status-badge {
+  display: inline-block;
+  padding: 0.4rem 0.8rem;
+  font-size: 0.9rem;
+  font-weight: bold;
+  border-radius: 12px;
+  color: white;
+  text-transform: capitalize;
+}
+
+.status-pending {
+  background-color: #ff9800; /* Orange */
+}
+
+.status-processing {
+  background-color: #2196f3; /* Blue */
+}
+
+.status-shipped {
+  background-color: #673ab7; /* Purple */
+}
+
+.status-delivered {
+  background-color: #4caf50; /* Green */
+}
+

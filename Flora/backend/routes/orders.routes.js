@@ -47,5 +47,52 @@ router.post("/place", (req, res) => {
     });
   });
 });
+// ✅ Get all orders of the logged-in client
+router.get("/mine", (req, res) => {
+  const client_id = req.session?.user?.user_id;
+
+  if (!client_id) {
+    return res.status(403).json({ error: "Unauthorized" });
+  }
+
+  const sql = `
+    SELECT o.order_id, o.order_date, o.total_price, o.status, oi.quantity, oi.price AS item_price,
+           p.name AS product_name, p.image AS product_image
+    FROM orders o
+    JOIN order_items oi ON o.order_id = oi.order_id
+    JOIN products p ON oi.product_id = p.product_id
+    WHERE o.client_id = ?
+    ORDER BY o.order_date DESC
+  `;
+
+  db.query(sql, [client_id], (err, results) => {
+    if (err) {
+      console.error("❌ Failed to fetch orders:", err);
+      return res.status(500).json({ error: "Database error" });
+    }
+
+    res.json({ orders: results });
+  });
+});// ✅ Update order status by shop owner
+router.patch("/:id/status", (req, res) => {
+  const order_id = req.params.id;
+  const { status } = req.body;
+
+  if (!status) {
+    return res.status(400).json({ error: "Status is required" });
+  }
+
+  db.query(
+    "UPDATE orders SET status = ? WHERE order_id = ?",
+    [status, order_id],
+    (err, result) => {
+      if (err) {
+        console.error("❌ Failed to update order status:", err);
+        return res.status(500).json({ error: "Failed to update order status" });
+      }
+      res.json({ message: "Order status updated successfully!" });
+    }
+  );
+});
 
 module.exports = router;
