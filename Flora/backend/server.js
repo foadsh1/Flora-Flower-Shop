@@ -5,7 +5,7 @@ const path = require("path");
 
 const authRoutes = require("./routes/auth.routes");
 const shopRoutes = require("./routes/shop.routes");
-
+const productsRoutes = require("./routes/products.routes");
 const app = express();
 
 app.use(
@@ -32,7 +32,7 @@ app.use("/admin", require("./routes/admin.routes")); // ✅ Admin routes
 
 // ✅ Static image folder
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
-
+app.use("/products", productsRoutes);
 // ✅ Routes
 app.use("/auth", authRoutes);
 app.use("/shop", shopRoutes);

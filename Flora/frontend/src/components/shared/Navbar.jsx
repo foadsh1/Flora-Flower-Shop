@@ -45,6 +45,7 @@ const Navbar = () => {
           ) : (
             <Link to="/owner/profile">My Shop Profile</Link>
           )}
+          <Link to="/owner/products">Manage Products</Link>
           <button onClick={handleLogout}>Logout</button>
         </div>
       )}
