@@ -78,12 +78,6 @@ router.post("/signin", (req, res) => {
       try {
         const match = await bcrypt.compare(password, user.password);
         console.log("🔍 Password match:", match);
-        const hashedPassword = await bcrypt.hash(password, 10);
-        console.log(hashedPassword);
-
-        console.log(user.password);
-        console.log(hashedPassword === user.password);
-
         if (!match) {
           return res.status(401).json({ error: "Invalid credentials." });
         }

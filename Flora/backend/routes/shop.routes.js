@@ -37,6 +37,15 @@ router.post("/create", upload.single("shop_image"), (req, res) => {
     }
   );
 });
+router.get("/all", (req, res) => {
+  db.query("SELECT * FROM shops", (err, results) => {
+    if (err) {
+      console.error("❌ Failed to fetch shops:", err);
+      return res.status(500).json({ error: "Database error" });
+    }
+    res.json({ shops: results });
+  });
+});
 
 // ✅ GET /shop/mine
 router.get("/mine", (req, res) => {

@@ -19,6 +19,9 @@ const Navbar = () => {
       <Link to="/" className="logo">
         Flora 🌸
       </Link>
+      <Link to="/shops" className="nav-links">
+        Explore Shops
+      </Link>
 
       {!user && (
         <div className="nav-links">
