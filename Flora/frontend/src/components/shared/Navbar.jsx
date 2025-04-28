@@ -33,6 +33,7 @@ const Navbar = () => {
       {user?.role === "client" && (
         <div className="nav-links">
           <Link to="/profile">My Profile</Link>
+          <Link to="/cart">My Cart 🛒</Link> 
           <button onClick={handleLogout}>Logout</button>
         </div>
       )}

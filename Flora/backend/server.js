@@ -2,7 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const cookieSession = require("cookie-session");
 const path = require("path");
-
+const ordersRoutes = require("./routes/orders.routes");
 const authRoutes = require("./routes/auth.routes");
 const shopRoutes = require("./routes/shop.routes");
 const productsRoutes = require("./routes/products.routes");
@@ -36,7 +36,7 @@ app.use("/products", productsRoutes);
 // ✅ Routes
 app.use("/auth", authRoutes);
 app.use("/shop", shopRoutes);
-
+app.use("/orders", ordersRoutes);
 const PORT = 5000;
 app.listen(PORT, () => {
   console.log(`✅ Server running at http://localhost:${PORT}`);

@@ -9,9 +9,13 @@ import ShopOwnerProfile from "./components/owner/ShopOwnerProfile";
 import AdminUsers from "./components/admin/AdminUsers";
 import Shops from "./components/shared/Shops";
 import ShopOwnerProducts from "./components/owner/ShopOwnerProducts";
+import ShopDetails from "./components/shared/ShopDetails"; 
+import Cart from "./components/client/Cart";
 const routes = [
   { path: "/", element: <Home /> },
   { path: "/shops", element: <Shops /> },
+  { path: "/shops/:id", element: <ShopDetails /> },
+  { path: "/cart", element: <Cart /> },
   { path: "/login", element: <Login /> },
   { path: "/signup", element: <Signup /> },
   { path: "/owner/products", element: <ShopOwnerProducts /> },

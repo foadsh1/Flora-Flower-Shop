@@ -119,6 +119,18 @@ router.patch("/update", upload.single("shop_image"), (req, res) => {
     return res.json({ message: "Shop updated successfully" });
   });
 });
+// ✅ GET all products of a specific shop
+router.get("/:id/products", (req, res) => {
+  const shop_id = req.params.id;
+
+  db.query("SELECT * FROM products WHERE shop_id = ?", [shop_id], (err, results) => {
+    if (err) {
+      console.error("❌ Failed to fetch shop products:", err);
+      return res.status(500).json({ error: "Database error" });
+    }
+    res.json({ products: results });
+  });
+});
 
 
 module.exports = router;
