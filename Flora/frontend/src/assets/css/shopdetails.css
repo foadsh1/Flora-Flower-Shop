@@ -44,6 +44,7 @@
   object-fit: cover;
   border-bottom: 1px solid #eee;
   transition: 0.3s ease;
+  
 }
 
 .product-card h4 {
@@ -84,6 +85,23 @@
 
 .add-cart-btn:hover {
   background-color: #f50057;
+  transform: translateY(-2px);
+}
+.login-to-cart-btn {
+  display: inline-block;
+  margin-top: 1rem;
+  padding: 0.6rem 1.2rem;
+  background-color: #c2185b;
+  color: white;
+  font-weight: bold;
+  text-align: center;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.login-to-cart-btn:hover {
+  background-color: #ad1457;
   transform: translateY(-2px);
 }
 

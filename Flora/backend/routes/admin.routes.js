@@ -25,6 +25,9 @@ router.patch("/users/:id/status", (req, res) => {
   if (!req.session.user || req.session.user.role !== "admin") {
     return res.status(403).json({ error: "Unauthorized" });
   }
+  if (!["active", "unactive"].includes(status)) {
+    return res.status(400).json({ error: "Invalid status" });
+  }
 
   db.query(
     "UPDATE users SET status = ? WHERE user_id = ?",
