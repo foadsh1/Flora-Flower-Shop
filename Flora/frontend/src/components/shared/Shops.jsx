@@ -6,6 +6,7 @@ import "../../assets/css/shops.css"; // we'll create simple styles
 
 const Shops = () => {
   const [shops, setShops] = useState([]);
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
     axios
@@ -17,11 +18,22 @@ const Shops = () => {
   return (
     <div className="shops-container">
       <h2>Explore Flower Shops</h2>
+      <input
+        type="text"
+        placeholder="Search shops by name..."
+        className="shop-search-input"
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+      />
       <div className="shops-grid">
         {shops.length === 0 ? (
           <p>No shops available yet.</p>
         ) : (
-          shops.map((shop) => (
+            shops
+              .filter((shop) =>
+                shop.shop_name.toLowerCase().includes(search.toLowerCase())
+              )
+              .map((shop) => (
             <div key={shop.shop_id} className="shop-card">
               {shop.shop_image && (
                 <img
