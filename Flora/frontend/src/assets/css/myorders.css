@@ -1,17 +1,62 @@
+/* src/assets/css/myorders.css */
+
 .orders-container {
   padding: 3rem 2rem;
-  background: #f7f9fc;
+  background-color: #fff5f8;
   min-height: 100vh;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.orders-container h2 {
+  font-size: 2.5rem;
+  color: #c2185b;
   text-align: center;
+  margin-bottom: 2rem;
 }
 
 .order-card {
-  background: white;
+  background-color: #ffffff;
+  border: 1px solid #f8bbd0;
   border-radius: 12px;
-  padding: 2rem;
+  padding: 1.5rem;
   margin-bottom: 2rem;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  text-align: left;
+  box-shadow: 0 4px 12px rgba(194, 24, 91, 0.1);
+}
+
+.order-card h3 {
+  color: #c2185b;
+  margin-bottom: 0.5rem;
+}
+
+.order-card p {
+  color: #444;
+  margin: 0.25rem 0;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 0.4rem 0.8rem;
+  font-size: 0.85rem;
+  font-weight: bold;
+  border-radius: 12px;
+  color: white;
+  text-transform: capitalize;
+}
+
+.status-pending {
+  background-color: #ff9800;
+}
+
+.status-processing {
+  background-color: #2196f3;
+}
+
+.status-shipped {
+  background-color: #9c27b0;
+}
+
+.status-delivered {
+  background-color: #4caf50;
 }
 
 .order-products {
@@ -22,7 +67,7 @@
 }
 
 .product-item {
-  background: #f0f0f0;
+  background-color: #fce4ec;
   padding: 1rem;
   border-radius: 10px;
   display: flex;

@@ -3,6 +3,7 @@ import axios from "axios";
 import "../../assets/css/auth.css";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
+import flowerVideo from "../../assets/videos/flowers.mp4";
 
 const Login = () => {
   const [formData, setFormData] = useState({ email: "", password: "" });
@@ -45,8 +46,12 @@ const Login = () => {
 
   return (
     <div className="auth-container">
+      <video autoPlay muted loop playsInline className="bg-video">
+        <source src={flowerVideo} type="video/mp4" />
+      </video>
       <form className="auth-form" onSubmit={handleSubmit}>
         <h2>Sign In</h2>
+        
 
         {error && <div className="auth-error">{error}</div>}
 

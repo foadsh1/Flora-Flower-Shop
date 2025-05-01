@@ -1,16 +1,39 @@
 /* 🌸 Floral Sign-in/Signup Styling */
 
 .auth-container {
+  position: relative;
   display: flex;
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background: url("../../assets/images/home.jpg") no-repeat center center/cover;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  overflow: hidden;
 }
 
+/* 🌼 Background Video */
+.bg-video {
+  position: absolute;
+  top: 0;
+  left: 0;
+  min-width: 100%;
+  min-height: 100%;
+  object-fit: cover;
+  z-index: -2;
+}
+
+/* Optional soft gradient overlay */
+.auth-container::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom right, rgba(255, 245, 248, 0.5), rgba(255, 255, 255, 0.4));
+  z-index: -1;
+}
+
+/* Auth Form */
 .auth-form {
   background-color: rgba(255, 255, 255, 0.95);
+  border: 1px solid #f8bbd0;
   border-radius: 12px;
   padding: 2rem 3rem;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
@@ -18,6 +41,7 @@
   width: 100%;
   backdrop-filter: blur(6px);
   animation: fadeIn 0.5s ease-in-out;
+  z-index: 1;
 }
 
 .auth-form h2 {

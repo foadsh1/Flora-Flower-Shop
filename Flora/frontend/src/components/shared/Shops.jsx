@@ -33,7 +33,7 @@ const Shops = () => {
               <h3>{shop.shop_name}</h3>
               <p>{shop.location}</p>
               <p>{shop.description}</p>
-              <a href={`/shops/${shop.shop_id}`} c>
+              <a href={`/shops/${shop.shop_id}`} className="view-shop-btn">
                 View Shop
               </a>{" "}
             </div>

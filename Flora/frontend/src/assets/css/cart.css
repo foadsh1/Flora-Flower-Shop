@@ -1,61 +1,94 @@
+/* src/assets/css/cart.css */
+
 .cart-container {
-  padding: 2rem;
-  text-align: center;
+  padding: 3rem 2rem;
+  background-color: #fff5f8;
   min-height: 100vh;
-  background: #f7f9fc;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.cart-container h2 {
+  font-size: 2.5rem;
+  color: #c2185b;
+  text-align: center;
+  margin-bottom: 2rem;
 }
 
 .cart-item {
+  background: #fff;
+  border: 1px solid #f8bbd0;
+  border-radius: 12px;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
   display: flex;
   align-items: center;
-  margin: 1rem 0;
-  background: white;
-  border-radius: 10px;
-  padding: 1rem;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 12px rgba(194, 24, 91, 0.07);
 }
 
 .cart-image {
   width: 100px;
   height: 100px;
-  object-fit: cover;
-  border-radius: 8px;
+  object-fit: contain;
+  border-radius: 10px;
+  background-color: #fbe9f1;
+  padding: 8px;
   margin-right: 1rem;
 }
 
 .cart-info {
   flex: 1;
-  text-align: left;
 }
 
 .cart-info h4 {
+  font-size: 1.1rem;
+  color: #333;
   margin-bottom: 0.5rem;
 }
 
 .cart-info input {
   width: 60px;
-  margin: 0 1rem;
+  padding: 0.4rem;
+  margin-right: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
 }
 
-.cart-summary {
-  margin-top: 2rem;
-}
-
-.checkout-btn, .clear-btn {
-  margin: 1rem;
-  padding: 0.8rem 2rem;
+.cart-info button {
+  background-color: #f44336;
+  color: white;
   border: none;
-  border-radius: 10px;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
   cursor: pointer;
   font-weight: bold;
 }
 
+.cart-summary {
+  text-align: center;
+  margin-top: 2rem;
+}
+
+.checkout-btn,
+.clear-btn {
+  margin: 0.5rem;
+  padding: 0.8rem 2rem;
+  font-size: 1rem;
+  font-weight: bold;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+}
+
 .checkout-btn {
-  background: #4CAF50;
+  background-color: #c2185b;
   color: white;
 }
 
+.checkout-btn:hover {
+  background-color: #ad1457;
+}
+
 .clear-btn {
-  background: #f44336;
+  background-color: #f44336;
   color: white;
 }

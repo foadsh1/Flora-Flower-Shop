@@ -168,11 +168,13 @@ const ShopOwnerProducts = () => {
           products.map((product) => (
             <div key={product.product_id} className="product-card">
               {product.image && (
+                <div className="image-container">
                 <img
                   src={`http://localhost:5000/uploads/${product.image}`}
                   alt={product.name}
                   className="product-image"
                 />
+                </div>
               )}
               <h4>{product.name}</h4>
               <p>{product.description}</p>

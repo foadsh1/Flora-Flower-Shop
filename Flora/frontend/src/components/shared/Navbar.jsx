@@ -19,7 +19,7 @@ const Navbar = () => {
       <Link to="/" className="logo">
         Flora 🌸
       </Link>
-      <Link to="/shops" className="nav-links">
+      <Link to="/shops" className="explore-btn">
         Explore Shops
       </Link>
 

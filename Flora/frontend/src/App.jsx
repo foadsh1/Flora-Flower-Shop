@@ -4,6 +4,7 @@ import Navbar from "./components/shared/Navbar";
 import routes from "./routes";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import Footer from "./components/shared/Footer";
 const App = () => {
   return (
     <>
@@ -14,6 +15,7 @@ const App = () => {
           <Route key={i} path={r.path} element={r.element} />
         ))}
       </Routes>
+      <Footer /> 
     </>
   );
 };
