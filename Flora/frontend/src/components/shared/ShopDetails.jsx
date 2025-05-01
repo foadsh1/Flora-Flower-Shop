@@ -5,8 +5,6 @@ import "../../assets/css/shopdetails.css";
 import { useContext } from "react";
 import { CartContext } from "../context/CartContext"; 
 import { toast } from "react-toastify";
-import { AuthContext } from "../context/AuthContext";
-import { Link } from "react-router-dom";
 
 
 const ShopDetails = () => {
@@ -14,7 +12,6 @@ const ShopDetails = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
 const { addToCart } = useContext(CartContext);
-const { user } = useContext(AuthContext);
   useEffect(() => {
     axios
       .get(`http://localhost:5000/shop/${id}/products`, {
@@ -56,21 +53,15 @@ const { user } = useContext(AuthContext);
               <p>
                 <strong>Available:</strong> {product.quantity}
               </p>
-              {user?.role === "client" ? (
-                <button
-                  onClick={() => {
-                    addToCart(product);
-                    toast.success(`${product.name} added to cart! 🌸`);
-                  }}
-                  className="add-cart-btn"
-                >
-                  Add to Cart
-                </button>
-              ) : (
-                <Link to="/login" className="login-to-cart-btn">
-                  Login as Client to Order
-                </Link>
-              )}
+              <button
+                onClick={() => {
+                  addToCart(product);
+                  toast.success(`${product.name} added to cart! 🌸`);
+                }}
+                className="add-cart-btn"
+              >
+                Add to Cart
+              </button>
             </div>
           ))
         )}

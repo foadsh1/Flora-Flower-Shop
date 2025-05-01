@@ -1,0 +1,88 @@
+.review-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+.review-modal {
+  background-color: #fff5f8;
+  padding: 2rem;
+  border-radius: 14px;
+  border: 1px solid #f8bbd0;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+.review-modal h3 {
+  margin-bottom: 1.5rem;
+  color: #c2185b;
+  text-align: center;
+}
+
+.review-modal-form label {
+  font-weight: bold;
+  display: block;
+  margin-top: 1rem;
+  color: #444;
+}
+
+.review-modal-form textarea {
+  width: 100%;
+  padding: 0.8rem;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  margin-top: 0.5rem;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  resize: vertical;
+}
+
+.review-error {
+  color: red;
+  margin-top: 0.5rem;
+  text-align: center;
+}
+
+.review-modal-buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 1.5rem;
+}
+
+.review-modal-buttons button {
+  padding: 0.7rem 1.5rem;
+  border-radius: 8px;
+  font-weight: bold;
+  font-size: 1rem;
+  border: none;
+  cursor: pointer;
+}
+
+.review-modal-buttons button[type="submit"] {
+  background-color: #c2185b;
+  color: white;
+}
+
+.review-modal-buttons .cancel-btn {
+  background-color: #ccc;
+  color: #333;
+}
+
+.star-input {
+  margin-top: 0.5rem;
+  font-size: 1.8rem;
+  color: #ccc;
+}
+
+.star-input .star {
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.star-input .star.filled {
+  color: #fbc02d;
+}

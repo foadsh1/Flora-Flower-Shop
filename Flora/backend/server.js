@@ -7,7 +7,7 @@ const authRoutes = require("./routes/auth.routes");
 const shopRoutes = require("./routes/shop.routes");
 const productsRoutes = require("./routes/products.routes");
 const app = express();
-
+const reviewRoutes = require("./routes/review.routes");
 app.use(
   cors({
     origin: "http://localhost:3000",
@@ -37,6 +37,7 @@ app.use("/products", productsRoutes);
 app.use("/auth", authRoutes);
 app.use("/shop", shopRoutes);
 app.use("/orders", ordersRoutes);
+app.use("/reviews", reviewRoutes);
 const PORT = 5000;
 app.listen(PORT, () => {
   console.log(`✅ Server running at http://localhost:${PORT}`);

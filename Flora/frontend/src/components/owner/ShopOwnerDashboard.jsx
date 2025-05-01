@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
 import "../../assets/css/dashboard.css";
+import { Link } from "react-router-dom";
 
 const ShopOwnerDashboard = () => {
   const [orders, setOrders] = useState([]);
@@ -93,6 +94,11 @@ const ShopOwnerDashboard = () => {
                   <button onClick={() => updateStatus(order.order_id)}>
                     Update
                   </button>
+                </td>
+                <td>
+                  <Link to={`/owner/orders/${order.order_id}`} className="view-details-btn">
+                    View Details
+                  </Link>
                 </td>
               </tr>
             ))

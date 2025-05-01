@@ -80,4 +80,17 @@
 .status-delivered {
   background-color: #4caf50; /* Green */
 }
+.view-details-btn {
+  padding: 0.4rem 1rem;
+  background-color: #c2185b;
+  color: white;
+  border-radius: 8px;
+  font-weight: bold;
+  text-decoration: none;
+  font-size: 0.9rem;
+  transition: background-color 0.3s;
+}
 
+.view-details-btn:hover {
+  background-color: #ad1457;
+}

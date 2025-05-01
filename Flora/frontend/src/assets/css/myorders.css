@@ -81,3 +81,32 @@
   object-fit: cover;
   border-radius: 8px;
 }
+.write-review-btn {
+  margin-top: 1rem;
+  padding: 0.6rem 1.2rem;
+  background-color: #c2185b;
+  color: white;
+  font-weight: bold;
+  font-size: 1rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.write-review-btn:hover {
+  background-color: #ad1457;
+  transform: translateY(-2px);
+}
+.review-submitted-badge {
+  display: inline-block;
+  margin-top: 1rem;
+  background-color: #dff0d8;
+  color: #2e7d32;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-weight: bold;
+  font-size: 0.95rem;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
