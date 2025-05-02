@@ -3,8 +3,8 @@ const db = require("../models/db");
 
 const router = express.Router();
 
-// ✅ Place an order
-router.post("/place", (req, res) => {
+// ✅ Place an order with stock validation
+router.post("/place", async (req, res) => {
   const { cart, totalPrice, shopId } = req.body;
   const client_id = req.session?.user?.user_id;
 
@@ -12,40 +12,63 @@ router.post("/place", (req, res) => {
     return res.status(403).json({ error: "Unauthorized" });
   }
 
-  // Step 1: Create new order
-  const orderSql = `
-    INSERT INTO orders (client_id, shop_id, total_price)
-    VALUES (?, ?, ?)
-  `;
-  db.query(orderSql, [client_id, shopId, totalPrice], (err, result) => {
-    if (err) {
-      console.error("❌ Order creation failed:", err);
-      return res.status(500).json({ error: "Order creation failed" });
+  try {
+    // Step 1: Check stock for each product
+    for (const item of cart) {
+      const [results] = await db
+        .promise()
+        .query("SELECT name, quantity FROM products WHERE product_id = ?", [item.product_id]);
+
+      if (!results || results.length === 0) {
+        return res.status(404).json({ error: `Product not found: ID ${item.product_id}` });
+      }
+
+      const product = results[0];
+      if (product.quantity < item.quantity) {
+        return res.status(400).json({
+          error: `Not enough stock for ${product.name} (requested: ${item.quantity}, available: ${product.quantity})`,
+        });
+      }
     }
 
-    const order_id = result.insertId;
+    // Step 2: Create order
+    const [orderResult] = await db
+      .promise()
+      .query("INSERT INTO orders (client_id, shop_id, total_price) VALUES (?, ?, ?)", [
+        client_id,
+        shopId,
+        totalPrice,
+      ]);
+    const order_id = orderResult.insertId;
 
-    // Step 2: Insert order items
-    const itemsSql = `
-      INSERT INTO order_items (order_id, product_id, quantity, price)
-      VALUES ?
-    `;
+    // Step 3: Insert order items
     const itemsValues = cart.map((item) => [
       order_id,
       item.product_id,
       item.quantity,
       item.price,
     ]);
+    await db
+      .promise()
+      .query("INSERT INTO order_items (order_id, product_id, quantity, price) VALUES ?", [
+        itemsValues,
+      ]);
 
-    db.query(itemsSql, [itemsValues], (err2) => {
-      if (err2) {
-        console.error("❌ Order items failed:", err2);
-        return res.status(500).json({ error: "Order items failed" });
-      }
+    // Step 4: Update stock
+    for (const item of cart) {
+      await db
+        .promise()
+        .query(
+          "UPDATE products SET quantity = quantity - ? WHERE product_id = ?",
+          [item.quantity, item.product_id]
+        );
+    }
 
-      res.json({ message: "Order placed successfully!" });
-    });
-  });
+    res.json({ message: "Order placed successfully!" });
+  } catch (err) {
+    console.error("❌ Error placing order:", err);
+    res.status(500).json({ error: "Something went wrong while placing your order" });
+  }
 });
 // ✅ Get all orders of the logged-in client
 router.get("/mine", (req, res) => {
