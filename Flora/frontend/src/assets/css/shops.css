@@ -204,3 +204,48 @@
   color: #999;
   text-align: right;
 }
+.autocomplete-wrapper {
+  position: relative;
+  max-width: 300px;
+  background-color: #fff;
+  margin: 0 auto 2rem auto;
+  
+}
+
+.shop-search-input {
+  width: 100%;
+  padding: 0.5rem;
+  font-size: 1rem;
+  position: relative;
+  z-index: 2;
+  background: transparent;
+  color: #222;
+}
+.search-icon {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 1.1rem;
+  color: #999;
+  pointer-events: none;
+  z-index: 3;
+}
+
+.ghost-text {
+  position: absolute;
+  top: 0;
+  left: 0;
+  padding: 0.5rem;
+  font-size: 1rem;
+  pointer-events: none;
+  z-index: 1;
+  color: #aaa;
+  white-space: nowrap;
+  font-family: inherit;
+}
+
+.ghost-complete {
+  opacity: 0.4;
+}
+

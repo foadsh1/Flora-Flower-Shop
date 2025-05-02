@@ -1,4 +1,3 @@
-// src/components/shared/Shops.jsx
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Rating } from "react-simple-star-rating";
@@ -7,6 +6,7 @@ import "../../assets/css/shops.css";
 const Shops = () => {
   const [shops, setShops] = useState([]);
   const [search, setSearch] = useState("");
+  const [ghostSuggestion, setGhostSuggestion] = useState("");
   const [ratings, setRatings] = useState({});
   const [selectedShop, setSelectedShop] = useState(null);
   const [shopReviews, setShopReviews] = useState([]);
@@ -59,13 +59,38 @@ const Shops = () => {
   return (
     <div className="shops-container">
       <h2>Explore Flower Shops</h2>
-      <input
-        type="text"
-        placeholder="Search shops by name..."
-        className="shop-search-input"
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-      />
+
+      {/* 🌸 Ghost-style autocomplete wrapper */}
+      <div className="autocomplete-wrapper">
+        <input
+          type="text"
+          placeholder="Search shops by name..."
+          className="shop-search-input"
+          value={search}
+          onChange={(e) => {
+            const value = e.target.value;
+            setSearch(value);
+            const matches = shops
+              .map((s) => s.shop_name)
+              .filter((name) =>
+                name.toLowerCase().startsWith(value.toLowerCase())
+              );
+            setGhostSuggestion(matches.length > 0 ? matches[0] : "");
+          }}
+        />
+        <span className="search-icon">🔍</span>
+        {ghostSuggestion &&
+          search &&
+          ghostSuggestion.toLowerCase() !== search.toLowerCase() && (
+            <div className="ghost-text">
+              <span style={{ color: "transparent" }}>{search}</span>
+              <span className="ghost-complete">
+                {ghostSuggestion.slice(search.length)}
+              </span>
+            </div>
+          )}
+      </div>
+
       <div className="shops-grid">
         {shops.length === 0 ? (
           <p>No shops available yet.</p>
@@ -115,9 +140,7 @@ const Shops = () => {
 
                 <button
                   className="view-reviews-btn"
-                  onClick={() =>
-                    openReviewsModal(shop.shop_id, shop.shop_name)
-                  }
+                  onClick={() => openReviewsModal(shop.shop_id, shop.shop_name)}
                 >
                   View Reviews
                 </button>
