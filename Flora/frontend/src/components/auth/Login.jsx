@@ -31,7 +31,7 @@ const Login = () => {
       setUser(user);
 
       if (user.role === "client") {
-        navigate("/profile");
+        navigate("/");
       } else if (user.role === "shopowner") {
         res.data.hasShop
           ? navigate("/owner/dashboard")
@@ -51,7 +51,6 @@ const Login = () => {
       </video>
       <form className="auth-form" onSubmit={handleSubmit}>
         <h2>Sign In</h2>
-        
 
         {error && <div className="auth-error">{error}</div>}
 
@@ -77,7 +76,7 @@ const Login = () => {
             className="toggle-eye"
             onClick={() => setShowPassword((prev) => !prev)}
           >
-            {showPassword ? "👁️" : "🙈"}
+            {showPassword ? "🔓" : "🔒"}
           </span>
         </div>
 

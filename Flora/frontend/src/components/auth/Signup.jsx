@@ -93,7 +93,7 @@ const Signup = () => {
             className="toggle-eye"
             onClick={() => setShowPassword(!showPassword)}
           >
-            {showPassword ? "👁️" : "🙈"}
+            {showPassword ? "🔓" : "🔒"}
           </span>
         </div>
 
@@ -110,7 +110,7 @@ const Signup = () => {
             className="toggle-eye"
             onClick={() => setShowConfirm(!showConfirm)}
           >
-            {showConfirm ? "👁️" : "🙈"}
+            {showConfirm ? "🔓" : "🔒"}
           </span>
         </div>
 

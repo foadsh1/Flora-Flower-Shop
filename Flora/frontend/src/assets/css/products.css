@@ -86,9 +86,10 @@
 /* Product Grid */
 .products-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 2rem;
-  justify-items: center;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+  padding: 0 15rem;
+  justify-content: center;
 }
 
 /* Product Card */

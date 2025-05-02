@@ -6,6 +6,7 @@ import { AuthContext } from "../context/AuthContext";
 import axios from "axios";
 import { toast } from "react-toastify"; // ✅ import toast
 import "../../assets/css/cart.css";
+import { PayPalButtons } from "@paypal/react-paypal-js";
 
 const Cart = () => {
   const { cart, removeFromCart, updateQuantity, clearCart } =
@@ -95,9 +96,50 @@ const Cart = () => {
           ))}
           <div className="cart-summary">
             <h3>Total: ${totalPrice.toFixed(2)}</h3>
-            <button className="checkout-btn" onClick={placeOrder}>
-              Proceed to Checkout
-            </button>
+            <div className="paypal-checkout-wrapper">
+              <PayPalButtons
+                style={{ layout: "horizontal" }}
+                forceReRender={[totalPrice]}
+                createOrder={(data, actions) => {
+                  return actions.order.create({
+                    purchase_units: [
+                      {
+                        amount: {
+                          value: totalPrice.toFixed(2),
+                        },
+                      },
+                    ],
+                  });
+                }}
+                onApprove={async (data, actions) => {
+                  await actions.order.capture();
+
+                  const shopId = cart[0].shop_id;
+                  try {
+                    await axios.post(
+                      "http://localhost:5000/orders/place",
+                      {
+                        cart,
+                        totalPrice,
+                        shopId,
+                      },
+                      { withCredentials: true }
+                    );
+                    toast.success("Order placed and paid via PayPal! 🌸");
+                    clearCart();
+                    navigate("/profile");
+                  } catch (err) {
+                    console.error("Order placement failed:", err);
+                    toast.error("Payment succeeded, but order failed.");
+                  }
+                }}
+                onCancel={() => toast.info("Payment was cancelled.")}
+                onError={(err) => {
+                  console.error("PayPal error:", err);
+                  toast.error("Payment failed. Please try again.");
+                }}
+              />
+            </div>
             <button className="clear-btn" onClick={clearCart}>
               Clear Cart
             </button>

@@ -18,14 +18,15 @@
 .shops-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 2rem;
+  gap: 0.2rem;
+  padding: 0 20rem;
   justify-items: center;
 }
 
 /* Each Shop Card */
 .shop-card {
   background-color: #fff;
-  border: 1px solid #f8bbd0;
+  border: 2px solid #f8bbd0;
   border-radius: 14px;
   padding: 1.5rem;
   max-width: 300px;
@@ -35,6 +36,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: space-between;
 }
 
 .shop-card:hover {
@@ -209,7 +211,6 @@
   max-width: 300px;
   background-color: #fff;
   margin: 0 auto 2rem auto;
-  
 }
 
 .shop-search-input {
