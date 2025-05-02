@@ -14,6 +14,8 @@ const Shops = () => {
   const [showReviewsModal, setShowReviewsModal] = useState(false);
   const [filter, setFilter] = useState("all");
   const [selectedCity, setSelectedCity] = useState("");
+  const [mapCity, setMapCity] = useState("");
+  const [showMap, setShowMap] = useState(false);
 
   useEffect(() => {
     axios
@@ -78,7 +80,7 @@ const Shops = () => {
     .sort((a, b) => {
       const r1 = ratings[a.shop_id]?.avg || 0;
       const r2 = ratings[b.shop_id]?.avg || 0;
-      return r2 - r1; // descending by rating
+      return r2 - r1;
     });
 
   return (
@@ -86,7 +88,7 @@ const Shops = () => {
       <h2>Explore Flower Shops</h2>
 
       <div className="shop-search-controls">
-        {/* 🔍 Search with ghost suggestion */}
+        {/* Search bar */}
         <div className="autocomplete-wrapper">
           <input
             type="text"
@@ -116,7 +118,7 @@ const Shops = () => {
             )}
         </div>
 
-        {/* 🌆 City Dropdown */}
+        {/* City filter */}
         <div className="city-filter">
           <label>City:</label>
           <select
@@ -132,7 +134,7 @@ const Shops = () => {
           </select>
         </div>
 
-        {/* ⭐ Rating Filter */}
+        {/* Rating filter */}
         <div className="rating-filter">
           <label>Sort:</label>
           <select value={filter} onChange={(e) => setFilter(e.target.value)}>
@@ -142,6 +144,7 @@ const Shops = () => {
         </div>
       </div>
 
+      {/* Shops display */}
       <div className="shops-grid">
         {filteredShops.length === 0 ? (
           <p>No shops available.</p>
@@ -162,6 +165,15 @@ const Shops = () => {
                 )}
               </h3>
               <p>{shop.location}</p>
+              <button
+                className="view-map-btn"
+                onClick={() => {
+                  setMapCity(shop.location);
+                  setShowMap(true);
+                }}
+              >
+                Show Location in Maps
+              </button>
               <p>{shop.description}</p>
 
               {ratings[shop.shop_id] ? (
@@ -196,6 +208,28 @@ const Shops = () => {
         )}
       </div>
 
+      {/* Map slider panel */}
+      {showMap && (
+        <div className="map-slider">
+          <button className="close-map-btn" onClick={() => setShowMap(false)}>
+            ✖
+          </button>
+          <h3>Map: {mapCity}</h3>
+          <iframe
+            title="Test Map"
+            width="100%"
+            height="300"
+            style={{ border: "0", borderRadius: "12px" }}
+            loading="lazy"
+            allowFullScreen
+            src={`https://www.google.com/maps?q=${encodeURIComponent(
+              mapCity
+            )}&output=embed`}
+          ></iframe>
+        </div>
+      )}
+
+      {/* Review modal */}
       {showReviewsModal && (
         <div className="reviews-modal-overlay">
           <div className="reviews-modal">

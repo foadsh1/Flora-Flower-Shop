@@ -256,3 +256,70 @@
   color: #999;
   text-align: right;
 }
+.view-map-btn {
+  margin-top: 0.5rem;
+  background-color: transparent;
+  border: 1px solid #c2185b;
+  color: #c2185b;
+  padding: 0.4rem 1rem;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.view-map-btn:hover {
+  background-color: #ffe3ec;
+}
+
+.map-slider {
+  margin-top: 2rem;
+  background-color: #fff5f8;
+  border-top: 2px solid #f8bbd0;
+  padding: 1.5rem;
+  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.05);
+  border-radius: 12px;
+  animation: slideUp 0.4s ease;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(50px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.close-map-btn {
+  float: right;
+  background: none;
+  border: none;
+  font-size: 1.4rem;
+  cursor: pointer;
+  color: #c2185b;
+}
+.map-slider-inline {
+  width: 100%;
+  background: #fff5f8;
+  margin-top: 1rem;
+  padding: 1rem;
+  border: 1px solid #f8bbd0;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(194, 24, 91, 0.08);
+  animation: slideDown 0.4s ease-in-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
