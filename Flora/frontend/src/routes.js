@@ -12,7 +12,6 @@ import ShopOwnerProducts from "./components/owner/ShopOwnerProducts";
 import ShopDetails from "./components/shared/ShopDetails";
 import Cart from "./components/client/Cart";
 import MyOrders from "./components/client/MyOrders";
-import OrderDetails from "./components/owner/OrderDetails";
 import CustomizeBouquet from "./components/client/customize/CustomizeBouquet";
 const routes = [
   { path: "/", element: <Home /> },
@@ -21,7 +20,6 @@ const routes = [
   { path: "/cart", element: <Cart /> },
   { path: "/my-orders", element: <MyOrders /> },
   { path: "/customize", element: <CustomizeBouquet /> },
-  { path: "/owner/orders/:order_id", element: <OrderDetails /> },
   { path: "/login", element: <Login /> },
   { path: "/signup", element: <Signup /> },
   { path: "/owner/products", element: <ShopOwnerProducts /> },
