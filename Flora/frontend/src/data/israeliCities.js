@@ -1,0 +1,36 @@
+// src/data/israeliCities.js
+const israeliCities = [
+  "Jerusalem",
+  "Tel Aviv",
+  "Haifa",
+  "Rishon LeZion",
+  "Petah Tikva",
+  "Ashdod",
+  "Netanya",
+  "Beersheba",
+  "Bnei Brak",
+  "Holon",
+  "Ramat Gan",
+  "Rehovot",
+  "Bat Yam",
+  "Ashkelon",
+  "Herzliya",
+  "Kfar Saba",
+  "Modiin-Maccabim-Reut",
+  "Nazareth",
+  "Lod",
+  "Raanana",
+  "Ramat HaSharon",
+  "Hadera",
+  "Sderot",
+  "Nahariya",
+  "Kiryat Gat",
+  "Tiberias",
+  "Eilat",
+  "Acre",
+  "Dimona",
+  "Safed",
+  "Sakhnin"
+];
+
+export default israeliCities;

@@ -1,5 +1,3 @@
-/* src/assets/css/shops.css */
-
 .shops-container {
   padding: 3rem 2rem;
   background-color: #fff5f8;
@@ -12,6 +10,67 @@
   color: #c2185b;
   text-align: center;
   margin-bottom: 2rem;
+}
+
+/* Search Controls (search + city + rating) */
+.shop-search-controls {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  padding: 0 1rem;
+}
+
+.autocomplete-wrapper,
+.city-filter,
+.rating-filter {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+/* Consistent Inputs */
+.shop-search-input,
+.city-filter select,
+.rating-filter select {
+  padding: 0.6rem 1rem;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-family: inherit;
+  background-color: white;
+  color: #c2185b;
+  font-weight: bold;
+  min-width: 220px;
+}
+
+.search-icon {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 1.1rem;
+  color: #999;
+  pointer-events: none;
+  z-index: 3;
+}
+
+.ghost-text {
+  position: absolute;
+  top: 0;
+  left: 0;
+  padding: 0.6rem 1rem;
+  font-size: 1rem;
+  pointer-events: none;
+  z-index: 1;
+  color: #aaa;
+  white-space: nowrap;
+  font-family: inherit;
+}
+
+.ghost-complete {
+  opacity: 0.4;
 }
 
 /* Shops Grid */
@@ -95,17 +154,7 @@
   transform: translateY(0) scale(0.98);
   box-shadow: 0 2px 6px rgba(194, 24, 91, 0.1);
 }
-.shop-search-input {
-  width: 100%;
-  max-width: 400px;
-  padding: 0.7rem 1rem;
-  margin: 0 auto 2rem;
-  border-radius: 8px;
-  border: 1px solid #ccc;
-  font-size: 1rem;
-  display: block;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-}
+
 .shop-rating {
   margin: 0.5rem 0;
   display: flex;
@@ -124,6 +173,7 @@
   color: #999;
   margin: 0.5rem 0;
 }
+
 .top-rated-badge {
   background-color: #fbc02d;
   color: #fff;
@@ -206,56 +256,3 @@
   color: #999;
   text-align: right;
 }
-.autocomplete-wrapper {
-  position: relative;
-  max-width: 300px;
-  background-color: #fff;
-  margin: 0 auto 2rem auto;
-}
-
-.shop-search-input {
-  width: 100%;
-  padding: 0.5rem;
-  font-size: 1rem;
-  position: relative;
-  z-index: 2;
-  background: transparent;
-  color: #222;
-}
-.search-icon {
-  position: absolute;
-  right: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  font-size: 1.1rem;
-  color: #999;
-  pointer-events: none;
-  z-index: 3;
-}
-
-.ghost-text {
-  position: absolute;
-  top: 0;
-  left: 0;
-  padding: 0.5rem;
-  font-size: 1rem;
-  pointer-events: none;
-  z-index: 1;
-  color: #aaa;
-  white-space: nowrap;
-  font-family: inherit;
-}
-
-.ghost-complete {
-  opacity: 0.4;
-}
-.rating-filter select {
-  padding: 0.5rem 0.8rem;
-  border-radius: 8px;
-  border: 1px solid #ccc;
-  background: white;
-  color: #c2185b;
-  font-weight: bold;
-  font-family: inherit;
-}
-

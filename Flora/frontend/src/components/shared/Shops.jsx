@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Rating } from "react-simple-star-rating";
 import "../../assets/css/shops.css";
+import israeliCities from "../../data/israeliCities"; // Top 30 cities
 
 const Shops = () => {
   const [shops, setShops] = useState([]);
@@ -12,6 +13,7 @@ const Shops = () => {
   const [shopReviews, setShopReviews] = useState([]);
   const [showReviewsModal, setShowReviewsModal] = useState(false);
   const [filter, setFilter] = useState("all");
+  const [selectedCity, setSelectedCity] = useState("");
 
   useEffect(() => {
     axios
@@ -59,18 +61,24 @@ const Shops = () => {
 
   const filteredShops = shops
     .filter((shop) => {
+      const nameMatch = shop.shop_name.toLowerCase().includes(search.toLowerCase());
+      const locationMatch = shop.location.toLowerCase().includes(search.toLowerCase());
+      const cityMatch =
+        selectedCity === "" ||
+        shop.location.toLowerCase() === selectedCity.toLowerCase();
+
       if (filter === "top") {
-        return ratings[shop.shop_id]?.avg >= 4.5;
+        return (nameMatch || locationMatch) &&
+          cityMatch &&
+          ratings[shop.shop_id]?.avg >= 4.5;
       }
-      return (
-        shop.shop_name.toLowerCase().includes(search.toLowerCase()) ||
-        shop.location.toLowerCase().includes(search.toLowerCase())
-      );
+
+      return (nameMatch || locationMatch) && cityMatch;
     })
     .sort((a, b) => {
       const r1 = ratings[a.shop_id]?.avg || 0;
       const r2 = ratings[b.shop_id]?.avg || 0;
-      return r2 - r1; // Descending
+      return r2 - r1; // descending by rating
     });
 
   return (
@@ -78,10 +86,11 @@ const Shops = () => {
       <h2>Explore Flower Shops</h2>
 
       <div className="shop-search-controls">
+        {/* 🔍 Search with ghost suggestion */}
         <div className="autocomplete-wrapper">
           <input
             type="text"
-            placeholder="Search by name or city..."
+            placeholder="Search by name or city...🔍"
             className="shop-search-input"
             value={search}
             onChange={(e) => {
@@ -95,7 +104,6 @@ const Shops = () => {
               setGhostSuggestion(matches.length > 0 ? matches[0] : "");
             }}
           />
-          <span className="search-icon">🔍</span>
           {ghostSuggestion &&
             search &&
             ghostSuggestion.toLowerCase() !== search.toLowerCase() && (
@@ -108,12 +116,26 @@ const Shops = () => {
             )}
         </div>
 
+        {/* 🌆 City Dropdown */}
+        <div className="city-filter">
+          <label>City:</label>
+          <select
+            value={selectedCity}
+            onChange={(e) => setSelectedCity(e.target.value)}
+          >
+            <option value="">All Cities</option>
+            {israeliCities.map((city) => (
+              <option key={city} value={city}>
+                {city}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* ⭐ Rating Filter */}
         <div className="rating-filter">
           <label>Sort:</label>
-          <select
-            value={filter}
-            onChange={(e) => setFilter(e.target.value)}
-          >
+          <select value={filter} onChange={(e) => setFilter(e.target.value)}>
             <option value="all">All</option>
             <option value="top">Top Rated</option>
           </select>
