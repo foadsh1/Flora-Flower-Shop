@@ -35,6 +35,7 @@ const Navbar = () => {
           <Link to="/profile">My Profile</Link>
           <Link to="/cart">My Cart 🛒</Link>
           <Link to="/my-orders">My Orders 📦</Link>
+          <Link to="/customize"> Customize Bouquet💐 </Link>
           <button onClick={handleLogout}>Logout</button>
         </div>
       )}
