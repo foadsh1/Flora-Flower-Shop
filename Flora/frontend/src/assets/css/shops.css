@@ -249,4 +249,13 @@
 .ghost-complete {
   opacity: 0.4;
 }
+.rating-filter select {
+  padding: 0.5rem 0.8rem;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  background: white;
+  color: #c2185b;
+  font-weight: bold;
+  font-family: inherit;
+}
 
