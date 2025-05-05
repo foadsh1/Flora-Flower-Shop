@@ -110,3 +110,17 @@
   font-size: 0.95rem;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
+.receipt-download-btn {
+  background-color: #c2185b;
+  color: white;
+  font-weight: bold;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  margin-top: 0.5rem;
+}
+
+.receipt-download-btn:hover {
+  background-color: #ad1457;
+}

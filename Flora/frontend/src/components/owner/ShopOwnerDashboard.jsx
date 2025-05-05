@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
 import "../../assets/css/dashboard.css";
+import { generateReceiptPDF } from "../../utils/generateReceiptCanvas"; // ✅ Updated import
 
 const ShopOwnerDashboard = () => {
   const [orders, setOrders] = useState([]);
@@ -61,6 +62,12 @@ const ShopOwnerDashboard = () => {
       setSelectedOrder(orderId);
     } catch (err) {
       console.error("Failed to load order details", err);
+    }
+  };
+
+  const downloadReceipt = () => {
+    if (orderDetails) {
+      generateReceiptPDF(orderDetails, "shopowner");
     }
   };
 
@@ -157,6 +164,12 @@ const ShopOwnerDashboard = () => {
                             <p>“{orderDetails.review.comment}”</p>
                           </div>
                         )}
+
+                        <div className="receipt-actions">
+                          <button className="download-receipt-btn" onClick={downloadReceipt}>
+                            Download Receipt (PDF)
+                          </button>
+                        </div>
                       </div>
                     </td>
                   </tr>

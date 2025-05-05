@@ -1,7 +1,7 @@
-// src/components/client/MyOrders.jsx
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import ReviewModal from "./ReviewModal";
+import { generateReceiptPDF } from "../../utils/generateReceiptCanvas";
 import "../../assets/css/myorders.css";
 
 const MyOrders = () => {
@@ -126,6 +126,25 @@ const MyOrders = () => {
                   Write Review
                 </button>
               ))}
+
+            <button
+              className="receipt-download-btn"
+              onClick={() =>
+                generateReceiptPDF(
+                  {
+                    order_id: orderId,
+                    order_date: order.orderDate,
+                    status: order.status,
+                    shop_name: order.shopName,
+                    items: order.products,
+                    total_price: order.totalPrice,
+                  },
+                  "client"
+                )
+              }
+            >
+              Download Receipt
+            </button>
           </div>
         ))
       )}

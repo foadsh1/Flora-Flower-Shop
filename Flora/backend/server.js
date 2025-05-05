@@ -31,7 +31,11 @@ app.use(
 app.use("/admin", require("./routes/admin.routes")); // ✅ Admin routes
 
 // ✅ Static image folder
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+app.use("/uploads", express.static("uploads", {
+  setHeaders: (res, path) => {
+    res.set("Access-Control-Allow-Origin", "*");
+  }
+}));
 app.use("/products", productsRoutes);
 // ✅ Routes
 app.use("/auth", authRoutes);
