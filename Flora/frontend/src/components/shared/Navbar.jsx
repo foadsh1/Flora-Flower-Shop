@@ -46,6 +46,7 @@ const Navbar = () => {
       {user?.role === "shopowner" && (
         <div className="nav-links">
           <Link to="/owner/dashboard">Dashboard</Link>
+          <Link to="/owner/supplier">Supplier Order</Link>
           {user.hasShop ? (
             <Link to="/create-shop">Create Shop</Link>
           ) : (

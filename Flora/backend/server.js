@@ -8,6 +8,7 @@ const shopRoutes = require("./routes/shop.routes");
 const productsRoutes = require("./routes/products.routes");
 const app = express();
 const reviewRoutes = require("./routes/review.routes");
+const supplierRoutes = require("./routes/supplier.routes");
 app.use(
   cors({
     origin: "http://localhost:3000",
@@ -42,6 +43,7 @@ app.use("/auth", authRoutes);
 app.use("/shop", shopRoutes);
 app.use("/orders", ordersRoutes);
 app.use("/reviews", reviewRoutes);
+app.use("/supplier", supplierRoutes);
 const PORT = 5000;
 app.listen(PORT, () => {
   console.log(`✅ Server running at http://localhost:${PORT}`);
