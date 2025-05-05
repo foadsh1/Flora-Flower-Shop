@@ -1,15 +1,20 @@
 // src/utils/generateReceiptPDF.js
 import jsPDF from "jspdf";
-
+import logo from "../assets/images/logo.png";
 /**
  * Generate a professional PDF receipt for Flora Flower Shops
  * @param {Object} data - Order details
  * @param {string} role - "client" or "shopowner"
  */
+
 export const generateReceiptPDF = (data, role = "client") => {
   const doc = new jsPDF({ unit: "pt", format: "a4" });
   const margin = 40;
   let y = margin;
+  const img = new Image();
+  img.src = logo;
+  img.onload = () => {
+    doc.addImage(img, "PNG", 500, 10, 70, 50); // x, y, width, height
 
   // 🌸 Branding Header
   doc.setFont("helvetica", "bold");
@@ -100,4 +105,5 @@ export const generateReceiptPDF = (data, role = "client") => {
   doc.text("This is an automatically generated receipt. No signature required.", margin, y + 12);
 
   doc.save(`Flora_Order_${data.order_id}_Receipt.pdf`);
+};
 };

@@ -2,7 +2,7 @@ import React, { useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import "../../assets/css/navbar.css";
-
+import logo from "../../assets/images/logo.png"
 const Navbar = () => {
   const { user, logout, loading } = useContext(AuthContext);
   const navigate = useNavigate();
@@ -17,7 +17,10 @@ const Navbar = () => {
   return (
     <nav className="navbar">
       <Link to="/" className="logo">
-        Flora 🌸
+        <img
+          src={logo}
+          alt="Flora Logo"
+        />
       </Link>
       <Link to="/shops" className="explore-btn">
         Explore Shops
