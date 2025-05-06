@@ -112,6 +112,7 @@ const ShopOwnerDashboard = () => {
                       <option value="Pending">Pending</option>
                       <option value="Processing">Processing</option>
                       <option value="Shipped">Shipped</option>
+                      <option value="Out for Delivery">Out for Delivery</option>
                       <option value="Delivered">Delivered</option>
                     </select>
                     <button onClick={() => updateStatus(order.order_id)}>Update</button>
@@ -140,7 +141,18 @@ const ShopOwnerDashboard = () => {
                         <p><strong>Status:</strong> {orderDetails.status}</p>
                         <p><strong>Client:</strong> {orderDetails.client_name}</p>
                         <p><strong>Date:</strong> {new Date(orderDetails.order_date).toLocaleDateString()}</p>
-                        <p><strong>Total:</strong> ${orderDetails.total_price}</p>
+                        {orderDetails.coupon_code ? (
+                          <>
+                            <p><strong>Original Price:</strong> ${(orderDetails.total_price / (1 - orderDetails.discount_applied / 100)).toFixed(2)}</p>
+                            <div className="slider-coupon">
+                              <p><strong>Coupon Used:</strong> {orderDetails.coupon_code}</p>
+                              <p><strong>Discount:</strong> {orderDetails.discount_applied}%</p>
+                            </div>
+                            <p><strong>Total After Discount:</strong> ${orderDetails.total_price}</p>
+                          </>
+                        ) : (
+                          <p><strong>Total:</strong> ${orderDetails.total_price}</p>
+                        )}
 
                         <h5>Items:</h5>
                         {orderDetails.items.map((item, index) => (

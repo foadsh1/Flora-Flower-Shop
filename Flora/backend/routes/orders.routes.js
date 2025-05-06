@@ -3,9 +3,8 @@ const db = require("../models/db");
 
 const router = express.Router();
 
-// ✅ Place an order with stock validation
 router.post("/place", async (req, res) => {
-  const { cart, totalPrice, shopId } = req.body;
+  const { cart, totalPrice, shopId, couponCode, discount } = req.body;
   const client_id = req.session?.user?.user_id;
 
   if (!client_id) {
@@ -13,7 +12,7 @@ router.post("/place", async (req, res) => {
   }
 
   try {
-    // Step 1: Check stock for each product
+    // Step 1: Validate stock
     for (const item of cart) {
       const [results] = await db
         .promise()
@@ -31,17 +30,33 @@ router.post("/place", async (req, res) => {
       }
     }
 
-    // Step 2: Create order
+    // Step 2: Optional coupon validation
+    if (couponCode) {
+      const [couponResults] = await db
+        .promise()
+        .query("SELECT * FROM coupons WHERE code = ? AND is_active = TRUE AND expires_at > NOW()", [couponCode]);
+
+      if (!couponResults || couponResults.length === 0) {
+        return res.status(400).json({ error: "Invalid or expired coupon" });
+      }
+
+      const dbDiscount = couponResults[0].discount_percent;
+      if (parseInt(dbDiscount) !== parseInt(discount)) {
+        return res.status(400).json({ error: "Discount mismatch" });
+      }
+    }
+
+    // Step 3: Insert into orders
     const [orderResult] = await db
       .promise()
-      .query("INSERT INTO orders (client_id, shop_id, total_price) VALUES (?, ?, ?)", [
-        client_id,
-        shopId,
-        totalPrice,
-      ]);
+      .query(
+        `INSERT INTO orders (client_id, shop_id, total_price, coupon_code, discount_applied)
+         VALUES (?, ?, ?, ?, ?)`,
+        [client_id, shopId, totalPrice, couponCode || null, discount || 0]
+      );
     const order_id = orderResult.insertId;
 
-    // Step 3: Insert order items
+    // Step 4: Insert order items
     const itemsValues = cart.map((item) => [
       order_id,
       item.product_id,
@@ -54,7 +69,7 @@ router.post("/place", async (req, res) => {
         itemsValues,
       ]);
 
-    // Step 4: Update stock
+    // Step 5: Update product stock
     for (const item of cart) {
       await db
         .promise()
@@ -131,6 +146,7 @@ router.get("/:order_id/details", (req, res) => {
 
   const sql = `
     SELECT o.order_id, o.order_date, o.status, o.total_price,
+           o.coupon_code, o.discount_applied,
            u.username AS client_name,
            p.name AS product_name, p.image, oi.quantity, oi.price AS item_price,
            r.rating, r.comment
@@ -162,6 +178,8 @@ router.get("/:order_id/details", (req, res) => {
       status: base.status,
       total_price: base.total_price,
       client_name: base.client_name,
+      coupon_code: base.coupon_code,
+      discount_applied: base.discount_applied,
       items,
       review: base.rating ? {
         rating: base.rating,
@@ -172,5 +190,24 @@ router.get("/:order_id/details", (req, res) => {
     res.json(response);
   });
 });
+router.get("/coupon/validate", (req, res) => {
+  const { code } = req.query;
+
+  const sql = `
+    SELECT * FROM coupons
+    WHERE code = ? AND is_active = TRUE AND expires_at > NOW()
+  `;
+
+  db.query(sql, [code], (err, results) => {
+    if (err) return res.status(500).json({ error: "DB error" });
+    if (results.length === 0)
+      return res.status(400).json({ error: "Invalid or expired coupon" });
+
+    const coupon = results[0];
+    res.json({ discount: coupon.discount_percent });
+  });
+});
+
+
 
 module.exports = router;

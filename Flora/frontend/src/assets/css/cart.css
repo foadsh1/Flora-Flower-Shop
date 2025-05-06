@@ -1,10 +1,12 @@
-/* src/assets/css/cart.css */
-
+/* === Cart Container === */
 .cart-container {
   padding: 3rem 2rem;
   background-color: #fff5f8;
   min-height: 100vh;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .cart-container h2 {
@@ -14,20 +16,45 @@
   margin-bottom: 2rem;
 }
 
+/* === Layout Wrappers === */
+.cart-main {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+  width: 100%;
+  max-width: 1200px;
+}
+
+.cart-left {
+  flex: 2;
+  min-width: 300px;
+}
+
+.cart-right {
+  flex: 1;
+  min-width: 280px;
+  background-color: #fff;
+  border: 1px solid #f8bbd0;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 12px rgba(194, 24, 91, 0.07);
+}
+
+/* === Cart Items === */
 .cart-item {
   background: #fff;
   border: 1px solid #f8bbd0;
   border-radius: 12px;
   padding: 1rem;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.2rem;
   display: flex;
   align-items: center;
   box-shadow: 0 4px 12px rgba(194, 24, 91, 0.07);
 }
 
 .cart-image {
-  width: 100px;
-  height: 100px;
+  width: 90px;
+  height: 90px;
   object-fit: contain;
   border-radius: 10px;
   background-color: #fbe9f1;
@@ -63,14 +90,77 @@
   font-weight: bold;
 }
 
+/* === Cart Summary === */
 .cart-summary {
   text-align: center;
   margin-top: 2rem;
 }
 
+/* === Coupon Section === */
+.coupon-section {
+  margin: 1rem 0;
+  background: #fff5f8;
+  padding: 1rem;
+  border: 1px solid #f8bbd0;
+  border-radius: 8px;
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+.coupon-section input {
+  flex: 1 1 60%;
+  padding: 0.5rem;
+  border: 1px solid #f8bbd0;
+  border-radius: 6px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.coupon-section button {
+  padding: 0.5rem 1.2rem;
+  background-color: #c2185b;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.3s;
+  white-space: nowrap;
+}
+
+.coupon-section button:hover {
+  background-color: #a0154d;
+}
+
+.discount-info {
+  margin-top: 0.5rem;
+  color: #388e3c;
+  font-weight: 600;
+  text-align: left;
+}
+
+/* === PayPal Wrapper === */
+.paypal-checkout-wrapper {
+  margin-top: 1.5rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #fff5f8;
+  border: 1px solid #f8bbd0;
+  border-radius: 12px;
+  padding: 1rem;
+  box-shadow: 0 4px 10px rgba(194, 24, 91, 0.05);
+}
+
+.paypal-checkout-wrapper .paypal-buttons {
+  width: 100% !important;
+}
+
+/* === Buttons === */
 .checkout-btn,
 .clear-btn {
-  margin: 0.5rem;
+  width: 100%;
+  margin-top: 1rem;
   padding: 0.8rem 2rem;
   font-size: 1rem;
   font-weight: bold;
@@ -92,28 +182,24 @@
   background-color: #f44336;
   color: white;
 }
-.paypal-checkout-wrapper {
-  margin-top: 1.5rem;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background: #fff5f8;
-  border: 1px solid #f8bbd0;
-  border-radius: 12px;
-  padding: 1rem;
-  box-shadow: 0 4px 10px rgba(194, 24, 91, 0.05);
-  max-width: 400px;
-  margin-left: auto;
-  margin-right: auto;
-}
 
-.paypal-checkout-wrapper .paypal-buttons {
-  width: 400px !important;
-  max-width: 100% !important;
-}
+/* === Responsive === */
+@media (max-width: 768px) {
+  .cart-main {
+    flex-direction: column;
+  }
 
-@media (max-width: 500px) {
-  .paypal-checkout-wrapper {
-    padding: 0.75rem;
+  .cart-left,
+  .cart-right {
+    width: 100%;
+  }
+
+  .coupon-section {
+    flex-direction: column;
+  }
+
+  .coupon-section input,
+  .coupon-section button {
+    width: 100%;
   }
 }

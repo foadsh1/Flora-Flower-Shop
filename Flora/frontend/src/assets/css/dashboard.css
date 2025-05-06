@@ -210,3 +210,13 @@
   border: none;
   cursor: pointer;
 }
+.slider-coupon {
+  background-color: #fff0f5;
+  border-left: 4px solid #c2185b;
+  padding: 0.75rem 1rem;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  color: #c2185b;
+}
