@@ -1,6 +1,5 @@
 import jsPDF from "jspdf";
-import logo from "../assets/images/logo.png";
-import axios from "axios";
+import logo from "../../assets/images/logo.png";
 
 /**
  * Generate a professional PDF receipt for Flora Flower Shops
@@ -8,17 +7,7 @@ import axios from "axios";
  * @param {string} role - "client" or "shopowner"
  */
 export const generateReceiptPDF = async (data, role = "client") => {
-  let taxPercent = 17;
-
-  // Fetch tax percent from backend
-  try {
-    const res = await axios.get("http://localhost:5000/admin/tax", {
-      withCredentials: true,
-    });
-    taxPercent = parseFloat(res.data.tax) || 17;
-  } catch (err) {
-    console.warn("⚠️ Failed to fetch tax from DB, using default 17%");
-  }
+  const taxPercent = parseFloat(data.tax_percent) || 17;
 
   const doc = new jsPDF({ unit: "pt", format: "a4" });
   const margin = 40;
@@ -30,6 +19,7 @@ export const generateReceiptPDF = async (data, role = "client") => {
   img.onload = () => {
     doc.addImage(img, "PNG", 500, 10, 70, 50);
 
+    // Header
     doc.setFont("helvetica", "bold");
     doc.setFontSize(22);
     doc.setTextColor("#c2185b");
@@ -51,6 +41,7 @@ export const generateReceiptPDF = async (data, role = "client") => {
     doc.setTextColor("#000");
     doc.text("Receipt", margin, y);
 
+    // Order Info
     y += 30;
     doc.setFontSize(12);
     doc.setTextColor("#333");
@@ -63,30 +54,17 @@ export const generateReceiptPDF = async (data, role = "client") => {
     y += 20;
     doc.text(`Status: ${data.status}`, margin, y);
 
-    // 🧮 Tax + Price Info
+    // Tax and price summary
     y += 20;
     let subtotal = parseFloat(data.total_price) || 0;
-    let taxAmount = subtotal * (taxPercent / 100);
-    let totalWithTax = subtotal + taxAmount;
+    let taxAmount = subtotal * (taxPercent / (100 + taxPercent));
 
-    if (data.coupon_code) {
-      const originalTotal = subtotal / (1 - data.discount_applied / 100);
-      taxAmount = originalTotal * (taxPercent / 100);
-      totalWithTax = originalTotal + taxAmount;
-
-      doc.text(`Original Price: $${originalTotal.toFixed(2)}`, margin, y);
-      y += 20;
-      doc.text(`Coupon Code: ${data.coupon_code}`, margin, y);
-      doc.text(`Discount: ${data.discount_applied}%`, margin + 250, y);
-      y += 20;
-      doc.text(`Subtotal After Discount: $${subtotal.toFixed(2)}`, margin, y);
-    } else {
-      doc.text(`Subtotal: $${subtotal.toFixed(2)}`, margin, y);
-    }
-
-    y += 20;
-    doc.text(`Tax (${taxPercent}%): $${taxAmount.toFixed(2)}`, margin, y);
-    doc.text(`Total (incl. tax): $${totalWithTax.toFixed(2)}`, margin + 250, y);
+    doc.text(`Price (incl. tax): $${subtotal.toFixed(2)}`, margin, y);
+    doc.text(
+      `Includes Tax (${taxPercent}%): $${taxAmount.toFixed(2)}`,
+      margin + 250,
+      y
+    );
 
     // Client / Shop Info
     y += 30;
@@ -105,7 +83,7 @@ export const generateReceiptPDF = async (data, role = "client") => {
       doc.text("Location: Provided by client", margin, y + 15);
     }
 
-    // Products Table
+    // Product Table
     y += 40;
     doc.setFillColor("#f8bbd0");
     doc.rect(margin, y, 500, 24, "F");
@@ -114,8 +92,9 @@ export const generateReceiptPDF = async (data, role = "client") => {
     doc.setFont("helvetica", "bold");
     doc.text("Item", margin + 10, y + 16);
     doc.text("Qty", margin + 300, y + 16);
-    doc.text("Price", margin + 400, y + 16);
+    doc.text("Price (incl. tax)", margin + 400, y + 16);
 
+    // Products
     y += 34;
     doc.setFont("helvetica", "normal");
     data.items.forEach((item) => {
@@ -125,6 +104,7 @@ export const generateReceiptPDF = async (data, role = "client") => {
       y += 22;
     });
 
+    // Review
     if (data.review) {
       y += 30;
       doc.setFontSize(13);
@@ -133,11 +113,12 @@ export const generateReceiptPDF = async (data, role = "client") => {
       y += 18;
       doc.setFontSize(11);
       doc.setTextColor("#000");
-      doc.text(`Rating:  ${data.review.rating}`, margin, y);
+      doc.text(`Rating: ${data.review.rating}`, margin, y);
       y += 16;
       doc.text(`"${data.review.comment}"`, margin, y);
     }
 
+    // Footer
     y = 770;
     doc.setFontSize(10);
     doc.setTextColor("#999");

@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
 import "../../assets/css/dashboard.css";
-import { generateReceiptPDF } from "../../utils/generateReceiptCanvas"; // ✅ Updated import
+import { generateReceiptPDF } from "../utils/generateReceiptCanvas"; // ✅ Updated import
 
 const ShopOwnerDashboard = () => {
   const [orders, setOrders] = useState([]);

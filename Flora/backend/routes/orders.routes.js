@@ -12,14 +12,24 @@ router.post("/place", async (req, res) => {
   }
 
   try {
+    // ✅ Step 0: Get current tax from settings table
+    const [[{ value: taxPercentStr }]] = await db
+      .promise()
+      .query("SELECT value FROM settings WHERE key_name = 'tax_percent'");
+    const taxPercent = parseFloat(taxPercentStr) || 17;
+
     // Step 1: Validate stock
     for (const item of cart) {
       const [results] = await db
         .promise()
-        .query("SELECT name, quantity FROM products WHERE product_id = ?", [item.product_id]);
+        .query("SELECT name, quantity FROM products WHERE product_id = ?", [
+          item.product_id,
+        ]);
 
       if (!results || results.length === 0) {
-        return res.status(404).json({ error: `Product not found: ID ${item.product_id}` });
+        return res
+          .status(404)
+          .json({ error: `Product not found: ID ${item.product_id}` });
       }
 
       const product = results[0];
@@ -34,7 +44,10 @@ router.post("/place", async (req, res) => {
     if (couponCode) {
       const [couponResults] = await db
         .promise()
-        .query("SELECT * FROM coupons WHERE code = ? AND is_active = TRUE AND expires_at > NOW()", [couponCode]);
+        .query(
+          "SELECT * FROM coupons WHERE code = ? AND is_active = TRUE AND expires_at > NOW()",
+          [couponCode]
+        );
 
       if (!couponResults || couponResults.length === 0) {
         return res.status(400).json({ error: "Invalid or expired coupon" });
@@ -46,14 +59,19 @@ router.post("/place", async (req, res) => {
       }
     }
 
-    // Step 3: Insert into orders
-    const [orderResult] = await db
-      .promise()
-      .query(
-        `INSERT INTO orders (client_id, shop_id, total_price, coupon_code, discount_applied)
-         VALUES (?, ?, ?, ?, ?)`,
-        [client_id, shopId, totalPrice, couponCode || null, discount || 0]
-      );
+    // ✅ Step 3: Insert into orders (including tax_percent)
+    const [orderResult] = await db.promise().query(
+      `INSERT INTO orders (client_id, shop_id, total_price, coupon_code, discount_applied, tax_percent)
+         VALUES (?, ?, ?, ?, ?, ?)`,
+      [
+        client_id,
+        shopId,
+        totalPrice,
+        couponCode || null,
+        discount || 0,
+        taxPercent,
+      ]
+    );
     const order_id = orderResult.insertId;
 
     // Step 4: Insert order items
@@ -65,9 +83,10 @@ router.post("/place", async (req, res) => {
     ]);
     await db
       .promise()
-      .query("INSERT INTO order_items (order_id, product_id, quantity, price) VALUES ?", [
-        itemsValues,
-      ]);
+      .query(
+        "INSERT INTO order_items (order_id, product_id, quantity, price) VALUES ?",
+        [itemsValues]
+      );
 
     // Step 5: Update product stock
     for (const item of cart) {
@@ -82,7 +101,9 @@ router.post("/place", async (req, res) => {
     res.json({ message: "Order placed successfully!" });
   } catch (err) {
     console.error("❌ Error placing order:", err);
-    res.status(500).json({ error: "Something went wrong while placing your order" });
+    res
+      .status(500)
+      .json({ error: "Something went wrong while placing your order" });
   }
 });
 // ✅ Get all orders of the logged-in client
@@ -146,7 +167,7 @@ router.get("/:order_id/details", (req, res) => {
 
   const sql = `
     SELECT o.order_id, o.order_date, o.status, o.total_price,
-           o.coupon_code, o.discount_applied,
+           o.coupon_code, o.discount_applied, o.tax_percent,
            u.username AS client_name,
            p.name AS product_name, p.image, oi.quantity, oi.price AS item_price,
            r.rating, r.comment
@@ -180,6 +201,7 @@ router.get("/:order_id/details", (req, res) => {
       client_name: base.client_name,
       coupon_code: base.coupon_code,
       discount_applied: base.discount_applied,
+      tax_percent: base.tax_percent,
       items,
       review: base.rating ? {
         rating: base.rating,
@@ -190,6 +212,7 @@ router.get("/:order_id/details", (req, res) => {
     res.json(response);
   });
 });
+
 router.get("/coupon/validate", (req, res) => {
   const { code } = req.query;
 

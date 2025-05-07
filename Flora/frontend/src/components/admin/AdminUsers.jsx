@@ -8,6 +8,7 @@ const AdminUsers = () => {
   const [users, setUsers] = useState([]);
   const [tax, setTax] = useState("");
   const [newTax, setNewTax] = useState("");
+  const [updatedAt, setUpdatedAt] = useState(null);
   const [coupons, setCoupons] = useState([]);
   const [newCoupon, setNewCoupon] = useState({
     code: "",
@@ -19,14 +20,14 @@ const AdminUsers = () => {
     axios
       .get("http://localhost:5000/admin/users", { withCredentials: true })
       .then((res) => setUsers(res.data.users))
-      .catch((err) => toast.error("Failed to load users"));
+      .catch(() => toast.error("Failed to load users"));
   };
 
   const fetchCoupons = () => {
     axios
       .get("http://localhost:5000/admin/coupons", { withCredentials: true })
       .then((res) => setCoupons(res.data.coupons))
-      .catch((err) => toast.error("Failed to load coupons"));
+      .catch(() => toast.error("Failed to load coupons"));
   };
 
   const fetchTax = () => {
@@ -35,8 +36,9 @@ const AdminUsers = () => {
       .then((res) => {
         setTax(res.data.tax);
         setNewTax(res.data.tax);
+        setUpdatedAt(res.data.updatedAt);
       })
-      .catch((err) => toast.error("Failed to load tax"));
+      .catch(() => toast.error("Failed to load tax"));
   };
 
   useEffect(() => {
@@ -87,23 +89,36 @@ const AdminUsers = () => {
     }
   };
 
-  const updateTax = () => {
+  const updateTax = async () => {
     const value = parseFloat(newTax);
     if (isNaN(value) || value < 0 || value > 100) {
       return toast.error("Invalid tax value.");
     }
 
-    axios
-      .patch(
+    try {
+      const response = await axios.get("http://localhost:5000/admin/tax", {
+        withCredentials: true,
+      });
+      const currentTax = parseFloat(response.data.tax);
+
+      if (value === currentTax) {
+        return toast.info(
+          "No changes detected. Tax already set to this value."
+        );
+      }
+
+      // Update tax and auto-recalculate prices
+      await axios.patch(
         "http://localhost:5000/admin/tax",
         { tax_percent: value },
         { withCredentials: true }
-      )
-      .then(() => {
-        setTax(value);
-        toast.success("Tax updated successfully.");
-      })
-      .catch(() => toast.error("Failed to update tax"));
+      );
+      setTax(value);
+      toast.success("Tax and product prices updated successfully.");
+    } catch (err) {
+      toast.error("Failed to update tax.");
+      console.error(err);
+    }
   };
 
   return (
@@ -112,12 +127,6 @@ const AdminUsers = () => {
         position="bottom-right"
         autoClose={2500}
         hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
         theme="light"
         toastStyle={{
           background: "#fff5f8",
@@ -130,6 +139,7 @@ const AdminUsers = () => {
         }}
         bodyStyle={{ fontSize: "0.95rem" }}
       />
+
       <h2>User Management</h2>
       <table className="admin-table">
         <thead>
@@ -239,6 +249,11 @@ const AdminUsers = () => {
           max="100"
           step="0.01"
         />
+        {updatedAt && (
+          <p style={{ fontSize: "0.9rem", color: "#888", marginTop: "8px" }}>
+            Last updated: {new Date(updatedAt).toLocaleString()}
+          </p>
+        )}
         <button onClick={updateTax}>Update Tax</button>
       </div>
     </div>

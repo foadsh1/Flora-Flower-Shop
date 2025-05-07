@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import ReviewModal from "./ReviewModal";
-import { generateReceiptPDF } from "../../utils/generateReceiptCanvas";
+import { generateReceiptPDF } from "../utils/generateReceiptCanvas";
 import "../../assets/css/myorders.css";
 
 const MyOrders = () => {
