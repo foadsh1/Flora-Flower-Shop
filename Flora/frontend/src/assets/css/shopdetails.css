@@ -2,9 +2,10 @@
 
 .shop-details-container {
   padding: 3rem 2rem;
-  background: linear-gradient(to bottom right,  #fff7fa);
+  background: linear-gradient(to bottom right, #fff7fa, #fff0f5);
   min-height: 100vh;
   text-align: center;
+  font-family: 'Poppins', sans-serif;
 }
 
 .shop-details-container h2 {
@@ -12,17 +13,18 @@
   color: #222;
   margin-bottom: 2rem;
   font-weight: bold;
-  font-family: 'Poppins', sans-serif;
 }
 
+/* 🔧 Improved Responsive Product Grid */
 .products-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 0.2rem;
-  padding: 0 45rem;
-  justify-content: center;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 2rem;
+  padding: 0 2rem;
+  justify-items: center;
 }
 
+/* 🧾 Product Card */
 .product-card {
   background: #fff;
   border: 1px solid #f8bbd0;
@@ -32,9 +34,10 @@
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  max-width: 250px;
+  align-items: center;
+  max-width: 280px;
   width: 100%;
+  text-align: center;
 }
 
 .product-card:hover {
@@ -42,39 +45,35 @@
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
 }
 
+/* 🖼️ Product Image */
 .product-image {
-  width: 100%;
-  height: 220px;
-  object-fit: cover;
-  border-bottom: 1px solid #eee;
-  transition: 0.3s ease;
-  padding: 25px;
+  width: 160px;
+  height: 160px;
+  object-fit: contain;
+  background-color: #fbe9f1;
+  border-radius: 10px;
+  margin-bottom: 1rem;
+  padding: 12px;
 }
 
+/* 📄 Product Content */
 .product-card h4 {
-  font-size: 1.6rem;
+  font-size: 1.4rem;
   color: #333;
   margin: 1rem 0 0.5rem 0;
-  font-family: 'Poppins', sans-serif;
 }
 
 .product-card p {
   font-size: 1rem;
   color: #555;
-  padding: 0 1rem;
-  margin-bottom: 0.8rem;
+  margin-bottom: 0.6rem;
 }
 
 .product-card strong {
   color: #4CAF50;
 }
 
-.loading {
-  font-size: 1.8rem;
-  color: #888;
-  padding-top: 5rem;
-  font-family: 'Poppins', sans-serif;
-}
+/* 🛒 Add to Cart Button */
 .add-cart-btn {
   background-color: #ff4081;
   color: white;
@@ -91,6 +90,8 @@
   background-color: #f50057;
   transform: translateY(-2px);
 }
+
+/* 🔐 Login Redirect Button */
 .login-to-cart-btn {
   display: inline-block;
   margin-top: 1rem;
@@ -109,13 +110,39 @@
   transform: translateY(-2px);
 }
 
+/* ⏳ Loading Message */
+.loading {
+  font-size: 1.8rem;
+  color: #888;
+  padding-top: 5rem;
+}
 
-/* Responsive tweaks */
-@media (max-width: 600px) {
-  .product-card h4 {
-    font-size: 1.3rem;
+/* 📱 Responsive Tweaks */
+@media (max-width: 768px) {
+  .products-grid {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    padding: 0 1rem;
   }
+  .product-card {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .shop-details-container {
+    padding: 2rem 1rem;
+  }
+
+  .product-card h4 {
+    font-size: 1.2rem;
+  }
+
   .product-card p {
     font-size: 0.95rem;
+  }
+
+  .add-cart-btn,
+  .login-to-cart-btn {
+    width: 100%;
   }
 }

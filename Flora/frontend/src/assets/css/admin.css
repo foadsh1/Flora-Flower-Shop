@@ -80,3 +80,45 @@
 .admin-table td button:hover {
   background-color: #a0154d;
 }
+/* Tax Form */
+.tax-form {
+  margin-top: 2rem;
+  background: #fff;
+  border: 1px solid #f8bbd0;
+  border-radius: 12px;
+  padding: 1.5rem;
+  max-width: 400px;
+  box-shadow: 0 4px 12px rgba(194, 24, 91, 0.1);
+}
+
+.tax-form label {
+  display: block;
+  font-weight: bold;
+  color: #c2185b;
+  margin-bottom: 0.8rem;
+  font-size: 1.1rem;
+}
+
+.tax-form input {
+  width: 100%;
+  padding: 0.7rem;
+  margin-bottom: 1rem;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 1rem;
+}
+
+.tax-form button {
+  background-color: #c2185b;
+  color: white;
+  font-weight: bold;
+  border: none;
+  padding: 0.7rem 1.2rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.tax-form button:hover {
+  background-color: #ad1457;
+}

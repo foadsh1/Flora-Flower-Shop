@@ -1,103 +1,118 @@
 const express = require("express");
-const router = express.Router();
 const db = require("../models/db");
+const router = express.Router();
 
 // ✅ Get all users
-router.get("/users", (req, res) => {
-  if (!req.session.user || req.session.user.role !== "admin") {
-    return res.status(403).json({ error: "Unauthorized" });
+router.get("/users", async (req, res) => {
+  try {
+    const [users] = await db.promise().query("SELECT * FROM users");
+    res.json({ users });
+  } catch (err) {
+    console.error("❌ Failed to fetch users:", err);
+    res.status(500).json({ error: "Server error" });
   }
-
-  db.query(
-    "SELECT user_id, username, email, role, status FROM users",
-    (err, results) => {
-      if (err) return res.status(500).json({ error: "Database error" });
-      res.json({ users: results });
-    }
-  );
 });
 
 // ✅ Update user status
-router.patch("/users/:id/status", (req, res) => {
+router.patch("/users/:user_id/status", async (req, res) => {
+  const { user_id } = req.params;
   const { status } = req.body;
-  const userId = req.params.id;
-
-  if (!req.session.user || req.session.user.role !== "admin") {
-    return res.status(403).json({ error: "Unauthorized" });
+  try {
+    await db
+      .promise()
+      .query("UPDATE users SET status = ? WHERE user_id = ?", [
+        status,
+        user_id,
+      ]);
+    res.json({ message: "Status updated" });
+  } catch (err) {
+    console.error("❌ Failed to update status:", err);
+    res.status(500).json({ error: "Server error" });
   }
-
-  if (!["active", "unactive"].includes(status)) {
-    return res.status(400).json({ error: "Invalid status" });
-  }
-
-  db.query(
-    "UPDATE users SET status = ? WHERE user_id = ?",
-    [status, userId],
-    (err) => {
-      if (err) return res.status(500).json({ error: "Update failed" });
-      res.json({ message: "User status updated" });
-    }
-  );
 });
-
 
 // ✅ Get all coupons
-router.get("/coupons", (req, res) => {
-  if (!req.session.user || req.session.user.role !== "admin") {
-    return res.status(403).json({ error: "Unauthorized" });
+router.get("/coupons", async (req, res) => {
+  try {
+    const [coupons] = await db
+      .promise()
+      .query("SELECT * FROM coupons ORDER BY expires_at DESC");
+    res.json({ coupons });
+  } catch (err) {
+    console.error("❌ Failed to fetch coupons:", err);
+    res.status(500).json({ error: "Server error" });
   }
-
-  db.query("SELECT * FROM coupons ORDER BY expires_at DESC", (err, results) => {
-    if (err) return res.status(500).json({ error: "Database error" });
-    res.json({ coupons: results });
-  });
 });
 
-// ✅ Create a new coupon
-router.post("/coupons", (req, res) => {
-  if (!req.session.user || req.session.user.role !== "admin") {
-    return res.status(403).json({ error: "Unauthorized" });
-  }
-
+// ✅ Add new coupon
+router.post("/coupons", async (req, res) => {
   const { code, discount_percent, expires_at } = req.body;
-
-  if (!code || !discount_percent || !expires_at) {
-    return res.status(400).json({ error: "All fields are required" });
+  try {
+    await db
+      .promise()
+      .query(
+        "INSERT INTO coupons (code, discount_percent, expires_at, is_active) VALUES (?, ?, ?, 1)",
+        [code, discount_percent, expires_at]
+      );
+    res.json({ message: "Coupon added" });
+  } catch (err) {
+    console.error("❌ Failed to add coupon:", err);
+    res.status(500).json({ error: "Server error" });
   }
-
-  const sql = `
-    INSERT INTO coupons (code, discount_percent, expires_at)
-    VALUES (?, ?, ?)
-  `;
-
-  db.query(sql, [code, discount_percent, expires_at], (err) => {
-    if (err) {
-      if (err.code === "ER_DUP_ENTRY") {
-        return res.status(400).json({ error: "Coupon code already exists" });
-      }
-      return res.status(500).json({ error: "Failed to create coupon" });
-    }
-    res.json({ message: "Coupon created successfully" });
-  });
 });
 
-// ✅ Toggle coupon active status
-router.patch("/coupons/:id/status", (req, res) => {
-  if (!req.session.user || req.session.user.role !== "admin") {
-    return res.status(403).json({ error: "Unauthorized" });
+// ✅ Toggle coupon status
+router.patch("/coupons/:coupon_id/status", async (req, res) => {
+  const { coupon_id } = req.params;
+  const { is_active } = req.body;
+  try {
+    await db
+      .promise()
+      .query("UPDATE coupons SET is_active = ? WHERE coupon_id = ?", [
+        is_active ? 1 : 0,
+        coupon_id,
+      ]);
+    res.json({ message: "Coupon status updated" });
+  } catch (err) {
+    console.error("❌ Failed to update coupon status:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+// ✅ Get current tax percent
+router.get("/tax", async (req, res) => {
+  try {
+    const [rows] = await db
+      .promise()
+      .query("SELECT value FROM settings WHERE key_name = 'tax_percent'");
+    const tax = rows[0]?.value || 17;
+    res.json({ tax: parseFloat(tax) });
+  } catch (err) {
+    console.error("❌ Failed to fetch tax:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+// ✅ Set tax percent (insert or update)
+router.patch("/tax", async (req, res) => {
+  const { tax_percent } = req.body;
+  if (!tax_percent || isNaN(tax_percent)) {
+    return res.status(400).json({ error: "Invalid tax value" });
   }
 
-  const couponId = req.params.id;
-  const { is_active } = req.body;
-
-  db.query(
-    "UPDATE coupons SET is_active = ? WHERE coupon_id = ?",
-    [is_active ? 1 : 0, couponId],
-    (err) => {
-      if (err) return res.status(500).json({ error: "Failed to update status" });
-      res.json({ message: "Coupon status updated" });
-    }
-  );
+  try {
+    await db.promise().query(
+      `INSERT INTO settings (key_name, value)
+         VALUES ('tax_percent', ?)
+         ON DUPLICATE KEY UPDATE value = VALUES(value)`,
+      [tax_percent]
+    );
+    res.json({ message: "Tax percent saved" });
+  } catch (err) {
+    console.error("❌ Failed to update tax:", err);
+    res.status(500).json({ error: "Server error" });
+  }
 });
 
 module.exports = router;
+

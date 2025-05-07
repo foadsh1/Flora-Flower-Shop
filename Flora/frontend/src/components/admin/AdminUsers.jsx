@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import "../../assets/css/admin.css";
 
 const AdminUsers = () => {
   const [users, setUsers] = useState([]);
-  const [message, setMessage] = useState("");
-
+  const [tax, setTax] = useState("");
+  const [newTax, setNewTax] = useState("");
   const [coupons, setCoupons] = useState([]);
   const [newCoupon, setNewCoupon] = useState({
     code: "",
@@ -17,19 +19,30 @@ const AdminUsers = () => {
     axios
       .get("http://localhost:5000/admin/users", { withCredentials: true })
       .then((res) => setUsers(res.data.users))
-      .catch((err) => console.error("Failed to load users", err));
+      .catch((err) => toast.error("Failed to load users"));
   };
 
   const fetchCoupons = () => {
     axios
       .get("http://localhost:5000/admin/coupons", { withCredentials: true })
       .then((res) => setCoupons(res.data.coupons))
-      .catch((err) => console.error("Failed to load coupons", err));
+      .catch((err) => toast.error("Failed to load coupons"));
+  };
+
+  const fetchTax = () => {
+    axios
+      .get("http://localhost:5000/admin/tax", { withCredentials: true })
+      .then((res) => {
+        setTax(res.data.tax);
+        setNewTax(res.data.tax);
+      })
+      .catch((err) => toast.error("Failed to load tax"));
   };
 
   useEffect(() => {
     fetchUsers();
     fetchCoupons();
+    fetchTax();
   }, []);
 
   const handleStatusChange = async (user_id, newStatus) => {
@@ -39,26 +52,24 @@ const AdminUsers = () => {
         { status: newStatus },
         { withCredentials: true }
       );
-      setMessage("User status updated.");
+      toast.success("User status updated.");
       fetchUsers();
     } catch (err) {
-      console.error("Update failed", err);
+      toast.error("Update failed");
     }
   };
 
   const handleAddCoupon = async (e) => {
     e.preventDefault();
     try {
-      await axios.post(
-        "http://localhost:5000/admin/coupons",
-        newCoupon,
-        { withCredentials: true }
-      );
+      await axios.post("http://localhost:5000/admin/coupons", newCoupon, {
+        withCredentials: true,
+      });
       setNewCoupon({ code: "", discount_percent: "", expires_at: "" });
-      setMessage("Coupon added.");
+      toast.success("Coupon added.");
       fetchCoupons();
     } catch (err) {
-      console.error("Add coupon failed", err);
+      toast.error("Add coupon failed");
     }
   };
 
@@ -69,16 +80,57 @@ const AdminUsers = () => {
         { is_active: !is_active },
         { withCredentials: true }
       );
+      toast.success("Coupon status updated.");
       fetchCoupons();
     } catch (err) {
-      console.error("Failed to update coupon status", err);
+      toast.error("Failed to update coupon status");
     }
+  };
+
+  const updateTax = () => {
+    const value = parseFloat(newTax);
+    if (isNaN(value) || value < 0 || value > 100) {
+      return toast.error("Invalid tax value.");
+    }
+
+    axios
+      .patch(
+        "http://localhost:5000/admin/tax",
+        { tax_percent: value },
+        { withCredentials: true }
+      )
+      .then(() => {
+        setTax(value);
+        toast.success("Tax updated successfully.");
+      })
+      .catch(() => toast.error("Failed to update tax"));
   };
 
   return (
     <div className="admin-container">
+      <ToastContainer
+        position="bottom-right"
+        autoClose={2500}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+        toastStyle={{
+          background: "#fff5f8",
+          color: "#c2185b",
+          fontWeight: "bold",
+          fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
+          border: "1px solid #f8bbd0",
+          borderRadius: "12px",
+          boxShadow: "0 4px 12px rgba(194, 24, 91, 0.1)",
+        }}
+        bodyStyle={{ fontSize: "0.95rem" }}
+      />
       <h2>User Management</h2>
-      {message && <div className="success">{message}</div>}
       <table className="admin-table">
         <thead>
           <tr>
@@ -120,9 +172,7 @@ const AdminUsers = () => {
           type="text"
           placeholder="Code"
           value={newCoupon.code}
-          onChange={(e) =>
-            setNewCoupon({ ...newCoupon, code: e.target.value })
-          }
+          onChange={(e) => setNewCoupon({ ...newCoupon, code: e.target.value })}
           required
         />
         <input
@@ -138,7 +188,6 @@ const AdminUsers = () => {
         />
         <input
           type="datetime-local"
-          placeholder="Expires At"
           value={newCoupon.expires_at}
           onChange={(e) =>
             setNewCoupon({ ...newCoupon, expires_at: e.target.value })
@@ -168,7 +217,9 @@ const AdminUsers = () => {
               <td>{new Date(c.expires_at).toLocaleString()}</td>
               <td>{c.is_active ? "Active" : "Inactive"}</td>
               <td>
-                <button onClick={() => toggleCouponStatus(c.coupon_id, c.is_active)}>
+                <button
+                  onClick={() => toggleCouponStatus(c.coupon_id, c.is_active)}
+                >
                   {c.is_active ? "Deactivate" : "Activate"}
                 </button>
               </td>
@@ -176,6 +227,20 @@ const AdminUsers = () => {
           ))}
         </tbody>
       </table>
+
+      <h2>Tax Settings</h2>
+      <div className="tax-form">
+        <label>Current Tax: {tax}%</label>
+        <input
+          type="number"
+          value={newTax}
+          onChange={(e) => setNewTax(e.target.value)}
+          min="0"
+          max="100"
+          step="0.01"
+        />
+        <button onClick={updateTax}>Update Tax</button>
+      </div>
     </div>
   );
 };
