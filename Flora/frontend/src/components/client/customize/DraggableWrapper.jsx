@@ -2,7 +2,7 @@
 import React from "react";
 import { useDrag } from "react-dnd";
 
-const DraggableWrapper = ({ wrapper, onRemove }) => {
+const DraggableWrapper = ({ wrapper, onRemove, exporting }) => {
   const [{ isDragging }, dragRef] = useDrag(
     () => ({
       type: "wrapper",
@@ -24,19 +24,21 @@ const DraggableWrapper = ({ wrapper, onRemove }) => {
   return (
     <div
       ref={dragRef}
-      className="draggable-flower" // ✅ same class to use existing styling
+      className="draggable-flower"
       style={{
         top: wrapper.top,
         left: wrapper.left,
         opacity: isDragging ? 0.4 : 1,
         position: "absolute",
-        zIndex: 0, // ✅ always behind flowers
+        zIndex: 0,
       }}
     >
       <img src={wrapper.src} alt={wrapper.name} className="wrapper-svg" />
-      <button className="remove-button" onClick={onRemove}>
-        ×
-      </button>
+      {!exporting && (
+        <button className="remove-button" onClick={onRemove}>
+          ×
+        </button>
+      )}
     </div>
   );
 };

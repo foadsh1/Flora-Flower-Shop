@@ -5,6 +5,9 @@ import FlowerSelection from "./FlowerSelection";
 import WrapperSelection from "./WrapperSelection";
 import DraggableFlower from "./DraggableFlower";
 import DraggableWrapper from "./DraggableWrapper";
+import html2canvas from "html2canvas";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import "../../../assets/css/customize.css";
 
 const PreviewArea = ({
@@ -13,6 +16,7 @@ const PreviewArea = ({
   bouquet,
   setBouquet,
   handleRemove,
+  exporting, // ✅ NEW
 }) => {
   const [, dropRef] = useDrop(() => ({
     accept: ["flower", "wrapper"],
@@ -22,7 +26,7 @@ const PreviewArea = ({
       if (!offset || !preview) return;
 
       const previewRect = preview.getBoundingClientRect();
-      const top = offset.y - previewRect.top - 30; // 💡 consistent offset
+      const top = offset.y - previewRect.top - 30;
       const left = offset.x - previewRect.left - 30;
 
       if (item.type === "wrapper") {
@@ -47,13 +51,18 @@ const PreviewArea = ({
   return (
     <div ref={dropRef} className="preview-area">
       {wrapper && (
-        <DraggableWrapper wrapper={wrapper} onRemove={() => setWrapper(null)} />
+        <DraggableWrapper
+          wrapper={wrapper}
+          onRemove={() => setWrapper(null)}
+          exporting={exporting} // ✅ pass flag
+        />
       )}
       {bouquet.map((flower) => (
         <DraggableFlower
           key={flower.id}
           flower={flower}
           onRemove={() => handleRemove(flower.id)}
+          exporting={exporting} // ✅ pass flag
         />
       ))}
     </div>
@@ -63,9 +72,28 @@ const PreviewArea = ({
 const CustomizeBouquet = () => {
   const [bouquet, setBouquet] = useState([]);
   const [wrapper, setWrapper] = useState(null);
+  const [exporting, setExporting] = useState(false); // ✅ NEW
 
   const handleRemove = (id) => {
     setBouquet((prev) => prev.filter((f) => f.id !== id));
+  };
+
+  const exportAsImage = () => {
+    setExporting(true);
+    setTimeout(() => {
+      const preview = document.querySelector(".preview-area");
+      if (!preview) return;
+
+      html2canvas(preview).then((canvas) => {
+        const link = document.createElement("a");
+        link.download = "bouquet.png";
+        link.href = canvas.toDataURL();
+        link.click();
+
+        toast.success("Bouquet exported!");
+        setExporting(false);
+      });
+    }, 100); // ✅ allow time for remove buttons to hide
   };
 
   return (
@@ -88,7 +116,11 @@ const CustomizeBouquet = () => {
               bouquet={bouquet}
               setBouquet={setBouquet}
               handleRemove={handleRemove}
+              exporting={exporting} // ✅ pass down
             />
+            <button onClick={exportAsImage} className="export-btn">
+              📸 Export as Image
+            </button>
           </div>
         </div>
       </div>

@@ -107,3 +107,18 @@
   transform: scale(1.1);
   border-color: #c2185b;
 }
+.export-btn {
+  margin-top: 1rem;
+  background-color: #c2185b;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+.export-btn:hover {
+  background-color: #a3154a;
+}
+

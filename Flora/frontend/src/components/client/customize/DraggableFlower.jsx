@@ -1,7 +1,7 @@
 import React from "react";
 import { useDrag } from "react-dnd";
 
-const DraggableFlower = ({ flower, onRemove }) => {
+const DraggableFlower = ({ flower, onRemove, exporting }) => {
   const [{ isDragging }, dragRef] = useDrag(
     () => ({
       type: "flower",
@@ -32,9 +32,11 @@ const DraggableFlower = ({ flower, onRemove }) => {
       }}
     >
       <img src={flower.src} alt={flower.name} width="60" />
-      <button className="remove-button" onClick={onRemove}>
-        ×
-      </button>
+      {!exporting && (
+        <button className="remove-button" onClick={onRemove}>
+          ×
+        </button>
+      )}
     </div>
   );
 };

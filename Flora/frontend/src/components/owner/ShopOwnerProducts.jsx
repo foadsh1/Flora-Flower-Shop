@@ -8,7 +8,7 @@ const ShopOwnerProducts = () => {
   const [form, setForm] = useState({
     name: "",
     description: "",
-    price: "",
+    base_price: "",
     quantity: "",
   });
   const [image, setImage] = useState(null);
@@ -38,7 +38,7 @@ const ShopOwnerProducts = () => {
     setForm({
       name: "",
       description: "",
-      price: "",
+      base_price: "",
       quantity: "",
     });
     setImage(null);
@@ -82,7 +82,7 @@ const ShopOwnerProducts = () => {
     setForm({
       name: product.name,
       description: product.description,
-      price: product.price,
+      base_price: product.base_price,
       quantity: product.quantity,
     });
     setImage(null);
@@ -132,9 +132,9 @@ const ShopOwnerProducts = () => {
 
         <input
           type="number"
-          name="price"
-          placeholder="Price"
-          value={form.price}
+          name="base_price"
+          placeholder="Base Price (before tax)"
+          value={form.base_price}
           onChange={handleChange}
           required
         />
@@ -169,17 +169,20 @@ const ShopOwnerProducts = () => {
             <div key={product.product_id} className="product-card">
               {product.image && (
                 <div className="image-container">
-                <img
-                  src={`http://localhost:5000/uploads/${product.image}`}
-                  alt={product.name}
-                  className="product-image"
-                />
+                  <img
+                    src={`http://localhost:5000/uploads/${product.image}`}
+                    alt={product.name}
+                    className="product-image"
+                  />
                 </div>
               )}
               <h4>{product.name}</h4>
               <p>{product.description}</p>
               <p>
-                <strong>Price:</strong> ${product.price}
+                <strong>Base Price:</strong> ${product.base_price}
+              </p>
+              <p>
+                <strong>Final Price After Tax:</strong> ${product.price}
               </p>
               <p>
                 <strong>Quantity:</strong> {product.quantity}

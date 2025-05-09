@@ -14,12 +14,30 @@ const upload = multer({ storage });
 
 // ✅ Create a new product
 router.post("/", upload.single("image"), (req, res) => {
-  const { name, description, price, quantity } = req.body;
+  const { name, description, base_price, quantity } = req.body;
   const user_id = req.session?.user?.user_id;
 
   if (!user_id) return res.status(403).json({ error: "Unauthorized" });
 
-  // find the shop_id of the logged-in user
+  // ✅ Validate base_price
+  const basePriceNum = parseFloat(base_price);
+  if (isNaN(basePriceNum) || basePriceNum <= 0 || basePriceNum > 9999) {
+    return res
+      .status(400)
+      .json({ error: "Invalid base price. Must be between 0.01 and 9999." });
+  }
+
+  // ✅ Validate quantity
+  const quantityNum = parseInt(quantity);
+  if (isNaN(quantityNum) || quantityNum < 0 || quantityNum > 9999) {
+    return res
+      .status(400)
+      .json({
+        error: "Invalid quantity. Must be a number between 0 and 9999.",
+      });
+  }
+
+  // Get shop_id
   db.query(
     "SELECT shop_id FROM shops WHERE user_id = ?",
     [user_id],
@@ -32,8 +50,8 @@ router.post("/", upload.single("image"), (req, res) => {
       const image = req.file ? req.file.filename : null;
 
       db.query(
-        "INSERT INTO products (shop_id, name, description, price, quantity, image) VALUES (?, ?, ?, ?, ?, ?)",
-        [shop_id, name, description, price, quantity, image],
+        "INSERT INTO products (shop_id, name, description, base_price, quantity, image) VALUES (?, ?, ?, ?, ?, ?)",
+        [shop_id, name, description, basePriceNum, quantityNum, image],
         (err) => {
           if (err)
             return res.status(500).json({ error: "Failed to add product" });
@@ -75,20 +93,38 @@ router.get("/mine", (req, res) => {
 
 // ✅ Update a product
 router.patch("/:id", upload.single("image"), (req, res) => {
-  const { name, description, price, quantity } = req.body;
+  const { name, description, base_price, quantity } = req.body;
   const image = req.file ? req.file.filename : null;
   const productId = req.params.id;
 
+  // ✅ Validate base_price
+  const basePriceNum = parseFloat(base_price);
+  if (isNaN(basePriceNum) || basePriceNum <= 0 || basePriceNum > 9999) {
+    return res
+      .status(400)
+      .json({ error: "Invalid base price. Must be between 0.01 and 9999." });
+  }
+
+  // ✅ Validate quantity
+  const quantityNum = parseInt(quantity);
+  if (isNaN(quantityNum) || quantityNum < 0 || quantityNum > 9999) {
+    return res
+      .status(400)
+      .json({
+        error: "Invalid quantity. Must be a number between 0 and 9999.",
+      });
+  }
+
   let sql = `
     UPDATE products 
-    SET name = ?, description = ?, price = ?, quantity = ?
+    SET name = ?, description = ?, base_price = ?, quantity = ?
     ${image ? ", image = ?" : ""}
     WHERE product_id = ?
   `;
 
   const values = image
-    ? [name, description, price, quantity, image, productId]
-    : [name, description, price, quantity, productId];
+    ? [name, description, basePriceNum, quantityNum, image, productId]
+    : [name, description, basePriceNum, quantityNum, productId];
 
   db.query(sql, values, (err) => {
     if (err) return res.status(500).json({ error: "Failed to update product" });
