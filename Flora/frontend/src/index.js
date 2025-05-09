@@ -9,13 +9,13 @@ const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <React.StrictMode>
     <BrowserRouter>
+     <AuthProvider>
       <CartProvider>
-        <AuthProvider>
-          <PayPalScriptProvider options={{ "client-id": "sb" }}>
-            <App />
-          </PayPalScriptProvider>
-        </AuthProvider>
+        <PayPalScriptProvider options={{ "client-id": "sb" }}>
+          <App />
+        </PayPalScriptProvider>
       </CartProvider>
+    </AuthProvider>
     </BrowserRouter>
   </React.StrictMode>
 );

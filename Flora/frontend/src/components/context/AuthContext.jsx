@@ -13,7 +13,6 @@ export const AuthProvider = ({ children }) => {
       .then((res) => {
         const u = res.data.user;
 
-        // 🏪 shopowner — check for shop existence
         if (u.role === "shopowner") {
           axios
             .get("http://localhost:5000/shop/mine", { withCredentials: true })
@@ -22,14 +21,7 @@ export const AuthProvider = ({ children }) => {
             })
             .catch(() => setUser({ ...u, hasShop: false }))
             .finally(() => setLoading(false));
-        }
-        // 👑 admin — just set user
-        else if (u.role === "admin") {
-          setUser(u);
-          setLoading(false);
-        }
-        // 👤 client — just set user
-        else {
+        } else {
           setUser(u);
           setLoading(false);
         }
@@ -46,7 +38,7 @@ export const AuthProvider = ({ children }) => {
       {},
       { withCredentials: true }
     );
-    setUser(null);
+    setUser(null); // ✅ cart will reset automatically in CartContext
   };
 
   return (
