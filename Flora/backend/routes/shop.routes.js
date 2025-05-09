@@ -276,8 +276,141 @@ router.get("/analytics/compare", (req, res) => {
     res.json({ comparison });
   });
 });
+router.get("/coupons", async (req, res) => {
+  const user_id = req.session?.user?.user_id;
+  if (!user_id) return res.status(403).json({ error: "Unauthorized" });
 
+  try {
+    const [shop] = await db
+      .promise()
+      .query("SELECT shop_id FROM shops WHERE user_id = ?", [user_id]);
 
+    if (shop.length === 0)
+      return res.status(404).json({ error: "Shop not found" });
 
+    const shop_id = shop[0].shop_id;
+    const [coupons] = await db
+      .promise()
+      .query(
+        "SELECT * FROM coupons WHERE shop_id = ? ORDER BY expires_at DESC",
+        [shop_id]
+      );
+
+    res.json({ coupons });
+  } catch (err) {
+    console.error("❌ Failed to fetch shop coupons:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+router.post("/coupons", async (req, res) => {
+  const user_id = req.session?.user?.user_id;
+  if (!user_id) return res.status(403).json({ error: "Unauthorized" });
+
+  const { code, discount_percent, expires_at } = req.body;
+
+  try {
+    const [shop] = await db
+      .promise()
+      .query("SELECT shop_id FROM shops WHERE user_id = ?", [user_id]);
+
+    if (shop.length === 0)
+      return res.status(404).json({ error: "Shop not found" });
+
+    const shop_id = shop[0].shop_id;
+
+    await db
+      .promise()
+      .query(
+        "INSERT INTO coupons (code, discount_percent, expires_at, is_active, shop_id) VALUES (?, ?, ?, 1, ?)",
+        [code, discount_percent, expires_at, shop_id]
+      );
+
+    res.json({ message: "Coupon added" });
+  } catch (err) {
+    console.error("❌ Failed to add coupon:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+// ✅ Toggle coupon status (shopowner can only modify their coupons)
+router.patch("/coupons/:coupon_id/status", async (req, res) => {
+  const user = req.session?.user;
+  const { coupon_id } = req.params;
+  const { is_active } = req.body;
+
+  if (!user || user.role !== "shopowner") {
+    return res.status(403).json({ error: "Unauthorized" });
+  }
+
+  try {
+    const [[shop]] = await db
+      .promise()
+      .query("SELECT shop_id FROM shops WHERE user_id = ?", [user.user_id]);
+
+    if (!shop) return res.status(404).json({ error: "Shop not found" });
+
+    const [[coupon]] = await db
+      .promise()
+      .query(
+        "SELECT * FROM coupons WHERE coupon_id = ? AND shop_id = ?",
+        [coupon_id, shop.shop_id]
+      );
+
+    if (!coupon) return res.status(403).json({ error: "Unauthorized coupon" });
+
+    await db
+      .promise()
+      .query("UPDATE coupons SET is_active = ? WHERE coupon_id = ?", [
+        is_active ? 1 : 0,
+        coupon_id,
+      ]);
+
+    res.json({ message: "Coupon status updated" });
+  } catch (err) {
+    console.error("❌ Failed to update coupon status:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+router.get("/coupon/validate", async (req, res) => {
+  const { code } = req.query;
+  const user_id = req.session?.user?.user_id;
+
+  if (!code || !user_id) {
+    return res
+      .status(400)
+      .json({ error: "Missing coupon code or not logged in." });
+  }
+
+  try {
+    // Get the shop_id based on the user
+    const [[shop]] = await db
+      .promise()
+      .query("SELECT shop_id FROM shops WHERE user_id = ?", [user_id]);
+
+    if (!shop) {
+      return res.status(404).json({ error: "Shop not found for user." });
+    }
+
+    const shop_id = shop.shop_id;
+
+    const [rows] = await db.promise().query(
+      `SELECT * FROM coupons 
+         WHERE code = ? AND shop_id = ? 
+         AND is_active = 1 AND expires_at > NOW()`,
+      [code, shop_id]
+    );
+
+    if (rows.length === 0) {
+      return res
+        .status(404)
+        .json({ error: "Coupon not found, expired, or not for your shop." });
+    }
+
+    return res.json({ discount: rows[0].discount_percent });
+  } catch (err) {
+    console.error("❌ Coupon validation error:", err);
+    return res.status(500).json({ error: "Server error" });
+  }
+});
 
 module.exports = router;

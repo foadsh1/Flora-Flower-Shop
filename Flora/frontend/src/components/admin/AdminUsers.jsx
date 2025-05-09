@@ -9,25 +9,12 @@ const AdminUsers = () => {
   const [tax, setTax] = useState("");
   const [newTax, setNewTax] = useState("");
   const [updatedAt, setUpdatedAt] = useState(null);
-  const [coupons, setCoupons] = useState([]);
-  const [newCoupon, setNewCoupon] = useState({
-    code: "",
-    discount_percent: "",
-    expires_at: "",
-  });
 
   const fetchUsers = () => {
     axios
       .get("http://localhost:5000/admin/users", { withCredentials: true })
       .then((res) => setUsers(res.data.users))
       .catch(() => toast.error("Failed to load users"));
-  };
-
-  const fetchCoupons = () => {
-    axios
-      .get("http://localhost:5000/admin/coupons", { withCredentials: true })
-      .then((res) => setCoupons(res.data.coupons))
-      .catch(() => toast.error("Failed to load coupons"));
   };
 
   const fetchTax = () => {
@@ -43,7 +30,6 @@ const AdminUsers = () => {
 
   useEffect(() => {
     fetchUsers();
-    fetchCoupons();
     fetchTax();
   }, []);
 
@@ -58,34 +44,6 @@ const AdminUsers = () => {
       fetchUsers();
     } catch (err) {
       toast.error("Update failed");
-    }
-  };
-
-  const handleAddCoupon = async (e) => {
-    e.preventDefault();
-    try {
-      await axios.post("http://localhost:5000/admin/coupons", newCoupon, {
-        withCredentials: true,
-      });
-      setNewCoupon({ code: "", discount_percent: "", expires_at: "" });
-      toast.success("Coupon added.");
-      fetchCoupons();
-    } catch (err) {
-      toast.error("Add coupon failed");
-    }
-  };
-
-  const toggleCouponStatus = async (coupon_id, is_active) => {
-    try {
-      await axios.patch(
-        `http://localhost:5000/admin/coupons/${coupon_id}/status`,
-        { is_active: !is_active },
-        { withCredentials: true }
-      );
-      toast.success("Coupon status updated.");
-      fetchCoupons();
-    } catch (err) {
-      toast.error("Failed to update coupon status");
     }
   };
 
@@ -175,69 +133,6 @@ const AdminUsers = () => {
           ))}
         </tbody>
       </table>
-
-      <h2>Coupon Management</h2>
-      <form className="coupon-form" onSubmit={handleAddCoupon}>
-        <input
-          type="text"
-          placeholder="Code"
-          value={newCoupon.code}
-          onChange={(e) => setNewCoupon({ ...newCoupon, code: e.target.value })}
-          required
-        />
-        <input
-          type="number"
-          placeholder="Discount %"
-          value={newCoupon.discount_percent}
-          onChange={(e) =>
-            setNewCoupon({ ...newCoupon, discount_percent: e.target.value })
-          }
-          required
-          min="1"
-          max="100"
-        />
-        <input
-          type="datetime-local"
-          value={newCoupon.expires_at}
-          onChange={(e) =>
-            setNewCoupon({ ...newCoupon, expires_at: e.target.value })
-          }
-          required
-        />
-        <button type="submit">Add Coupon</button>
-      </form>
-
-      <table className="admin-table">
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Code</th>
-            <th>Discount %</th>
-            <th>Expires</th>
-            <th>Status</th>
-            <th>Toggle</th>
-          </tr>
-        </thead>
-        <tbody>
-          {coupons.map((c, index) => (
-            <tr key={c.coupon_id}>
-              <td>{index + 1}</td>
-              <td>{c.code}</td>
-              <td>{c.discount_percent}%</td>
-              <td>{new Date(c.expires_at).toLocaleString()}</td>
-              <td>{c.is_active ? "Active" : "Inactive"}</td>
-              <td>
-                <button
-                  onClick={() => toggleCouponStatus(c.coupon_id, c.is_active)}
-                >
-                  {c.is_active ? "Deactivate" : "Activate"}
-                </button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-
       <h2>Tax Settings</h2>
       <div className="tax-form">
         <label>Current Tax: {tax}%</label>

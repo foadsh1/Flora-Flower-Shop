@@ -31,54 +31,6 @@ router.patch("/users/:user_id/status", async (req, res) => {
   }
 });
 
-// ✅ Get all coupons
-router.get("/coupons", async (req, res) => {
-  try {
-    const [coupons] = await db
-      .promise()
-      .query("SELECT * FROM coupons ORDER BY expires_at DESC");
-    res.json({ coupons });
-  } catch (err) {
-    console.error("❌ Failed to fetch coupons:", err);
-    res.status(500).json({ error: "Server error" });
-  }
-});
-
-// ✅ Add new coupon
-router.post("/coupons", async (req, res) => {
-  const { code, discount_percent, expires_at } = req.body;
-  try {
-    await db
-      .promise()
-      .query(
-        "INSERT INTO coupons (code, discount_percent, expires_at, is_active) VALUES (?, ?, ?, 1)",
-        [code, discount_percent, expires_at]
-      );
-    res.json({ message: "Coupon added" });
-  } catch (err) {
-    console.error("❌ Failed to add coupon:", err);
-    res.status(500).json({ error: "Server error" });
-  }
-});
-
-// ✅ Toggle coupon status
-router.patch("/coupons/:coupon_id/status", async (req, res) => {
-  const { coupon_id } = req.params;
-  const { is_active } = req.body;
-  try {
-    await db
-      .promise()
-      .query("UPDATE coupons SET is_active = ? WHERE coupon_id = ?", [
-        is_active ? 1 : 0,
-        coupon_id,
-      ]);
-    res.json({ message: "Coupon status updated" });
-  } catch (err) {
-    console.error("❌ Failed to update coupon status:", err);
-    res.status(500).json({ error: "Server error" });
-  }
-});
-
 // ✅ Get current tax percent
 router.get("/tax", async (req, res) => {
   try {

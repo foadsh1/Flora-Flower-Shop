@@ -33,10 +33,21 @@ const ShopOwnerDashboard = () => {
   const [availableYears, setAvailableYears] = useState([]);
   const [compare, setCompare] = useState(false);
   const revenueChartRef = useRef();
+  const [coupons, setCoupons] = useState([]);
+  const [newCoupon, setNewCoupon] = useState({
+    code: "",
+    discount_percent: 10,
+    expires_at: "",
+  });
+  const [showCouponSlider, setShowCouponSlider] = useState(false);
+
 
   useEffect(() => {
     fetchOrders();
   }, []);
+  useEffect(() => {
+    if (showCouponSlider) fetchCoupons();
+  }, [showCouponSlider]);
 
   useEffect(() => {
     axios
@@ -71,6 +82,44 @@ const ShopOwnerDashboard = () => {
         setStatusMap(map);
       })
       .catch((err) => console.error(err));
+  };
+  const fetchCoupons = () => {
+    axios
+      .get("http://localhost:5000/shop/coupons", { withCredentials: true })
+      .then((res) => setCoupons(res.data.coupons))
+      .catch((err) => toast.error("Failed to load coupons"));
+  };
+
+  const addCoupon = () => {
+    const { code, discount_percent, expires_at } = newCoupon;
+    if (!code || !discount_percent || !expires_at) {
+      return toast.warn("All fields are required.");
+    }
+
+    axios
+      .post("http://localhost:5000/shop/coupons", newCoupon, {
+        withCredentials: true,
+      })
+      .then(() => {
+        toast.success("Coupon added!");
+        setNewCoupon({ code: "", discount_percent: "", expires_at: "" });
+        fetchCoupons();
+      })
+      .catch(() => toast.error("Failed to add coupon"));
+  };
+
+  const toggleCouponStatus = (id, currentStatus) => {
+    axios
+      .patch(
+        `http://localhost:5000/shop/coupons/${id}/status`,
+        { is_active: !currentStatus },
+        { withCredentials: true }
+      )
+      .then(() => {
+        toast.success("Status updated");
+        fetchCoupons();
+      })
+      .catch(() => toast.error("Failed to update status"));
   };
 
   const fetchAnalytics = () => {
@@ -316,6 +365,90 @@ const ShopOwnerDashboard = () => {
           )}
         </tbody>
       </table>
+      <button
+        className="toggle-coupons-btn"
+        onClick={() => setShowCouponSlider(!showCouponSlider)}
+      >
+        {showCouponSlider ? "Hide Coupons ▲" : "🎟️ Manage Coupons ▼"}
+      </button>
+
+      {showCouponSlider && (
+        <div className="inline-slider coupon-slider">
+          <button
+            className="close-slider"
+            onClick={() => setShowCouponSlider(false)}
+          >
+            ×
+          </button>
+          <h4>Coupon Management</h4>
+
+          <div className="coupon-form">
+            <input
+              type="text"
+              placeholder="Coupon Code"
+              value={newCoupon.code}
+              onChange={(e) =>
+                setNewCoupon((prev) => ({ ...prev, code: e.target.value }))
+              }
+            />
+            <input
+              type="number"
+              min="1"
+              max="100"
+              placeholder="Discount %"
+              value={newCoupon.discount_percent}
+              onChange={(e) =>
+                setNewCoupon((prev) => ({
+                  ...prev,
+                  discount_percent: parseInt(e.target.value),
+                }))
+              }
+            />
+            <input
+              type="date"
+              value={newCoupon.expires_at}
+              onChange={(e) =>
+                setNewCoupon((prev) => ({
+                  ...prev,
+                  expires_at: e.target.value,
+                }))
+              }
+            />
+            <button onClick={addCoupon}>Add Coupon</button>
+          </div>
+
+          <table className="coupon-table">
+            <thead>
+              <tr>
+                <th>Code</th>
+                <th>Discount</th>
+                <th>Expires</th>
+                <th>Status</th>
+                <th>Toggle</th>
+              </tr>
+            </thead>
+            <tbody>
+              {coupons.map((c) => (
+                <tr key={c.coupon_id}>
+                  <td>{c.code}</td>
+                  <td>{c.discount_percent}%</td>
+                  <td>{new Date(c.expires_at).toLocaleDateString()}</td>
+                  <td>{c.is_active ? "Active" : "Inactive"}</td>
+                  <td>
+                    <button
+                      onClick={() =>
+                        toggleCouponStatus(c.coupon_id, c.is_active)
+                      }
+                    >
+                      {c.is_active ? "Disable" : "Enable"}
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
 
       <button
         className="toggle-analytics-btn"

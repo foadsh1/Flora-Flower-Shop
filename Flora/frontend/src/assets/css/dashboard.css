@@ -255,15 +255,15 @@
   outline: none;
 }
 .toggle-analytics-btn {
-  margin-top: 2rem;
+  margin-top: 20px;
+  margin-left: 1rem;
   background-color: #c2185b;
   color: white;
+  padding: 8px 16px;
   border: none;
-  padding: 10px 20px;
-  border-radius: 8px;
+  border-radius: 6px;
   font-weight: bold;
   cursor: pointer;
-  transition: background 0.3s ease;
 }
 
 .toggle-analytics-btn:hover {
@@ -330,6 +330,70 @@
 .analytics-chart {
   flex: 1 1 48%;
 }
+.toggle-coupons-btn {
+  margin-top: 20px;
+  background-color: #c2185b;
+  color: white;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+}
 
+.toggle-coupons-btn:hover {
+  background-color: #a3154c;
+}
 
+.coupon-slider {
+  margin-top: 20px;
+  background-color: #fff5f8;
+  border: 1px solid #f8bbd0;
+  padding: 20px;
+  border-radius: 8px;
+}
+
+.coupon-form {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.coupon-form input {
+  padding: 6px 10px;
+  border: 1px solid #f8bbd0;
+  border-radius: 4px;
+}
+
+.coupon-form button {
+  background-color: #c2185b;
+  color: white;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 4px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.coupon-form button:hover {
+  background-color: #a3154c;
+}
+
+.coupon-table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: white;
+}
+
+.coupon-table th,
+.coupon-table td {
+  border: 1px solid #f8bbd0;
+  padding: 8px;
+  text-align: center;
+}
+
+.coupon-table th {
+  background-color: #fde1ec;
+}
 

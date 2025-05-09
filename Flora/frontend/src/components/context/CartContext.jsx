@@ -36,6 +36,12 @@ export const CartProvider = ({ children }) => {
 
   const addToCart = (product) => {
     setCart((prev) => {
+      // 🚫 Block if trying to mix shops
+      if (prev.length > 0 && prev[0].shop_id !== product.shop_id) {
+        toast.error("You can only add products from one shop at a time.");
+        return prev;
+      }
+
       const exist = prev.find((item) => item.product_id === product.product_id);
 
       if (exist) {
@@ -61,6 +67,7 @@ export const CartProvider = ({ children }) => {
       }
     });
   };
+
 
   const removeFromCart = (productId) => {
     setCart((prev) => {

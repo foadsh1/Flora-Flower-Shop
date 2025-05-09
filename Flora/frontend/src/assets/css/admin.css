@@ -35,37 +35,6 @@
   text-align: center;
   margin-bottom: 1rem;
 }
-/* === Coupon Management === */
-.coupon-form {
-  display: flex;
-  gap: 1rem;
-  flex-wrap: wrap;
-  margin-bottom: 1rem;
-  background: #fff5f8;
-  padding: 1rem;
-  border: 1px solid #f8bbd0;
-  border-radius: 8px;
-}
-
-.coupon-form input,
-.coupon-form button {
-  padding: 0.5rem;
-  border: 1px solid #f8bbd0;
-  border-radius: 6px;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-}
-
-.coupon-form button {
-  background-color: #c2185b;
-  color: white;
-  cursor: pointer;
-  transition: background 0.3s;
-}
-
-.coupon-form button:hover {
-  background-color: #a0154d;
-}
-
 .admin-table td button {
   padding: 5px 10px;
   border-radius: 5px;
