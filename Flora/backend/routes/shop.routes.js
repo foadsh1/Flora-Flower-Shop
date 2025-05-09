@@ -131,6 +131,62 @@ router.get("/:id/products", (req, res) => {
     res.json({ products: results });
   });
 });
+// ✅ GET /shop/analytics?days=30 (default 90)
+router.get("/analytics", (req, res) => {
+  if (!req.session.user || req.session.user.role !== "shopowner") {
+    return res.status(403).json({ error: "Unauthorized" });
+  }
+
+  const user_id = req.session.user.user_id;
+  const days = parseInt(req.query.days) || 90;
+
+  // 1. Get shop_id for this shopowner
+  const shopQuery = "SELECT shop_id FROM shops WHERE user_id = ?";
+  db.query(shopQuery, [user_id], (err, shopResult) => {
+    if (err || shopResult.length === 0) {
+      return res.status(500).json({ error: "Shop not found or DB error" });
+    }
+
+    const shop_id = shopResult[0].shop_id;
+
+    // 2. Top-selling flowers (limited to last X days)
+    const topFlowersQuery = `
+      SELECT p.name, SUM(oi.quantity) AS totalSold
+      FROM order_items oi
+      JOIN products p ON oi.product_id = p.product_id
+      JOIN orders o ON oi.order_id = o.order_id
+      WHERE o.shop_id = ? AND o.status = 'Delivered'
+        AND o.order_date >= CURDATE() - INTERVAL ? DAY
+      GROUP BY oi.product_id
+      ORDER BY totalSold DESC
+      LIMIT 5
+    `;
+
+    // 3. Monthly revenue grouped by month + year (e.g. "Jan 2024")
+    const monthlyRevenueQuery = `
+      SELECT DATE_FORMAT(order_date, '%b %Y') AS month, SUM(total_price) AS revenue
+      FROM orders
+      WHERE shop_id = ? AND status = 'Delivered'
+      GROUP BY YEAR(order_date), MONTH(order_date)
+      ORDER BY YEAR(order_date), MONTH(order_date)
+    `;
+
+    db.query(topFlowersQuery, [shop_id, days], (err1, topFlowers) => {
+      if (err1) {
+        return res.status(500).json({ error: "Failed to load top flowers" });
+      }
+
+      db.query(monthlyRevenueQuery, [shop_id], (err2, monthlyRevenue) => {
+        if (err2) {
+          return res.status(500).json({ error: "Failed to load revenue" });
+        }
+
+        res.json({ topFlowers, monthlyRevenue });
+      });
+    });
+  });
+});
+
 
 
 module.exports = router;
