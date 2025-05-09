@@ -123,13 +123,17 @@ router.patch("/update", upload.single("shop_image"), (req, res) => {
 router.get("/:id/products", (req, res) => {
   const shop_id = req.params.id;
 
-  db.query("SELECT * FROM products WHERE shop_id = ?", [shop_id], (err, results) => {
-    if (err) {
-      console.error("❌ Failed to fetch shop products:", err);
-      return res.status(500).json({ error: "Database error" });
+  db.query(
+    "SELECT product_id, name, description, price, quantity, image, shop_id FROM products WHERE shop_id = ?",
+    [shop_id],
+    (err, results) => {
+      if (err) {
+        console.error("❌ Failed to fetch shop products:", err);
+        return res.status(500).json({ error: "Database error" });
+      }
+      res.json({ products: results });
     }
-    res.json({ products: results });
-  });
+  );
 });
 router.get("/analytics", (req, res) => {
   const user = req.session?.user;
@@ -372,38 +376,22 @@ router.patch("/coupons/:coupon_id/status", async (req, res) => {
   }
 });
 router.get("/coupon/validate", async (req, res) => {
-  const { code } = req.query;
-  const user_id = req.session?.user?.user_id;
+  const { code, shop_id } = req.query;
 
-  if (!code || !user_id) {
-    return res
-      .status(400)
-      .json({ error: "Missing coupon code or not logged in." });
+  if (!code || !shop_id) {
+    return res.status(400).json({ error: "Missing coupon code or shop ID." });
   }
 
   try {
-    // Get the shop_id based on the user
-    const [[shop]] = await db
-      .promise()
-      .query("SELECT shop_id FROM shops WHERE user_id = ?", [user_id]);
-
-    if (!shop) {
-      return res.status(404).json({ error: "Shop not found for user." });
-    }
-
-    const shop_id = shop.shop_id;
-
     const [rows] = await db.promise().query(
       `SELECT * FROM coupons 
-         WHERE code = ? AND shop_id = ? 
-         AND is_active = 1 AND expires_at > NOW()`,
+       WHERE code = ? AND shop_id = ? 
+       AND is_active = 1 AND expires_at > NOW()`,
       [code, shop_id]
     );
 
     if (rows.length === 0) {
-      return res
-        .status(404)
-        .json({ error: "Coupon not found, expired, or not for your shop." });
+      return res.status(404).json({ error: "Coupon not valid for this shop." });
     }
 
     return res.json({ discount: rows[0].discount_percent });

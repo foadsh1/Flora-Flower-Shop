@@ -21,28 +21,25 @@ const Cart = () => {
   };
 
   const handleApplyCoupon = async () => {
-    const shopId = cart[0]?.shop_id;
+    const shopId = cart[0]?.shop_id; // ensure cart has one shop
 
     if (!couponCode || !shopId) {
-      return toast.warn(
-        "Please enter a coupon code and make sure your cart has items."
-      );
+      return toast.warn("Please enter a coupon code and ensure your cart is valid.");
     }
 
     try {
       const res = await axios.get(
-        `http://localhost:5000/orders/coupon/validate`,
+        "http://localhost:5000/shop/coupon/validate",
         {
           params: { code: couponCode, shop_id: shopId },
           withCredentials: true,
         }
       );
-
       setDiscount(res.data.discount);
       toast.success(`Coupon applied! ${res.data.discount}% off`);
     } catch (err) {
       setDiscount(0);
-      toast.error(err.response?.data?.error || "Invalid coupon for this shop.");
+      toast.error(err.response?.data?.error || "Coupon is not valid for this shop.");
     }
   };
 

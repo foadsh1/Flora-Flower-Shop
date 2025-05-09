@@ -3,7 +3,7 @@ import axios from "axios";
 import { Rating } from "react-simple-star-rating";
 import "../../assets/css/shops.css";
 import israeliCities from "../../data/israeliCities"; // Top 30 cities
-
+import { Link } from "react-router-dom";
 const Shops = () => {
   const [shops, setShops] = useState([]);
   const [search, setSearch] = useState("");
@@ -193,9 +193,9 @@ const Shops = () => {
                 <p className="no-rating">No ratings yet</p>
               )}
 
-              <a href={`/shops/${shop.shop_id}`} className="view-shop-btn">
+              <Link to={`/shops/${shop.shop_id}`} className="view-shop-btn">
                 View Shop
-              </a>
+              </Link>
 
               <button
                 className="view-reviews-btn"

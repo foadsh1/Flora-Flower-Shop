@@ -65,10 +65,10 @@ const { user } = useContext(AuthContext);
                 </button>
               ) : user?.role === "client" ? (
                 <button
-                  onClick={() => {
-                    addToCart(product);
-                    toast.success(`${product.name} added to cart! 🌸`);
-                  }}
+                    onClick={() => {
+                      addToCart({ ...product, shop_id: Number(id) }); // ⬅️ include shop_id
+                      toast.success(`${product.name} added to cart! 🌸`);
+                    }}
                   className="add-cart-btn"
                 >
                   Add to Cart

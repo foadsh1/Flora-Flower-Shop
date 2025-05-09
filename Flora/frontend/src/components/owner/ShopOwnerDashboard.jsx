@@ -66,10 +66,7 @@ const ShopOwnerDashboard = () => {
       .catch(() => setAvailableYears([2023, 2024, 2025]));
   }, []);
 
-  useEffect(() => {
-    fetchAnalytics();
-  }, [startDate, endDate, year1, year2, flowerLimit]);
-
+  
   const fetchOrders = () => {
     axios
       .get("http://localhost:5000/shop/my-orders", { withCredentials: true })
@@ -140,6 +137,9 @@ const ShopOwnerDashboard = () => {
       })
       .catch((err) => console.error("Failed to load analytics", err));
   };
+  useEffect(() => {
+    fetchAnalytics();
+  }, [startDate, endDate, year1, year2, flowerLimit]);
   const handleDownloadChart = () => {
     if (!revenueChartRef.current) return;
     html2canvas(revenueChartRef.current).then((canvas) => {
