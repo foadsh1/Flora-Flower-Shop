@@ -53,8 +53,17 @@ const { user } = useContext(AuthContext);
               </p>
               <p>
                 <strong>Available:</strong> {product.quantity}
+                {product.quantity === 0 ? (
+                  <span className="sold-out-badge">❌ Sold Out</span>
+                ) : product.quantity < 5 ? (
+                  <span className="low-stock-badge">⚠️ Low Stock</span>
+                ) : null}
               </p>
-              {user?.role === "client" ? (
+              {product.quantity === 0 ? (
+                <button className="sold-out-btn" disabled>
+                  Sold Out
+                </button>
+              ) : user?.role === "client" ? (
                 <button
                   onClick={() => {
                     addToCart(product);

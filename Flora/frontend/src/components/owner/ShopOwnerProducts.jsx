@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import "../../assets/css/products.css";
+import { toast } from "react-toastify";
 
 const ShopOwnerProducts = () => {
   const [products, setProducts] = useState([]);
@@ -22,9 +23,20 @@ const ShopOwnerProducts = () => {
   const fetchProducts = () => {
     axios
       .get("http://localhost:5000/products/mine", { withCredentials: true })
-      .then((res) => setProducts(res.data.products))
+      .then((res) => {
+        const lowStock = res.data.products.filter((p) => p.quantity < 5); // 👈 threshold
+
+        if (lowStock.length > 0) {
+          toast.warning(`⚠️ ${lowStock.length} flowers are low on stock!`, {
+            autoClose: 3000,
+          });
+        }
+
+        setProducts(res.data.products);
+      })
       .catch((err) => console.error("Failed to load products", err));
   };
+
 
   const handleChange = (e) => {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -187,6 +199,19 @@ const ShopOwnerProducts = () => {
               <p>
                 <strong>Quantity:</strong> {product.quantity}
               </p>
+              <p>
+                <strong>Quantity:</strong> {product.quantity}
+                {product.quantity === 0 ? (
+                  <span className="sold-out-badge">❌ Sold Out</span>
+                ) : product.quantity < 5 ? (
+                  <span className="low-stock-badge">⚠️ Low Stock</span>
+                ) : null}
+              </p>
+              {product.quantity === 0 && (
+                <a href="/owner/supplier" className="restock-btn">
+                  ➕ Restock Now
+                </a>
+              )}
               <div className="card-buttons">
                 <button onClick={() => handleEdit(product)}>Edit</button>
                 <button onClick={() => handleDelete(product.product_id)}>

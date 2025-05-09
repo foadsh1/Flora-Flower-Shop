@@ -116,6 +116,29 @@
   color: #888;
   padding-top: 5rem;
 }
+.sold-out-badge {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 2px 6px;
+  background-color: #9e9e9e;
+  color: white;
+  font-size: 0.75rem;
+  font-weight: bold;
+  border-radius: 8px;
+  animation: none;
+}
+
+.sold-out-btn {
+  background-color: #9e9e9e;
+  color: white;
+  font-weight: bold;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: not-allowed;
+  opacity: 0.8;
+}
+
 
 /* 📱 Responsive Tweaks */
 @media (max-width: 768px) {
