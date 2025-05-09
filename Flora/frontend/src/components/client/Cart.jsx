@@ -1,4 +1,3 @@
-// src/components/client/Cart.jsx
 import React, { useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { CartContext } from "../context/CartContext";
@@ -9,7 +8,8 @@ import "../../assets/css/cart.css";
 import { PayPalButtons } from "@paypal/react-paypal-js";
 
 const Cart = () => {
-  const { cart, removeFromCart, updateQuantity, clearCart } = useContext(CartContext);
+  const { cart, removeFromCart, updateQuantity, clearCart } =
+    useContext(CartContext);
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
 
@@ -35,7 +35,7 @@ const Cart = () => {
   };
 
   const totalPrice = cart.reduce(
-    (total, item) => total + item.price * item.quantity,
+    (total, item) => total + item.price * item.cartQuantity,
     0
   );
   const discountedTotal = totalPrice * (1 - discount / 100);
@@ -93,12 +93,23 @@ const Cart = () => {
                 <div className="cart-info">
                   <h4>{item.name}</h4>
                   <p>${item.price}</p>
+
+                  {item.quantity < 5 && (
+                    <p className="low-stock-alert">
+                      ⚠️ Hurry! Only {item.quantity} left in stock.
+                    </p>
+                  )}
+
                   <input
                     type="number"
-                    value={item.quantity}
+                    value={item.cartQuantity}
                     min="1"
+                    max={item.quantity}
                     onChange={(e) =>
-                      handleQuantityChange(item.product_id, parseInt(e.target.value))
+                      handleQuantityChange(
+                        item.product_id,
+                        parseInt(e.target.value)
+                      )
                     }
                   />
                   <button onClick={() => removeFromCart(item.product_id)}>

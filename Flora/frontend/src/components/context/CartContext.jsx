@@ -37,14 +37,27 @@ export const CartProvider = ({ children }) => {
   const addToCart = (product) => {
     setCart((prev) => {
       const exist = prev.find((item) => item.product_id === product.product_id);
+
       if (exist) {
+        if (exist.cartQuantity >= exist.quantity) {
+          toast.warn(
+            `Only ${exist.quantity} of ${exist.name} available in stock.`
+          );
+          return prev;
+        }
+
         return prev.map((item) =>
           item.product_id === product.product_id
-            ? { ...item, quantity: item.quantity + 1 }
+            ? { ...item, cartQuantity: item.cartQuantity + 1 }
             : item
         );
       } else {
-        return [...prev, { ...product, quantity: 1 }];
+        if (product.quantity < 1) {
+          toast.warn(`${product.name} is out of stock.`);
+          return prev;
+        }
+
+        return [...prev, { ...product, cartQuantity: 1 }];
       }
     });
   };
@@ -65,7 +78,9 @@ export const CartProvider = ({ children }) => {
   const updateQuantity = (productId, quantity) => {
     setCart((prev) =>
       prev.map((item) =>
-        item.product_id === productId ? { ...item, quantity } : item
+        item.product_id === productId
+          ? { ...item, cartQuantity: quantity }
+          : item
       )
     );
     toast.info("Quantity updated");
