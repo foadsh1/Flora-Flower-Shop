@@ -30,11 +30,7 @@ export const generateReceiptPDF = async (data, role = "client") => {
     doc.setTextColor("#444");
     doc.setFont("helvetica", "normal");
     doc.text("www.floraflowers.com", margin, y);
-    doc.text(
-      "Email: contact@flora.com | Phone: +972-3-1234567",
-      margin,
-      y + 15
-    );
+    doc.text("Email: contact@flora.com | Phone: +972-3-1234567", margin, y + 15);
 
     y += 50;
     doc.setFontSize(18);
@@ -54,10 +50,20 @@ export const generateReceiptPDF = async (data, role = "client") => {
     y += 20;
     doc.text(`Status: ${data.status}`, margin, y);
 
+    // If coupon used, show breakdown
+    if (data.coupon_code && data.discount_applied) {
+      y += 20;
+      const originalPrice = parseFloat(data.total_price) / (1 - data.discount_applied / 100);
+      doc.text(`Original Price: $${originalPrice.toFixed(2)}`, margin, y);
+      doc.text(`Coupon: ${data.coupon_code}`, margin + 250, y);
+      y += 20;
+      doc.text(`Discount Applied: ${data.discount_applied}%`, margin, y);
+    }
+
     // Tax and price summary
     y += 20;
-    let subtotal = parseFloat(data.total_price) || 0;
-    let taxAmount = subtotal * (taxPercent / (100 + taxPercent));
+    const subtotal = parseFloat(data.total_price) || 0;
+    const taxAmount = subtotal * (taxPercent / (100 + taxPercent));
 
     doc.text(`Price (incl. tax): $${subtotal.toFixed(2)}`, margin, y);
     doc.text(
