@@ -131,61 +131,152 @@ router.get("/:id/products", (req, res) => {
     res.json({ products: results });
   });
 });
-// ✅ GET /shop/analytics?days=30 (default 90)
 router.get("/analytics", (req, res) => {
+  const user = req.session?.user;
+  if (!user || user.role !== "shopowner") {
+    return res.status(403).json({ error: "Unauthorized" });
+  }
+
+  const user_id = user.user_id;
+  const { from, to, year1, year2, limit = 5 } = req.query;
+
+  db.query(
+    "SELECT shop_id FROM shops WHERE user_id = ?",
+    [user_id],
+    (err, shopResult) => {
+      if (err || shopResult.length === 0) {
+        return res.status(500).json({ error: "Shop lookup failed" });
+      }
+
+      const shop_id = shopResult[0].shop_id;
+
+      const topFlowerSql = `
+      SELECT p.name, SUM(oi.quantity) AS totalSold
+      FROM order_items oi
+      JOIN products p ON oi.product_id = p.product_id
+      JOIN orders o ON oi.order_id = o.order_id
+      WHERE o.shop_id = ? AND o.status = 'Delivered' 
+        AND o.order_date BETWEEN ? AND ?
+      GROUP BY oi.product_id
+      ORDER BY totalSold DESC
+      LIMIT ?
+    `;
+
+      const monthlyRevenueSql = `
+      SELECT 
+        m.month_num,
+        m.month_name,
+        IFNULL(SUM(o.total_price), 0) AS revenue
+      FROM (
+        SELECT 1 AS month_num, 'Jan' AS month_name UNION ALL
+        SELECT 2, 'Feb' UNION ALL
+        SELECT 3, 'Mar' UNION ALL
+        SELECT 4, 'Apr' UNION ALL
+        SELECT 5, 'May' UNION ALL
+        SELECT 6, 'Jun' UNION ALL
+        SELECT 7, 'Jul' UNION ALL
+        SELECT 8, 'Aug' UNION ALL
+        SELECT 9, 'Sep' UNION ALL
+        SELECT 10, 'Oct' UNION ALL
+        SELECT 11, 'Nov' UNION ALL
+        SELECT 12, 'Dec'
+      ) m
+      LEFT JOIN orders o ON MONTH(o.order_date) = m.month_num
+        AND o.status = 'Delivered'
+        AND o.shop_id = ?
+        AND o.order_date BETWEEN ? AND ?
+      GROUP BY m.month_num, m.month_name
+      ORDER BY m.month_num
+    `;
+
+      db.query(
+        topFlowerSql,
+        [shop_id, from, to, parseInt(limit)],
+        (err1, topFlowers) => {
+          if (err1)
+            return res.status(500).json({ error: "Top flower query failed" });
+
+          db.query(
+            monthlyRevenueSql,
+            [shop_id, from, to],
+            (err2, monthlyData) => {
+              if (err2)
+                return res
+                  .status(500)
+                  .json({ error: "Monthly revenue query failed" });
+
+              const monthlyRevenue = monthlyData.map((row) => ({
+                month: row.month_name,
+                revenue: row.revenue,
+              }));
+
+              res.json({ topFlowers, monthlyRevenue });
+            }
+          );
+        }
+      );
+    }
+  );
+});
+
+router.get("/analytics/compare", (req, res) => {
   if (!req.session.user || req.session.user.role !== "shopowner") {
     return res.status(403).json({ error: "Unauthorized" });
   }
 
   const user_id = req.session.user.user_id;
-  const days = parseInt(req.query.days) || 90;
+  const { year1, year2 } = req.query;
 
-  // 1. Get shop_id for this shopowner
-  const shopQuery = "SELECT shop_id FROM shops WHERE user_id = ?";
-  db.query(shopQuery, [user_id], (err, shopResult) => {
-    if (err || shopResult.length === 0) {
-      return res.status(500).json({ error: "Shop not found or DB error" });
+  if (!year1 || !year2) {
+    return res.status(400).json({ error: "Missing years for comparison" });
+  }
+
+  const sql = `
+    SELECT 
+      m.month_num,
+      m.month_name,
+      IFNULL(SUM(CASE WHEN YEAR(o.order_date) = ? THEN o.total_price END), 0) AS year1_revenue,
+      IFNULL(SUM(CASE WHEN YEAR(o.order_date) = ? THEN o.total_price END), 0) AS year2_revenue
+    FROM (
+      SELECT 1 AS month_num, 'Jan' AS month_name UNION ALL
+      SELECT 2, 'Feb' UNION ALL
+      SELECT 3, 'Mar' UNION ALL
+      SELECT 4, 'Apr' UNION ALL
+      SELECT 5, 'May' UNION ALL
+      SELECT 6, 'Jun' UNION ALL
+      SELECT 7, 'Jul' UNION ALL
+      SELECT 8, 'Aug' UNION ALL
+      SELECT 9, 'Sep' UNION ALL
+      SELECT 10, 'Oct' UNION ALL
+      SELECT 11, 'Nov' UNION ALL
+      SELECT 12, 'Dec'
+    ) m
+    LEFT JOIN orders o ON MONTH(o.order_date) = m.month_num
+      AND o.status = 'Delivered'
+      AND o.shop_id IN (
+        SELECT shop_id FROM shops WHERE user_id = ?
+      )
+      AND YEAR(o.order_date) IN (?, ?)
+    GROUP BY m.month_num, m.month_name
+    ORDER BY m.month_num;
+  `;
+
+  db.query(sql, [year1, year2, user_id, year1, year2], (err, results) => {
+    if (err) {
+      console.error("Compare revenue error:", err);
+      return res.status(500).json({ error: "Database error" });
     }
 
-    const shop_id = shopResult[0].shop_id;
+    const comparison = results.map((row) => ({
+      month: row.month_name,
+      [year1]: row.year1_revenue,
+      [year2]: row.year2_revenue,
+    }));
 
-    // 2. Top-selling flowers (limited to last X days)
-    const topFlowersQuery = `
-      SELECT p.name, SUM(oi.quantity) AS totalSold
-      FROM order_items oi
-      JOIN products p ON oi.product_id = p.product_id
-      JOIN orders o ON oi.order_id = o.order_id
-      WHERE o.shop_id = ? AND o.status = 'Delivered'
-        AND o.order_date >= CURDATE() - INTERVAL ? DAY
-      GROUP BY oi.product_id
-      ORDER BY totalSold DESC
-      LIMIT 5
-    `;
-
-    // 3. Monthly revenue grouped by month + year (e.g. "Jan 2024")
-    const monthlyRevenueQuery = `
-      SELECT DATE_FORMAT(order_date, '%b %Y') AS month, SUM(total_price) AS revenue
-      FROM orders
-      WHERE shop_id = ? AND status = 'Delivered'
-      GROUP BY YEAR(order_date), MONTH(order_date)
-      ORDER BY YEAR(order_date), MONTH(order_date)
-    `;
-
-    db.query(topFlowersQuery, [shop_id, days], (err1, topFlowers) => {
-      if (err1) {
-        return res.status(500).json({ error: "Failed to load top flowers" });
-      }
-
-      db.query(monthlyRevenueQuery, [shop_id], (err2, monthlyRevenue) => {
-        if (err2) {
-          return res.status(500).json({ error: "Failed to load revenue" });
-        }
-
-        res.json({ topFlowers, monthlyRevenue });
-      });
-    });
+    res.json({ comparison });
   });
 });
+
 
 
 

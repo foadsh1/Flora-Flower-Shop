@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
 import "../../assets/css/dashboard.css";
 import { generateReceiptPDF } from "../utils/generateReceiptCanvas";
-
+import html2canvas from "html2canvas";
 import {
   BarChart,
   Bar,
@@ -23,16 +23,41 @@ const ShopOwnerDashboard = () => {
   const [orderDetails, setOrderDetails] = useState(null);
   const [topFlowers, setTopFlowers] = useState([]);
   const [monthlyRevenue, setMonthlyRevenue] = useState([]);
-  const [analyticsDays, setAnalyticsDays] = useState(90);
   const [showAnalytics, setShowAnalytics] = useState(false);
+  const currentYear = new Date().getFullYear();
+  const [startDate, setStartDate] = useState(`${currentYear}-01-01`);
+  const [endDate, setEndDate] = useState(`${currentYear}-12-31`);
+  const [year1, setYear1] = useState(2023);
+  const [year2, setYear2] = useState(2024);
+  const [flowerLimit, setFlowerLimit] = useState(5);
+  const [availableYears, setAvailableYears] = useState([]);
+  const [compare, setCompare] = useState(false);
+  const revenueChartRef = useRef();
 
   useEffect(() => {
     fetchOrders();
   }, []);
 
   useEffect(() => {
+    axios
+      .get("http://localhost:5000/shop/mine", { withCredentials: true })
+      .then((res) => {
+        const createdYear = new Date(
+          res.data.shop.created_at || "2023-01-01"
+        ).getFullYear();
+        const nowYear = new Date().getFullYear();
+        const years = [];
+        for (let y = createdYear; y <= nowYear; y++) years.push(y);
+        setAvailableYears(years);
+        setYear1(nowYear - 1);
+        setYear2(nowYear);
+      })
+      .catch(() => setAvailableYears([2023, 2024, 2025]));
+  }, []);
+
+  useEffect(() => {
     fetchAnalytics();
-  }, [analyticsDays]);
+  }, [startDate, endDate, year1, year2, flowerLimit]);
 
   const fetchOrders = () => {
     axios
@@ -50,7 +75,14 @@ const ShopOwnerDashboard = () => {
 
   const fetchAnalytics = () => {
     axios
-      .get(`http://localhost:5000/shop/analytics?days=${analyticsDays}`, {
+      .get("http://localhost:5000/shop/analytics", {
+        params: {
+          from: startDate,
+          to: endDate,
+          year1,
+          year2,
+          limit: flowerLimit,
+        },
         withCredentials: true,
       })
       .then((res) => {
@@ -58,6 +90,15 @@ const ShopOwnerDashboard = () => {
         setMonthlyRevenue(res.data.monthlyRevenue);
       })
       .catch((err) => console.error("Failed to load analytics", err));
+  };
+  const handleDownloadChart = () => {
+    if (!revenueChartRef.current) return;
+    html2canvas(revenueChartRef.current).then((canvas) => {
+      const link = document.createElement("a");
+      link.download = "revenue_chart.png";
+      link.href = canvas.toDataURL();
+      link.click();
+    });
   };
 
   const handleStatusChange = (orderId, newStatus) => {
@@ -84,13 +125,10 @@ const ShopOwnerDashboard = () => {
       setSelectedOrder(null);
       return;
     }
-
     try {
       const res = await axios.get(
         `http://localhost:5000/orders/${orderId}/details`,
-        {
-          withCredentials: true,
-        }
+        { withCredentials: true }
       );
       setOrderDetails(res.data);
       setSelectedOrder(orderId);
@@ -104,6 +142,24 @@ const ShopOwnerDashboard = () => {
       generateReceiptPDF(orderDetails, "shopowner");
     }
   };
+  const fetchComparisonRevenue = () => {
+    axios
+      .get("http://localhost:5000/shop/analytics/compare", {
+        params: {
+          year1,
+          year2,
+        },
+        withCredentials: true,
+      })
+      .then((res) => {
+        setMonthlyRevenue(res.data.comparison); // expected format: [{ month: 'Jan', 2023: 1200, 2024: 1800 }, ...]
+      })
+      .catch((err) => {
+        console.error("Failed to fetch comparison revenue", err);
+        toast.error("Could not load revenue comparison data.");
+      });
+  };
+
 
   return (
     <div className="dashboard-container">
@@ -190,7 +246,6 @@ const ShopOwnerDashboard = () => {
                             orderDetails.order_date
                           ).toLocaleDateString()}
                         </p>
-
                         {orderDetails.coupon_code ? (
                           <>
                             <p>
@@ -272,50 +327,146 @@ const ShopOwnerDashboard = () => {
       {showAnalytics && (
         <>
           <div className="analytics-filter">
-            <label htmlFor="range">Filter Top Sellers:</label>
-            <select
-              id="range"
-              value={analyticsDays}
-              onChange={(e) => setAnalyticsDays(parseInt(e.target.value))}
+            <label>Start Date:</label>
+            <input
+              type="date"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+            />
+            <label>End Date:</label>
+            <input
+              type="date"
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+            />
+          </div>
+
+          <div className="analytics-chart">
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+              }}
             >
-              <option value={30}>Last 30 Days</option>
-              <option value={60}>Last 60 Days</option>
-              <option value={90}>Last 90 Days</option>
+              <h4>Top-Selling Flowers</h4>
+              <div>
+                <label style={{ fontSize: "0.85rem", marginRight: "4px" }}>
+                  Top
+                </label>
+                <input
+                  type="number"
+                  min="1"
+                  max="20"
+                  value={flowerLimit}
+                  onChange={(e) => setFlowerLimit(parseInt(e.target.value))}
+                  style={{ width: "60px", padding: "2px 6px" }}
+                />
+              </div>
+            </div>
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={topFlowers}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" />
+                <YAxis />
+                <Tooltip />
+                <Bar dataKey="totalSold" fill="#c2185b" />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+
+          <div className="analytics-controls" style={{ marginTop: "1.5rem" }}>
+            <label>Compare Years:</label>
+            <select
+              value={year1}
+              onChange={(e) => setYear1(parseInt(e.target.value))}
+            >
+              {availableYears.map((y) => (
+                <option key={y} value={y}>
+                  {y}
+                </option>
+              ))}
             </select>
+            <select
+              value={year2}
+              onChange={(e) => setYear2(parseInt(e.target.value))}
+            >
+              {availableYears.map((y) => (
+                <option key={y} value={y}>
+                  {y}
+                </option>
+              ))}
+            </select>
+
+            <button
+              className="compare-btn"
+              onClick={() => {
+                if (compare) {
+                  setCompare(false);
+                  fetchAnalytics(); // go back to single chart based on date
+                } else {
+                  setCompare(true);
+                  fetchComparisonRevenue(); // show two years side-by-side
+                }
+              }}
+            >
+              {compare ? "Reset View" : "Compare"}
+            </button>
+
+            <button className="download-btn" onClick={handleDownloadChart}>
+              📥 Download Revenue Chart
+            </button>
           </div>
 
           <div className="analytics-slider">
-            <div className="analytics-grid">
-              <div className="analytics-chart">
-                <h4>Top-Selling Flowers</h4>
-                <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={topFlowers}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" />
-                    <YAxis />
-                    <Tooltip />
-                    <Bar dataKey="totalSold" fill="#c2185b" />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-
-              <div className="analytics-chart">
-                <h4>Monthly Revenue</h4>
-                <ResponsiveContainer width="100%" height={300}>
-                  <LineChart data={monthlyRevenue}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="month" />
-                    <YAxis />
-                    <Tooltip />
-                    <Line
-                      type="monotone"
-                      dataKey="revenue"
-                      stroke="#c2185b"
-                      strokeWidth={2}
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
+            <div className="analytics-grid" ref={revenueChartRef}>
+              {compare ? (
+                <div className="analytics-chart" ref={revenueChartRef}>
+                  <h4>
+                    Monthly Revenue Comparison: {year1} vs {year2}
+                  </h4>
+                  <ResponsiveContainer width="100%" height={300}>
+                    <LineChart data={monthlyRevenue}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="month" />
+                      <YAxis />
+                      <Tooltip />
+                      <Line
+                        type="monotone"
+                        dataKey={year1}
+                        stroke="#c2185b"
+                        strokeWidth={2}
+                        name={`Year ${year1}`}
+                      />
+                      <Line
+                        type="monotone"
+                        dataKey={year2}
+                        stroke="#2196f3"
+                        strokeWidth={2}
+                        name={`Year ${year2}`}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+              ) : (
+                <div className="analytics-chart" ref={revenueChartRef}>
+                  <h4>Monthly Revenue (Between Dates)</h4>
+                  <ResponsiveContainer width="100%" height={300}>
+                    <LineChart data={monthlyRevenue}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="month" />
+                      <YAxis />
+                      <Tooltip />
+                      <Line
+                        type="monotone"
+                        dataKey="revenue"
+                        stroke="#c2185b"
+                        strokeWidth={2}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+              )}
             </div>
           </div>
         </>
