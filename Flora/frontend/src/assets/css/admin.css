@@ -91,3 +91,33 @@
 .tax-form button:hover {
   background-color: #ad1457;
 }
+.warn-btn {
+  background-color: #ffc107;
+  color: #000;
+  border: none;
+  padding: 6px 10px;
+  margin-top: 6px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.warn-btn:disabled {
+  background-color: #eee;
+  color: #aaa;
+  cursor: not-allowed;
+}
+.admin-reply-btn {
+  padding: 8px 16px;
+  background-color: #c2185b;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.admin-reply-btn:hover {
+  background-color: #a01547;
+}

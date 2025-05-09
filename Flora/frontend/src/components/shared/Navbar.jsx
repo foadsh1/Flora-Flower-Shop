@@ -1,10 +1,14 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
+import axios from "axios";
 import "../../assets/css/navbar.css";
-import logo from "../../assets/images/logo.png"
+import logo from "../../assets/images/logo.png";
+
 const Navbar = () => {
   const { user, logout, loading } = useContext(AuthContext);
+  const [unreadMessages, setUnreadMessages] = useState(0);
+  const [unreadWarnings, setUnreadWarnings] = useState(0);
   const navigate = useNavigate();
 
   const handleLogout = async () => {
@@ -12,16 +16,52 @@ const Navbar = () => {
     navigate("/login");
   };
 
+  useEffect(() => {
+    if (!user) return;
+
+    if (user.role === "admin") {
+      // Admin: fetch pending user messages only
+      axios
+        .get("http://localhost:5000/contact/admin/unread-count", {
+          withCredentials: true,
+        })
+        .then((res) => {
+          setUnreadMessages(res.data.unreadCount || 0);
+        })
+        .catch(() => {
+          setUnreadMessages(0);
+        });
+    } else {
+      // Client or Shopowner: fetch both message replies + warnings
+      axios
+        .get("http://localhost:5000/contact/unread-count", {
+          withCredentials: true,
+        })
+        .then((res) => {
+          setUnreadMessages(res.data.unreadMessages || 0);
+          setUnreadWarnings(res.data.unreadWarnings || 0);
+        })
+        .catch(() => {
+          setUnreadMessages(0);
+          setUnreadWarnings(0);
+        });
+    }
+  }, [user]);
+
+  const totalUnread = unreadMessages + unreadWarnings;
+  const tooltipText =
+    user?.role === "admin"
+      ? `${unreadMessages} unread message${unreadMessages !== 1 ? "s" : ""}`
+      : `${unreadMessages} message${unreadMessages !== 1 ? "s" : ""}, ${unreadWarnings} warning${unreadWarnings !== 1 ? "s" : ""}`;
+
   if (loading) return null;
 
   return (
     <nav className="navbar">
       <Link to="/" className="logo">
-        <img
-          src={logo}
-          alt="Flora Logo"
-        />
+        <img src={logo} alt="Flora Logo" />
       </Link>
+
       <Link to="/shops" className="explore-btn">
         Explore Shops
       </Link>
@@ -33,26 +73,25 @@ const Navbar = () => {
         </div>
       )}
 
-      {user?.role === "client" && (
+      {(user?.role === "client" || user?.role === "shopowner") && (
         <div className="nav-links">
           <Link to="/profile">My Profile</Link>
           <Link to="/cart">My Cart 🛒</Link>
           <Link to="/my-orders">My Orders 📦</Link>
-          <Link to="/customize"> Customize Bouquet💐 </Link>
-          <button onClick={handleLogout}>Logout</button>
-        </div>
-      )}
-
-      {user?.role === "shopowner" && (
-        <div className="nav-links">
-          <Link to="/owner/dashboard">Dashboard</Link>
-          <Link to="/owner/supplier">Supplier Order</Link>
-          {user.hasShop ? (
-            <Link to="/create-shop">Create Shop</Link>
-          ) : (
-            <Link to="/owner/profile">My Shop Profile</Link>
-          )}
-          <Link to="/owner/products">Manage Products</Link>
+          <Link to="/customize">Customize Bouquet 💐</Link>
+          <Link to="/contact-admin">Contact Admin</Link>
+          <Link to="/my-messages" className="message-link">
+            <span
+              className={`notification-icon ${totalUnread > 0 ? "pulse" : ""}`}
+              title={tooltipText}
+            >
+              🔔
+              {totalUnread > 0 && (
+                <span className="unread-badge">{totalUnread}</span>
+              )}
+            </span>{" "}
+            Messages
+          </Link>
           <button onClick={handleLogout}>Logout</button>
         </div>
       )}
@@ -60,6 +99,18 @@ const Navbar = () => {
       {user?.role === "admin" && (
         <div className="nav-links">
           <Link to="/admin">Admin</Link>
+          <Link to="/admin/messages" className="message-link">
+            <span
+              className={`notification-icon ${unreadMessages > 0 ? "pulse" : ""}`}
+              title={tooltipText}
+            >
+              🔔
+              {unreadMessages > 0 && (
+                <span className="unread-badge">{unreadMessages}</span>
+              )}
+            </span>{" "}
+            Messages
+          </Link>
           <button onClick={handleLogout}>Logout</button>
         </div>
       )}

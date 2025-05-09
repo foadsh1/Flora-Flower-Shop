@@ -17,12 +17,12 @@ export const AuthProvider = ({ children }) => {
           axios
             .get("http://localhost:5000/shop/mine", { withCredentials: true })
             .then((res2) => {
-              setUser({ ...u, hasShop: !!res2.data.shop });
+              setUser({ ...u, hasShop: !!res2.data.shop, warnings: u.warnings });
             })
-            .catch(() => setUser({ ...u, hasShop: false }))
+            .catch(() => setUser({ ...u, hasShop: false, warnings: u.warnings }))
             .finally(() => setLoading(false));
         } else {
-          setUser(u);
+          setUser({ ...u, warnings: u.warnings });
           setLoading(false);
         }
       })
@@ -31,6 +31,7 @@ export const AuthProvider = ({ children }) => {
         setLoading(false);
       });
   }, []);
+  
 
   const logout = async () => {
     await axios.post(

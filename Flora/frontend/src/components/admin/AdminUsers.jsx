@@ -10,6 +10,11 @@ const AdminUsers = () => {
   const [newTax, setNewTax] = useState("");
   const [updatedAt, setUpdatedAt] = useState(null);
 
+  useEffect(() => {
+    fetchUsers();
+    fetchTax();
+  }, []);
+
   const fetchUsers = () => {
     axios
       .get("http://localhost:5000/admin/users", { withCredentials: true })
@@ -27,11 +32,6 @@ const AdminUsers = () => {
       })
       .catch(() => toast.error("Failed to load tax"));
   };
-
-  useEffect(() => {
-    fetchUsers();
-    fetchTax();
-  }, []);
 
   const handleStatusChange = async (user_id, newStatus) => {
     try {
@@ -60,44 +60,38 @@ const AdminUsers = () => {
       const currentTax = parseFloat(response.data.tax);
 
       if (value === currentTax) {
-        return toast.info(
-          "No changes detected. Tax already set to this value."
-        );
+        return toast.info("No changes detected.");
       }
 
-      // Update tax and auto-recalculate prices
       await axios.patch(
         "http://localhost:5000/admin/tax",
         { tax_percent: value },
         { withCredentials: true }
       );
       setTax(value);
-      toast.success("Tax and product prices updated successfully.");
+      toast.success("Tax updated successfully.");
     } catch (err) {
       toast.error("Failed to update tax.");
-      console.error(err);
+    }
+  };
+
+  const issueWarning = async (user_id) => {
+    try {
+      await axios.post(
+        "http://localhost:5000/contact/warnings",
+        { user_id, reason: "Misbehavior" },
+        { withCredentials: true }
+      );
+      toast.success("Warning issued.");
+      fetchUsers();
+    } catch (err) {
+      toast.error("Failed to issue warning");
     }
   };
 
   return (
     <div className="admin-container">
-      <ToastContainer
-        position="bottom-right"
-        autoClose={2500}
-        hideProgressBar={false}
-        theme="light"
-        toastStyle={{
-          background: "#fff5f8",
-          color: "#c2185b",
-          fontWeight: "bold",
-          fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
-          border: "1px solid #f8bbd0",
-          borderRadius: "12px",
-          boxShadow: "0 4px 12px rgba(194, 24, 91, 0.1)",
-        }}
-        bodyStyle={{ fontSize: "0.95rem" }}
-      />
-
+      <ToastContainer />
       <h2>User Management</h2>
       <table className="admin-table">
         <thead>
@@ -107,7 +101,8 @@ const AdminUsers = () => {
             <th>Email</th>
             <th>Role</th>
             <th>Status</th>
-            <th>Change Status</th>
+            <th>Warnings</th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -118,6 +113,7 @@ const AdminUsers = () => {
               <td>{u.email}</td>
               <td>{u.role}</td>
               <td>{u.status}</td>
+              <td>{u.warnings || 0}</td>
               <td>
                 <select
                   value={u.status}
@@ -128,11 +124,19 @@ const AdminUsers = () => {
                   <option value="active">active</option>
                   <option value="unactive">unactive</option>
                 </select>
+                <button
+                  className="warn-btn"
+                  disabled={u.warnings >= 3}
+                  onClick={() => issueWarning(u.user_id)}
+                >
+                  ⚠️ Warn
+                </button>
               </td>
             </tr>
           ))}
         </tbody>
       </table>
+
       <h2>Tax Settings</h2>
       <div className="tax-form">
         <label>Current Tax: {tax}%</label>

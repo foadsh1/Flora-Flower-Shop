@@ -122,12 +122,29 @@ router.post("/signout", (req, res) => {
   res.json({ message: "Logged out successfully" });
 });
 
-// ✅ CHECK SESSION
-router.get("/me", (req, res) => {
-  if (req.session?.user) {
-    return res.json({ user: req.session.user });
+/// ✅ CHECK SESSION + return warning count
+router.get("/me", async (req, res) => {
+  if (!req.session?.user) {
+    return res.status(401).json({ error: "Not logged in" });
   }
-  return res.status(401).json({ error: "Not logged in" });
+
+  try {
+    const [[{ warnings }]] = await db
+      .promise()
+      .query("SELECT COUNT(*) AS warnings FROM warnings WHERE user_id = ?", [
+        req.session.user.user_id,
+      ]);
+
+    return res.json({
+      user: {
+        ...req.session.user,
+        warnings,
+      },
+    });
+  } catch (err) {
+    console.error("❌ Failed to fetch warnings:", err);
+    return res.status(500).json({ error: "Server error" });
+  }
 });
 
 // ✅ GET PROFILE
