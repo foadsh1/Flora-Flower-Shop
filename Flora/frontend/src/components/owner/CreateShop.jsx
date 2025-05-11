@@ -2,17 +2,25 @@ import React, { useState, useEffect, useContext } from "react";
 import axios from "axios";
 import "../../assets/css/shop.css";
 import { useNavigate } from "react-router-dom";
-import { AuthContext } from "../context/AuthContext"; // 🧠 import context
+import { AuthContext } from "../context/AuthContext";
+
+const daysOfWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
 const CreateShop = () => {
   const [form, setForm] = useState({
     shop_name: "",
     location: "",
     description: "",
+    phone: "",
+    working_hours: "", // final string (e.g. "Sun–Thu 09:00–18:00")
   });
   const [image, setImage] = useState(null);
+  const [selectedDays, setSelectedDays] = useState([]);
+  const [openTime, setOpenTime] = useState("09:00");
+  const [closeTime, setCloseTime] = useState("18:00");
+
   const navigate = useNavigate();
-  const { setUser } = useContext(AuthContext); // ✅ get setUser
+  const { setUser } = useContext(AuthContext);
 
   useEffect(() => {
     axios
@@ -33,11 +41,28 @@ const CreateShop = () => {
     setImage(e.target.files[0]);
   };
 
+  const toggleDay = (day) => {
+    setSelectedDays((prev) =>
+      prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day]
+    );
+  };
+
+  const formatWorkingHours = () => {
+    if (selectedDays.length === 0) return "";
+    const days = selectedDays.join(", ");
+    return `${days} ${openTime}–${closeTime}`;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    const workingHoursString = formatWorkingHours();
     const formData = new FormData();
-    Object.entries(form).forEach(([key, value]) => formData.append(key, value));
+
+    Object.entries({ ...form, working_hours: workingHoursString }).forEach(([key, value]) =>
+      formData.append(key, value)
+    );
+
     if (image) formData.append("shop_image", image);
 
     try {
@@ -46,7 +71,6 @@ const CreateShop = () => {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
-      // ✅ Refresh session & shop data after creation
       const meRes = await axios.get("http://localhost:5000/auth/me", {
         withCredentials: true,
       });
@@ -78,6 +102,44 @@ const CreateShop = () => {
 
         <label>Description</label>
         <textarea name="description" onChange={handleChange}></textarea>
+
+        <label>Phone Number</label>
+        <input
+          name="phone"
+          type="tel"
+          placeholder="e.g. 052-1234567"
+          required
+          onChange={handleChange}
+        />
+
+        <label>Working Days</label>
+        <div className="day-checkbox-group">
+          {daysOfWeek.map((day) => (
+            <label key={day} className="day-checkbox">
+              <input
+                type="checkbox"
+                value={day}
+                checked={selectedDays.includes(day)}
+                onChange={() => toggleDay(day)}
+              />
+              {day.slice(0, 3)}
+            </label>
+          ))}
+        </div>
+
+        <label>Opening Time</label>
+        <input
+          type="time"
+          value={openTime}
+          onChange={(e) => setOpenTime(e.target.value)}
+        />
+
+        <label>Closing Time</label>
+        <input
+          type="time"
+          value={closeTime}
+          onChange={(e) => setCloseTime(e.target.value)}
+        />
 
         <label>Shop Image</label>
         <input

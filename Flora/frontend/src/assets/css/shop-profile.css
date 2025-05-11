@@ -74,3 +74,26 @@
   color: #777;
   padding: 2rem;
 }
+.day-checkbox-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.3rem;
+}
+
+.day-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  background: #fce4ec;
+  border: 1px solid #f8bbd0;
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  color: #c2185b;
+  cursor: pointer;
+}
+
+.day-checkbox input {
+  accent-color: #c2185b;
+}

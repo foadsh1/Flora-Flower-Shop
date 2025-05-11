@@ -10,6 +10,7 @@ const ShopDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [products, setProducts] = useState([]);
+  const [shopInfo, setShopInfo] = useState(null);
   const [loading, setLoading] = useState(true);
 
   const [search, setSearch] = useState("");
@@ -17,21 +18,24 @@ const ShopDetails = () => {
   const [maxPrice, setMaxPrice] = useState("");
   const [typeFilter, setTypeFilter] = useState("all");
   const [showFilters, setShowFilters] = useState(false);
-
+  const [mapCity, setMapCity] = useState("");
+  const [showMap, setShowMap] = useState(false);
   const { cart, addToCart } = useContext(CartContext);
   const { user } = useContext(AuthContext);
 
   useEffect(() => {
-    axios
-      .get(`http://localhost:5000/shop/${id}/products`, {
-        withCredentials: true,
-      })
-      .then((res) => {
-        setProducts(res.data.products);
+    Promise.all([
+      axios.get(`http://localhost:5000/shop/${id}/products`, { withCredentials: true }),
+      axios.get("http://localhost:5000/shop/all", { withCredentials: true }),
+    ])
+      .then(([prodRes, shopRes]) => {
+        setProducts(prodRes.data.products);
+        const thisShop = shopRes.data.shops.find((s) => s.shop_id === parseInt(id));
+        setShopInfo(thisShop || null);
         setLoading(false);
       })
       .catch((err) => {
-        console.error("Failed to load products", err);
+        console.error("Failed to load data", err);
         setLoading(false);
       });
   }, [id]);
@@ -50,7 +54,6 @@ const ShopDetails = () => {
         (!minPrice || product.price >= parseFloat(minPrice)) &&
         (!maxPrice || product.price <= parseFloat(maxPrice));
       const typeMatch = typeFilter === "all" || product.type === typeFilter;
-
       return nameMatch && priceMatch && typeMatch;
     });
   };
@@ -86,7 +89,6 @@ const ShopDetails = () => {
             <span className="low-stock-badge">⚠️ Low Stock</span>
           ) : null}
         </p>
-
         {product.quantity === 0 ? (
           <button className="sold-out-btn" disabled>
             Sold Out
@@ -122,21 +124,45 @@ const ShopDetails = () => {
       <div className="shop-header">
         <button className="back-btn" onClick={() => navigate(-1)}>← Back</button>
         <h2>Shop Flower Collection</h2>
-        <button className="toggle-filters-btn" onClick={() => setShowFilters(true)}>
-          🔍 Filters
-        </button>
       </div>
 
-      {/* 🔲 Overlay when filter is open */}
-      {showFilters && <div className="filter-overlay" onClick={() => setShowFilters(false)} />}
+      {shopInfo && (
+        <>
+          {shopInfo.shop_image && (
+            <div className="shop-image-banner">
+              <img
+                src={`http://localhost:5000/uploads/${shopInfo.shop_image}`}
+                alt={shopInfo.shop_name}
+                className="shop-banner-img"
+              />
+            </div>
+          )}
+          <div className="shop-contact-box">
+            <p><strong>📍 Location:</strong> {shopInfo.location}</p>
+            <button
+              className="view-map-btn"
+              onClick={() => {
+                setMapCity(shopInfo.location);
+                setShowMap(true);
+              }}
+            >
+              Show Location in Maps
+            </button>
+            <p><strong>📞 Phone:</strong> {shopInfo.phone || "Not available"}</p>
+            <p><strong>🕒 Hours:</strong> {shopInfo.working_hours || "Not specified"}</p>
+          </div>
+        </>
+      )}
 
-      {/* 🔽 Slide-in Filter Panel */}
+      <button className="toggle-filters-btn" onClick={() => setShowFilters(true)}>
+        🔍 Filters
+      </button>
+      {showFilters && <div className="filter-overlay" onClick={() => setShowFilters(false)} />}
       <div className={`filter-slider ${showFilters ? "open" : ""}`}>
         <div className="filter-header">
           <h3>Filters</h3>
           <button className="close-btn" onClick={() => setShowFilters(false)}>❌</button>
         </div>
-
         <input
           type="text"
           placeholder="Search by name..."
@@ -163,9 +189,7 @@ const ShopDetails = () => {
           <option value="single">Single Flowers</option>
           <option value="bouquet">Bouquets</option>
         </select>
-        <button className="reset-btn" onClick={resetFilters}>
-          Reset Filters
-        </button>
+        <button className="reset-btn" onClick={resetFilters}>Reset Filters</button>
       </div>
 
       <div className="product-sections">
@@ -183,6 +207,21 @@ const ShopDetails = () => {
         )}
         {singles.length === 0 && bouquets.length === 0 && (
           <p>No matching products found.</p>
+        )}
+        {showMap && (
+          <div className="map-slider">
+            <button className="close-map-btn" onClick={() => setShowMap(false)}>✖</button>
+            <h3>Map: {mapCity}</h3>
+            <iframe
+              title="Map Preview"
+              width="100%"
+              height="300"
+              style={{ border: "0", borderRadius: "12px" }}
+              loading="lazy"
+              allowFullScreen
+              src={`https://www.google.com/maps?q=${encodeURIComponent(mapCity)}&output=embed`}
+            ></iframe>
+          </div>
         )}
       </div>
     </div>

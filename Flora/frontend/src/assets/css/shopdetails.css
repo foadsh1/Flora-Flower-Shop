@@ -291,9 +291,83 @@
   font-weight: bold;
   cursor: pointer;
 }
+.shop-image-banner {
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.shop-banner-img {
+  max-width: 100%;
+  max-height: 300px;
+  object-fit: cover;
+  border-radius: 12px;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
+}
 
 .reset-btn:hover {
   background-color: #b71c1c;
+}
+/* 📍 View Map Button */
+.view-map-btn {
+  margin-top: 0.5rem;
+  background-color: transparent;
+  border: 1px solid #c2185b;
+  color: #c2185b;
+  padding: 0.4rem 1rem;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.view-map-btn:hover {
+  background-color: #ffe3ec;
+}
+
+/* 🕹️ View Shop Button */
+.map-slider {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 90%;
+  background-color: #fff5f8;
+  border-top: 2px solid #f8bbd0;
+  box-shadow: 0 -6px 18px rgba(0, 0, 0, 0.1);
+  padding: 1.5rem;
+  border-radius: 12px 12px 0 0;
+  z-index: 1000;
+  animation: slideDrawerUp 0.4s ease;
+}
+
+@keyframes slideDrawerUp {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+.view-shop-btn:hover {
+  background-color: #ad1457;
+  transform: translateY(-2px) scale(1.03);
+  box-shadow: 0 6px 16px rgba(194, 24, 91, 0.25);
+}
+
+.view-shop-btn:active {
+  transform: translateY(0) scale(0.98);
+  box-shadow: 0 2px 6px rgba(194, 24, 91, 0.1);
+}
+/* ❌ Close Button */
+.close-map-btn {
+  float: right;
+  background: none;
+  border: none;
+  font-size: 1.4rem;
+  cursor: pointer;
+  color: #c2185b;
 }
 /* On wider screens: side-by-side layout */
 @media (min-width: 1024px) {

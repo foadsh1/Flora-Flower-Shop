@@ -18,24 +18,33 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-// ✅ POST /shop/create
 router.post("/create", upload.single("shop_image"), (req, res) => {
   if (!req.session.user || req.session.user.role !== "shopowner") {
     return res.status(403).json({ error: "Unauthorized" });
   }
 
-  const { shop_name, location, description } = req.body;
+  const { shop_name, description, working_hours } = req.body;
   const shop_image = req.file ? req.file.filename : null;
   const user_id = req.session.user.user_id;
 
-  db.query(
-    "INSERT INTO shops (shop_name, location, description, shop_image, user_id) VALUES (?, ?, ?, ?, ?)",
-    [shop_name, location, description, shop_image, user_id],
-    (err) => {
-      if (err) return res.status(500).json({ error: "Database error" });
-      res.status(201).json({ message: "Shop created successfully" });
+  // Fetch phone + address from users table
+  db.query("SELECT phone, address FROM users WHERE user_id = ?", [user_id], (err, userResults) => {
+    if (err || userResults.length === 0) {
+      return res.status(500).json({ error: "User lookup failed" });
     }
-  );
+
+    const { phone, address } = userResults[0];
+
+    db.query(
+      `INSERT INTO shops (shop_name, location, description, shop_image, phone, working_hours, user_id)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      [shop_name, address, description, shop_image, phone, working_hours, user_id],
+      (err) => {
+        if (err) return res.status(500).json({ error: "Database error" });
+        res.status(201).json({ message: "Shop created successfully" });
+      }
+    );
+  });
 });
 router.get("/all", (req, res) => {
   db.query("SELECT * FROM shops", (err, results) => {
@@ -97,22 +106,23 @@ router.get("/my-orders", (req, res) => {
 });
 // ✅ PATCH /shop/update
 router.patch("/update", upload.single("shop_image"), (req, res) => {
-  const { shop_name, location, description } = req.body;
+  const { shop_name, location, description, phone, working_hours } = req.body;
   const shop_image = req.file ? req.file.filename : null;
   const user_id = req.session?.user?.user_id;
 
   if (!user_id) return res.status(403).json({ error: "Unauthorized" });
 
   let sql = `
-    UPDATE shops
-    SET shop_name = ?, location = ?, description = ?
-    ${shop_image ? ", shop_image = ?" : ""}
-    WHERE user_id = ?
-  `;
+  UPDATE shops
+  SET shop_name = ?, location = ?, description = ?, phone = ?, working_hours = ?
+  ${shop_image ? ", shop_image = ?" : ""}
+  WHERE user_id = ?
+`;
 
   const values = shop_image
-    ? [shop_name, location, description, shop_image, user_id]
-    : [shop_name, location, description, user_id];
+    ? [shop_name, location, description, phone, working_hours, shop_image, user_id]
+    : [shop_name, location, description, phone, working_hours, user_id];
+
 
   db.query(sql, values, (err) => {
     if (err) return res.status(500).json({ error: "Update failed" });

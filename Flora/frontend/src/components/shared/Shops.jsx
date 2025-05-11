@@ -164,7 +164,7 @@ const Shops = () => {
                   <span className="top-rated-badge">🌟 Top Rated</span>
                 )}
               </h3>
-              <p>{shop.location}</p>
+              <p>📍{shop.location}</p>
               <button
                 className="view-map-btn"
                 onClick={() => {
@@ -175,6 +175,8 @@ const Shops = () => {
                 Show Location in Maps
               </button>
               <p>{shop.description}</p>
+              <p><strong>📞 Phone:</strong> {shop.phone || "Not available"}</p>
+              <p><strong>🕒 Hours:</strong> {shop.working_hours || "Not specified"}</p>
 
               {ratings[shop.shop_id] ? (
                 <div className="shop-rating">
