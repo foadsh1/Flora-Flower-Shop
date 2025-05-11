@@ -124,7 +124,7 @@ router.get("/:id/products", (req, res) => {
   const shop_id = req.params.id;
 
   db.query(
-    "SELECT product_id, name, description, price, quantity, image, shop_id FROM products WHERE shop_id = ?",
+    "SELECT product_id, name, description, price, quantity, image, shop_id, type FROM products WHERE shop_id = ?",
     [shop_id],
     (err, results) => {
       if (err) {

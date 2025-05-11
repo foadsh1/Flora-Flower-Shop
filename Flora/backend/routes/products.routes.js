@@ -14,7 +14,7 @@ const upload = multer({ storage });
 
 // ✅ Create a new product
 router.post("/", upload.single("image"), (req, res) => {
-  const { name, description, base_price, quantity } = req.body;
+  const { name, description, base_price, quantity, type } = req.body;
   const user_id = req.session?.user?.user_id;
 
   if (!user_id) return res.status(403).json({ error: "Unauthorized" });
@@ -37,6 +37,13 @@ router.post("/", upload.single("image"), (req, res) => {
       });
   }
 
+  // ✅ Validate type
+  if (!["single", "bouquet"].includes(type)) {
+    return res
+      .status(400)
+      .json({ error: "Invalid product type. Must be 'single' or 'bouquet'." });
+  }
+
   // Get shop_id
   db.query(
     "SELECT shop_id FROM shops WHERE user_id = ?",
@@ -50,8 +57,8 @@ router.post("/", upload.single("image"), (req, res) => {
       const image = req.file ? req.file.filename : null;
 
       db.query(
-        "INSERT INTO products (shop_id, name, description, base_price, quantity, image) VALUES (?, ?, ?, ?, ?, ?)",
-        [shop_id, name, description, basePriceNum, quantityNum, image],
+        "INSERT INTO products (shop_id, name, description, base_price, quantity, image, type) VALUES (?, ?, ?, ?, ?, ?, ?)",
+        [shop_id, name, description, basePriceNum, quantityNum, image, type],
         (err) => {
           if (err)
             return res.status(500).json({ error: "Failed to add product" });
@@ -93,7 +100,7 @@ router.get("/mine", (req, res) => {
 
 // ✅ Update a product
 router.patch("/:id", upload.single("image"), (req, res) => {
-  const { name, description, base_price, quantity } = req.body;
+  const { name, description, base_price, quantity, type } = req.body;
   const image = req.file ? req.file.filename : null;
   const productId = req.params.id;
 
@@ -115,16 +122,23 @@ router.patch("/:id", upload.single("image"), (req, res) => {
       });
   }
 
+  // ✅ Validate type
+  if (!["single", "bouquet"].includes(type)) {
+    return res
+      .status(400)
+      .json({ error: "Invalid product type. Must be 'single' or 'bouquet'." });
+  }
+
   let sql = `
     UPDATE products 
-    SET name = ?, description = ?, base_price = ?, quantity = ?
+    SET name = ?, description = ?, base_price = ?, quantity = ?, type = ?
     ${image ? ", image = ?" : ""}
     WHERE product_id = ?
   `;
 
   const values = image
-    ? [name, description, basePriceNum, quantityNum, image, productId]
-    : [name, description, basePriceNum, quantityNum, productId];
+    ? [name, description, basePriceNum, quantityNum, type, image, productId]
+    : [name, description, basePriceNum, quantityNum, type, productId];
 
   db.query(sql, values, (err) => {
     if (err) return res.status(500).json({ error: "Failed to update product" });
