@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import axios from "axios";
 import "../../assets/css/shop.css";
 import { useNavigate } from "react-router-dom";
+import { AuthContext } from "../context/AuthContext"; // 🧠 import context
 
 const CreateShop = () => {
   const [form, setForm] = useState({
@@ -11,6 +12,7 @@ const CreateShop = () => {
   });
   const [image, setImage] = useState(null);
   const navigate = useNavigate();
+  const { setUser } = useContext(AuthContext); // ✅ get setUser
 
   useEffect(() => {
     axios
@@ -43,6 +45,17 @@ const CreateShop = () => {
         withCredentials: true,
         headers: { "Content-Type": "multipart/form-data" },
       });
+
+      // ✅ Refresh session & shop data after creation
+      const meRes = await axios.get("http://localhost:5000/auth/me", {
+        withCredentials: true,
+      });
+      const shopRes = await axios.get("http://localhost:5000/shop/mine", {
+        withCredentials: true,
+      });
+      const u = meRes.data.user;
+      setUser({ ...u, hasShop: !!shopRes.data.shop });
+
       navigate("/owner/dashboard");
     } catch (err) {
       console.error("Shop creation failed:", err);

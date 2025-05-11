@@ -8,30 +8,36 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    axios
-      .get("http://localhost:5000/auth/me", { withCredentials: true })
-      .then((res) => {
+    const fetchUserAndShop = async () => {
+      try {
+        const res = await axios.get("http://localhost:5000/auth/me", {
+          withCredentials: true,
+        });
+
         const u = res.data.user;
 
         if (u.role === "shopowner") {
-          axios
-            .get("http://localhost:5000/shop/mine", { withCredentials: true })
-            .then((res2) => {
-              setUser({ ...u, hasShop: !!res2.data.shop, warnings: u.warnings });
-            })
-            .catch(() => setUser({ ...u, hasShop: false, warnings: u.warnings }))
-            .finally(() => setLoading(false));
+          try {
+            const shopRes = await axios.get("http://localhost:5000/shop/mine", {
+              withCredentials: true,
+            });
+            const hasShop = !!shopRes.data.shop;
+            setUser({ ...u, hasShop, warnings: u.warnings });
+          } catch {
+            setUser({ ...u, hasShop: false, warnings: u.warnings });
+          }
         } else {
           setUser({ ...u, warnings: u.warnings });
-          setLoading(false);
         }
-      })
-      .catch(() => {
+      } catch (err) {
         setUser(null);
+      } finally {
         setLoading(false);
-      });
+      }
+    };
+
+    fetchUserAndShop();
   }, []);
-  
 
   const logout = async () => {
     await axios.post(
@@ -39,7 +45,7 @@ export const AuthProvider = ({ children }) => {
       {},
       { withCredentials: true }
     );
-    setUser(null); // ✅ cart will reset automatically in CartContext
+    setUser(null);
   };
 
   return (
