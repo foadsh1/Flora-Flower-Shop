@@ -121,3 +121,18 @@
 .admin-reply-btn:hover {
   background-color: #a01547;
 }
+.reply-button {
+  margin-top: 0.5rem;
+  padding: 6px 12px;
+  background-color: #c2185b;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.reply-button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}

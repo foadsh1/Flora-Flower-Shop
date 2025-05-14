@@ -94,10 +94,30 @@ const AdminMessages = () => {
               <td>
                 <textarea
                   placeholder="Reply..."
-                  defaultValue={m.response || ""}
-                  onBlur={(e) => sendReply(m.message_id, e.target.value)}
+                  value={m.tempResponse || m.response || ""}
+                  onChange={(e) =>
+                    setMessages((prev) =>
+                      prev.map((msg) =>
+                        msg.message_id === m.message_id
+                          ? { ...msg, tempResponse: e.target.value }
+                          : msg
+                      )
+                    )
+                  }
                   style={{ width: "260px", minHeight: "80px" }}
                 />
+                <button
+                  className="reply-button"
+                  onClick={() =>
+                    sendReply(m.message_id, m.tempResponse || m.response || "")
+                  }
+                  disabled={
+                    (m.tempResponse ?? m.response)?.trim() === "" ||
+                    m.status === "responded"
+                  }
+                >
+                  Send
+                </button>
               </td>
               <td>
                 {m.status === "responded" ? (
