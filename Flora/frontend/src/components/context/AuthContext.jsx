@@ -10,7 +10,7 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const fetchUserAndShop = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/auth/me", {
+        const res = await axios.get("http://localhost:4000/auth/me", {
           withCredentials: true,
         });
 
@@ -18,7 +18,7 @@ export const AuthProvider = ({ children }) => {
 
         if (u.role === "shopowner") {
           try {
-            const shopRes = await axios.get("http://localhost:5000/shop/mine", {
+            const shopRes = await axios.get("http://localhost:4000/shop/mine", {
               withCredentials: true,
             });
             const hasShop = !!shopRes.data.shop;
@@ -41,7 +41,7 @@ export const AuthProvider = ({ children }) => {
 
   const logout = async () => {
     await axios.post(
-      "http://localhost:5000/auth/signout",
+      "http://localhost:4000/auth/signout",
       {},
       { withCredentials: true }
     );

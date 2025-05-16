@@ -25,8 +25,8 @@ const ShopDetails = () => {
 
   useEffect(() => {
     Promise.all([
-      axios.get(`http://localhost:5000/shop/${id}/products`, { withCredentials: true }),
-      axios.get("http://localhost:5000/shop/all", { withCredentials: true }),
+      axios.get(`http://localhost:4000/shop/${id}/products`, { withCredentials: true }),
+      axios.get("http://localhost:4000/shop/all", { withCredentials: true }),
     ])
       .then(([prodRes, shopRes]) => {
         setProducts(prodRes.data.products);
@@ -71,7 +71,7 @@ const ShopDetails = () => {
       <div key={product.product_id} className="product-card">
         {product.image && (
           <img
-            src={`http://localhost:5000/uploads/${product.image}`}
+            src={`http://localhost:4000/uploads/${product.image}`}
             alt={product.name}
             className="product-image"
           />
@@ -131,7 +131,7 @@ const ShopDetails = () => {
           {shopInfo.shop_image && (
             <div className="shop-image-banner">
               <img
-                src={`http://localhost:5000/uploads/${shopInfo.shop_image}`}
+                src={`http://localhost:4000/uploads/${shopInfo.shop_image}`}
                 alt={shopInfo.shop_name}
                 className="shop-banner-img"
               />

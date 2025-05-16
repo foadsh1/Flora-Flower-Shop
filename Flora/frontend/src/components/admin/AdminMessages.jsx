@@ -15,7 +15,7 @@ const AdminMessages = () => {
 
   const fetchMessages = () => {
     axios
-      .get("http://localhost:5000/contact/admin/messages", {
+      .get("http://localhost:4000/contact/admin/messages", {
         withCredentials: true,
       })
       .then((res) => setMessages(res.data.messages || []))
@@ -29,7 +29,7 @@ const AdminMessages = () => {
 
     try {
       await axios.patch(
-        `http://localhost:5000/contact/admin/messages/${message_id}/reply`,
+        `http://localhost:4000/contact/admin/messages/${message_id}/reply`,
         { response },
         { withCredentials: true }
       );

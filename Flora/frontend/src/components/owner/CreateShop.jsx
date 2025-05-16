@@ -24,7 +24,7 @@ const CreateShop = () => {
 
   useEffect(() => {
     axios
-      .get("http://localhost:5000/shop/mine", { withCredentials: true })
+      .get("http://localhost:4000/shop/mine", { withCredentials: true })
       .then((res) => {
         if (res.data.shop) {
           navigate("/owner/dashboard");
@@ -66,15 +66,15 @@ const CreateShop = () => {
     if (image) formData.append("shop_image", image);
 
     try {
-      await axios.post("http://localhost:5000/shop/create", formData, {
+      await axios.post("http://localhost:4000/shop/create", formData, {
         withCredentials: true,
         headers: { "Content-Type": "multipart/form-data" },
       });
 
-      const meRes = await axios.get("http://localhost:5000/auth/me", {
+      const meRes = await axios.get("http://localhost:4000/auth/me", {
         withCredentials: true,
       });
-      const shopRes = await axios.get("http://localhost:5000/shop/mine", {
+      const shopRes = await axios.get("http://localhost:4000/shop/mine", {
         withCredentials: true,
       });
       const u = meRes.data.user;

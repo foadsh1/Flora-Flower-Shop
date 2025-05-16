@@ -57,7 +57,7 @@ const ShopOwnerDashboard = () => {
     if (showCouponSlider) {
       fetchCoupons();
       axios
-        .get("http://localhost:5000/admin/users", { withCredentials: true })
+        .get("http://localhost:4000/admin/users", { withCredentials: true })
         .then((res) => {
           const onlyClients = res.data.users.filter((u) => u.role === "client");
           setClients(onlyClients); // filtered list for display
@@ -68,7 +68,7 @@ const ShopOwnerDashboard = () => {
   }, [showCouponSlider]);
   useEffect(() => {
     axios
-      .get("http://localhost:5000/shop/mine", { withCredentials: true })
+      .get("http://localhost:4000/shop/mine", { withCredentials: true })
       .then((res) => {
         const createdYear = new Date(
           res.data.shop.created_at || "2023-01-01"
@@ -86,7 +86,7 @@ const ShopOwnerDashboard = () => {
   
   const fetchOrders = () => {
     axios
-      .get("http://localhost:5000/shop/my-orders", { withCredentials: true })
+      .get("http://localhost:4000/shop/my-orders", { withCredentials: true })
       .then((res) => {
         setOrders(res.data.orders);
         const map = {};
@@ -99,7 +99,7 @@ const ShopOwnerDashboard = () => {
   };
   const fetchCoupons = () => {
     axios
-      .get("http://localhost:5000/shop/coupons", { withCredentials: true })
+      .get("http://localhost:4000/shop/coupons", { withCredentials: true })
       .then((res) => setCoupons(res.data.coupons))
       .catch((err) => toast.error("Failed to load coupons"));
   };
@@ -111,7 +111,7 @@ const ShopOwnerDashboard = () => {
     }
 
     axios
-      .post("http://localhost:5000/shop/coupons", newCoupon, {
+      .post("http://localhost:4000/shop/coupons", newCoupon, {
         withCredentials: true,
       })
       .then(() => {
@@ -125,7 +125,7 @@ const ShopOwnerDashboard = () => {
   const toggleCouponStatus = (id, currentStatus) => {
     axios
       .patch(
-        `http://localhost:5000/shop/coupons/${id}/status`,
+        `http://localhost:4000/shop/coupons/${id}/status`,
         { is_active: !currentStatus },
         { withCredentials: true }
       )
@@ -150,7 +150,7 @@ const ShopOwnerDashboard = () => {
     };
 
     axios
-      .post("http://localhost:5000/shop/send-coupon-message", body, {
+      .post("http://localhost:4000/shop/send-coupon-message", body, {
         withCredentials: true,
       })
       .then((res) => {
@@ -166,7 +166,7 @@ const ShopOwnerDashboard = () => {
 
   const fetchAnalytics = () => {
     axios
-      .get("http://localhost:5000/shop/analytics", {
+      .get("http://localhost:4000/shop/analytics", {
         params: {
           from: startDate,
           to: endDate,
@@ -202,7 +202,7 @@ const ShopOwnerDashboard = () => {
   const updateStatus = async (orderId) => {
     try {
       await axios.patch(
-        `http://localhost:5000/orders/${orderId}/status`,
+        `http://localhost:4000/orders/${orderId}/status`,
         { status: statusMap[orderId] },
         { withCredentials: true }
       );
@@ -221,7 +221,7 @@ const ShopOwnerDashboard = () => {
     }
     try {
       const res = await axios.get(
-        `http://localhost:5000/orders/${orderId}/details`,
+        `http://localhost:4000/orders/${orderId}/details`,
         { withCredentials: true }
       );
       setOrderDetails(res.data);
@@ -238,7 +238,7 @@ const ShopOwnerDashboard = () => {
   };
   const fetchComparisonRevenue = () => {
     axios
-      .get("http://localhost:5000/shop/analytics/compare", {
+      .get("http://localhost:4000/shop/analytics/compare", {
         params: {
           year1,
           year2,
@@ -374,7 +374,7 @@ const ShopOwnerDashboard = () => {
                         {orderDetails.items.map((item, index) => (
                           <div key={index} className="slider-item">
                             <img
-                              src={`http://localhost:5000/uploads/${item.image}`}
+                              src={`http://localhost:4000/uploads/${item.image}`}
                               alt={item.name}
                             />
                             <div>
@@ -568,7 +568,7 @@ const ShopOwnerDashboard = () => {
                 onClick={() =>
                   axios
                     .post(
-                      "http://localhost:5000/shop/send-coupon-message",
+                      "http://localhost:4000/shop/send-coupon-message",
                       {
                         coupon_id: sendData.coupon_id,
                         message: sendData.message,

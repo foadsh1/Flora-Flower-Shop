@@ -46,7 +46,7 @@ app.use("/orders", ordersRoutes);
 app.use("/reviews", reviewRoutes);
 app.use("/supplier", supplierRoutes);
 app.use("/contact", contactRoutes);
-const PORT = 5000;
+const PORT = 4000;
 app.listen(PORT, () => {
   console.log(`✅ Server running at http://localhost:${PORT}`);
 });

@@ -28,7 +28,7 @@ const ShopOwnerProducts = () => {
 
   const fetchProducts = () => {
     axios
-      .get("http://localhost:5000/products/mine", { withCredentials: true })
+      .get("http://localhost:4000/products/mine", { withCredentials: true })
       .then((res) => {
         const lowStock = res.data.products.filter((p) => p.quantity < 5);
         if (lowStock.length > 0) {
@@ -77,7 +77,7 @@ const ShopOwnerProducts = () => {
     try {
       if (editingProduct) {
         await axios.patch(
-          `http://localhost:5000/products/${editingProduct.product_id}`,
+          `http://localhost:4000/products/${editingProduct.product_id}`,
           formData,
           {
             withCredentials: true,
@@ -86,7 +86,7 @@ const ShopOwnerProducts = () => {
         );
         setMessage("✅ Product updated successfully.");
       } else {
-        await axios.post("http://localhost:5000/products", formData, {
+        await axios.post("http://localhost:4000/products", formData, {
           withCredentials: true,
           headers: { "Content-Type": "multipart/form-data" },
         });
@@ -115,7 +115,7 @@ const ShopOwnerProducts = () => {
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this flower?")) return;
     try {
-      await axios.delete(`http://localhost:5000/products/${id}`, {
+      await axios.delete(`http://localhost:4000/products/${id}`, {
         withCredentials: true,
       });
       setMessage("🗑️ Product deleted successfully.");
@@ -152,7 +152,7 @@ const ShopOwnerProducts = () => {
       {product.image && (
         <div className="image-container">
           <img
-            src={`http://localhost:5000/uploads/${product.image}`}
+            src={`http://localhost:4000/uploads/${product.image}`}
             alt={product.name}
             className="product-image"
           />

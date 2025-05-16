@@ -20,7 +20,7 @@ const ReviewModal = ({ shopId, shopName, onClose, onReviewSubmitted }) => {
 
     try {
       await axios.post(
-        "http://localhost:5000/reviews",
+        "http://localhost:4000/reviews",
         {
           shop_id: shopId,
           rating,

@@ -17,14 +17,14 @@ const AdminUsers = () => {
 
   const fetchUsers = () => {
     axios
-      .get("http://localhost:5000/admin/users", { withCredentials: true })
+      .get("http://localhost:4000/admin/users", { withCredentials: true })
       .then((res) => setUsers(res.data.users))
       .catch(() => toast.error("Failed to load users"));
   };
 
   const fetchTax = () => {
     axios
-      .get("http://localhost:5000/admin/tax", { withCredentials: true })
+      .get("http://localhost:4000/admin/tax", { withCredentials: true })
       .then((res) => {
         setTax(res.data.tax);
         setNewTax(res.data.tax);
@@ -36,7 +36,7 @@ const AdminUsers = () => {
   const handleStatusChange = async (user_id, newStatus) => {
     try {
       await axios.patch(
-        `http://localhost:5000/admin/users/${user_id}/status`,
+        `http://localhost:4000/admin/users/${user_id}/status`,
         { status: newStatus },
         { withCredentials: true }
       );
@@ -54,7 +54,7 @@ const AdminUsers = () => {
     }
 
     try {
-      const response = await axios.get("http://localhost:5000/admin/tax", {
+      const response = await axios.get("http://localhost:4000/admin/tax", {
         withCredentials: true,
       });
       const currentTax = parseFloat(response.data.tax);
@@ -64,7 +64,7 @@ const AdminUsers = () => {
       }
 
       await axios.patch(
-        "http://localhost:5000/admin/tax",
+        "http://localhost:4000/admin/tax",
         { tax_percent: value },
         { withCredentials: true }
       );
@@ -78,7 +78,7 @@ const AdminUsers = () => {
   const issueWarning = async (user_id) => {
     try {
       await axios.post(
-        "http://localhost:5000/contact/warnings",
+        "http://localhost:4000/contact/warnings",
         { user_id, reason: "Misbehavior" },
         { withCredentials: true }
       );

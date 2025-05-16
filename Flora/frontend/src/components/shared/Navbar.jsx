@@ -21,7 +21,7 @@ const Navbar = () => {
     if (user?.role === "admin") {
       // ✅ Admin-specific endpoint
       axios
-        .get("http://localhost:5000/contact/admin/unread-count", {
+        .get("http://localhost:4000/contact/admin/unread-count", {
           withCredentials: true,
         })
         .then((res) => {
@@ -33,7 +33,7 @@ const Navbar = () => {
     } else if (user) {
       // ✅ Shopowner or Client endpoint
       axios
-        .get("http://localhost:5000/contact/unread-count", {
+        .get("http://localhost:4000/contact/unread-count", {
           withCredentials: true,
         })
         .then((res) => {

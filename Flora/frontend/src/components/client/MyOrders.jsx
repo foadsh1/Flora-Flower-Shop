@@ -13,14 +13,14 @@ const MyOrders = () => {
 
   const fetchOrders = () => {
     axios
-      .get("http://localhost:5000/orders/mine", { withCredentials: true })
+      .get("http://localhost:4000/orders/mine", { withCredentials: true })
       .then((res) => setOrders(res.data.orders))
       .catch((err) => console.error("Failed to fetch orders", err));
   };
 
   const fetchMyReviews = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/reviews/mine", {
+      const res = await axios.get("http://localhost:4000/reviews/mine", {
         withCredentials: true,
       });
       const reviewedIds = res.data.reviews.map((r) => r.shop_id);
@@ -98,7 +98,7 @@ const MyOrders = () => {
                 <div key={index} className="product-item">
                   {product.image && (
                     <img
-                      src={`http://localhost:5000/uploads/${product.image}`}
+                      src={`http://localhost:4000/uploads/${product.image}`}
                       alt={product.name}
                     />
                   )}

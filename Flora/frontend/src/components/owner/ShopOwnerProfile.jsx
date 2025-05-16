@@ -22,7 +22,7 @@ const ShopOwnerProfile = () => {
 
   useEffect(() => {
     axios
-      .get("http://localhost:5000/shop/mine", { withCredentials: true })
+      .get("http://localhost:4000/shop/mine", { withCredentials: true })
       .then((res) => {
         if (res.data.shop) {
           const shopData = res.data.shop;
@@ -91,7 +91,7 @@ const ShopOwnerProfile = () => {
     }
 
     try {
-      await axios.patch("http://localhost:5000/shop/update", formData, {
+      await axios.patch("http://localhost:4000/shop/update", formData, {
         withCredentials: true,
         headers: {
           "Content-Type": "multipart/form-data",
@@ -100,7 +100,7 @@ const ShopOwnerProfile = () => {
       setSuccess("✅ Shop profile updated!");
       setEditMode(false);
       setImage(null);
-      const updated = await axios.get("http://localhost:5000/shop/mine", {
+      const updated = await axios.get("http://localhost:4000/shop/mine", {
         withCredentials: true,
       });
       setShop(updated.data.shop);
@@ -184,7 +184,7 @@ const ShopOwnerProfile = () => {
         <label>Shop Image</label>
         {shop.shop_image && (
           <img
-            src={`http://localhost:5000/uploads/${shop.shop_image}`}
+            src={`http://localhost:4000/uploads/${shop.shop_image}`}
             alt="shop"
             style={{
               width: "100%",

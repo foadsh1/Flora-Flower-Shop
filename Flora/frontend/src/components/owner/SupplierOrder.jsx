@@ -12,7 +12,7 @@ const SupplierOrder = () => {
 
   const fetchFlowers = () => {
     axios
-      .get("http://localhost:5000/products/mine", { withCredentials: true })
+      .get("http://localhost:4000/products/mine", { withCredentials: true })
       .then((res) => {
         const flowersWithRestock = res.data.products.map((f) => ({
           ...f,
@@ -42,7 +42,7 @@ const SupplierOrder = () => {
 
     axios
       .post(
-        "http://localhost:5000/supplier/order",
+        "http://localhost:4000/supplier/order",
         { items: selectedItems },
         { withCredentials: true }
       )
@@ -77,7 +77,7 @@ const SupplierOrder = () => {
                 <td>
                   {flower.image && (
                     <img
-                      src={`http://localhost:5000/uploads/${flower.image}`}
+                      src={`http://localhost:4000/uploads/${flower.image}`}
                       alt={flower.name}
                       className="flower-thumb"
                     />

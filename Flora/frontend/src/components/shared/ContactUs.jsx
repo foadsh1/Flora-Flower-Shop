@@ -33,7 +33,7 @@ const ContactUs = () => {
     try {
       setLoading(true);
       await axios.post(
-        "http://localhost:5000/contact/message",
+        "http://localhost:4000/contact/message",
         {
           ...formData,
           user_id: user.user_id,

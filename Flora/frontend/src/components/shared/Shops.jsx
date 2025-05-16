@@ -19,7 +19,7 @@ const Shops = () => {
 
   useEffect(() => {
     axios
-      .get("http://localhost:5000/shop/all", { withCredentials: true })
+      .get("http://localhost:4000/shop/all", { withCredentials: true })
       .then((res) => setShops(res.data.shops))
       .catch((err) => console.error("Failed to fetch shops", err));
   }, []);
@@ -27,7 +27,7 @@ const Shops = () => {
   useEffect(() => {
     const fetchRatings = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/reviews/averages");
+        const res = await axios.get("http://localhost:4000/reviews/averages");
         const ratingsMap = {};
         res.data.ratings.forEach((r) => {
           ratingsMap[r.shop_id] = {
@@ -46,7 +46,7 @@ const Shops = () => {
 
   const openReviewsModal = async (shopId, shopName) => {
     try {
-      const res = await axios.get(`http://localhost:5000/reviews/${shopId}`);
+      const res = await axios.get(`http://localhost:4000/reviews/${shopId}`);
       setShopReviews(res.data.reviews);
       setSelectedShop({ id: shopId, name: shopName });
       setShowReviewsModal(true);
@@ -153,7 +153,7 @@ const Shops = () => {
             <div key={shop.shop_id} className="shop-card">
               {shop.shop_image && (
                 <img
-                  src={`http://localhost:5000/uploads/${shop.shop_image}`}
+                  src={`http://localhost:4000/uploads/${shop.shop_image}`}
                   alt={shop.shop_name}
                   className="shop-image"
                 />

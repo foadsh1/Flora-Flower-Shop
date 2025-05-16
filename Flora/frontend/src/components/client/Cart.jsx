@@ -29,7 +29,7 @@ const Cart = () => {
 
     try {
       const res = await axios.get(
-        "http://localhost:5000/shop/coupon/validate",
+        "http://localhost:4000/shop/coupon/validate",
         {
           params: { code: couponCode, shop_id: shopId },
           withCredentials: true,
@@ -65,7 +65,7 @@ const Cart = () => {
 
     try {
       await axios.post(
-        "http://localhost:5000/orders/place",
+        "http://localhost:4000/orders/place",
         {
           cart,
           totalPrice: discountedTotal,
@@ -95,7 +95,7 @@ const Cart = () => {
             {cart.map((item) => (
               <div key={item.product_id} className="cart-item">
                 <img
-                  src={`http://localhost:5000/uploads/${item.image}`}
+                  src={`http://localhost:4000/uploads/${item.image}`}
                   alt={item.name}
                   className="cart-image"
                 />
@@ -168,7 +168,7 @@ const Cart = () => {
                   const shopId = cart[0].shop_id;
                   try {
                     await axios.post(
-                      "http://localhost:5000/orders/place",
+                      "http://localhost:4000/orders/place",
                       {
                         cart,
                         totalPrice: discountedTotal,

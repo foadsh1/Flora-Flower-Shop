@@ -15,7 +15,7 @@ const ClientProfile = () => {
 
   useEffect(() => {
     axios
-      .get("http://localhost:5000/auth/profile", { withCredentials: true })
+      .get("http://localhost:4000/auth/profile", { withCredentials: true })
       .then((res) => {
         setUser(res.data.user);
         setForm({
@@ -41,7 +41,7 @@ const ClientProfile = () => {
 
     try {
       const res = await axios.patch(
-        "http://localhost:5000/auth/profile",
+        "http://localhost:4000/auth/profile",
         form,
         { withCredentials: true }
       );

@@ -15,7 +15,7 @@ const ViewMessages = () => {
   useEffect(() => {
     if (!user) return;
     axios
-      .get("http://localhost:5000/contact/messages/my-replies", {
+      .get("http://localhost:4000/contact/messages/my-replies", {
         withCredentials: true,
       })
       .then((res) => {
@@ -25,7 +25,7 @@ const ViewMessages = () => {
       });
 
     axios
-      .get("http://localhost:5000/contact/my-warnings", {
+      .get("http://localhost:4000/contact/my-warnings", {
         withCredentials: true,
       })
       .then((res) => {
@@ -34,20 +34,29 @@ const ViewMessages = () => {
         setHasUnreadWarnings(warns.some((w) => w.is_read === 0));
       });
 
-    axios
-      .get("http://localhost:5000/contact/coupon-messages", {
-        withCredentials: true,
-      })
-      .then((res) => {
-        const coupons = res.data.messages || [];
-        setCouponMessages(coupons);
-        setHasUnreadCoupons(coupons.some((c) => c.is_read === 0));
-      });
+    if (user.role === "client") {
+      axios
+        .get("http://localhost:4000/contact/coupon-messages", {
+          withCredentials: true,
+        })
+        .then((res) => {
+          const coupons = res.data.messages || [];
+          setCouponMessages(coupons);
+          setHasUnreadCoupons(coupons.some((c) => c.is_read === 0));
+        })
+        .catch((err) => {
+          console.warn(
+            "❌ Coupon fetch failed:",
+            err.response?.data || err.message
+          );
+        });
+    }
   }, [user]);
+    
 
   const markAdminMessagesRead = () => {
     axios.patch(
-      "http://localhost:5000/contact/messages/mark-read",
+      "http://localhost:4000/contact/messages/mark-read",
       {},
       {
         withCredentials: true,
@@ -57,7 +66,7 @@ const ViewMessages = () => {
 
   const markCouponMessagesRead = () => {
     axios.patch(
-      "http://localhost:5000/contact/coupon-messages/mark-read",
+      "http://localhost:4000/contact/coupon-messages/mark-read",
       {},
       {
         withCredentials: true,
