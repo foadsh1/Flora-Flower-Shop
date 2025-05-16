@@ -71,9 +71,7 @@ const ShopOwnerProducts = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const formData = new FormData();
-    Object.entries(form).forEach(([key, value]) =>
-      formData.append(key, value)
-    );
+    Object.entries(form).forEach(([key, value]) => formData.append(key, value));
     if (image) formData.append("image", image);
 
     try {
@@ -129,7 +127,9 @@ const ShopOwnerProducts = () => {
 
   const applyFilters = () => {
     return products.filter((product) => {
-      const nameMatch = product.name.toLowerCase().includes(search.toLowerCase());
+      const nameMatch = product.name
+        .toLowerCase()
+        .includes(search.toLowerCase());
       const priceMatch =
         (!minPrice || product.price >= parseFloat(minPrice)) &&
         (!maxPrice || product.price <= parseFloat(maxPrice));
@@ -140,8 +140,12 @@ const ShopOwnerProducts = () => {
   };
 
   const filtered = applyFilters();
-  const singles = filtered.filter((p) => p.type === "single");
-  const bouquets = filtered.filter((p) => p.type === "bouquet");
+  const lowStock = filtered.filter((p) => p.quantity > 0 && p.quantity < 5);
+  const outOfStock = filtered.filter((p) => p.quantity === 0);
+  const inStock = filtered.filter((p) => p.quantity >= 5);
+
+  const singles = inStock.filter((p) => p.type === "single");
+  const bouquets = inStock.filter((p) => p.type === "bouquet");
 
   const renderProductCard = (product) => (
     <div key={product.product_id} className="product-card">
@@ -170,7 +174,7 @@ const ShopOwnerProducts = () => {
           <span className="low-stock-badge"> ⚠️ Low Stock</span>
         ) : null}
       </p>
-      {product.quantity === 0 && (
+      {product.quantity < 5 && (
         <a href="/owner/supplier" className="restock-btn">
           ➕ Restock Now
         </a>
@@ -186,19 +190,23 @@ const ShopOwnerProducts = () => {
     <div className="products-container">
       <div className="shop-header">
         <h2>Manage My Products</h2>
-        <button className="toggle-filters-btn" onClick={() => setShowFilters(true)}>
+        <button
+          className="toggle-filters-btn"
+          onClick={() => setShowFilters(true)}
+        >
           🔍 Filters
         </button>
       </div>
 
-      {/* Overlay */}
-      {showFilters && <div className="filter-overlay" onClick={() => setShowFilters(false)} />}
-
-      {/* Slide-in Filter Panel */}
+      {showFilters && (
+        <div className="filter-overlay" onClick={() => setShowFilters(false)} />
+      )}
       <div className={`filter-slider ${showFilters ? "open" : ""}`}>
         <div className="filter-header">
           <h3>Filters</h3>
-          <button className="close-btn" onClick={() => setShowFilters(false)}>❌</button>
+          <button className="close-btn" onClick={() => setShowFilters(false)}>
+            ❌
+          </button>
         </div>
         <input
           type="text"
@@ -226,23 +234,57 @@ const ShopOwnerProducts = () => {
           <option value="single">Single Flowers</option>
           <option value="bouquet">Bouquets</option>
         </select>
-        <button className="reset-btn" onClick={resetFilters}>Reset Filters</button>
+        <button className="reset-btn" onClick={resetFilters}>
+          Reset Filters
+        </button>
       </div>
 
       {message && <div className="success">{message}</div>}
 
-      <form className="product-form" onSubmit={handleSubmit} encType="multipart/form-data">
+      <form
+        className="product-form"
+        onSubmit={handleSubmit}
+        encType="multipart/form-data"
+      >
         <h3>{editingProduct ? "Edit Product" : "Add New Product"}</h3>
         <select name="type" value={form.type} onChange={handleChange} required>
           <option value="single">🌸 Single Flower</option>
           <option value="bouquet">💐 Pre-made Bouquet</option>
         </select>
-        <input type="text" name="name" placeholder="Product Name" value={form.name} onChange={handleChange} required />
-        <textarea name="description" placeholder="Description" value={form.description} onChange={handleChange}></textarea>
-        <input type="number" name="base_price" placeholder="Base Price (before tax)" value={form.base_price} onChange={handleChange} required />
-        <input type="number" name="quantity" placeholder="Quantity" value={form.quantity} onChange={handleChange} required />
+        <input
+          type="text"
+          name="name"
+          placeholder="Product Name"
+          value={form.name}
+          onChange={handleChange}
+          required
+        />
+        <textarea
+          name="description"
+          placeholder="Description"
+          value={form.description}
+          onChange={handleChange}
+        ></textarea>
+        <input
+          type="number"
+          name="base_price"
+          placeholder="Base Price (before tax)"
+          value={form.base_price}
+          onChange={handleChange}
+          required
+        />
+        <input
+          type="number"
+          name="quantity"
+          placeholder="Quantity"
+          value={form.quantity}
+          onChange={handleChange}
+          required
+        />
         <input type="file" accept="image/*" onChange={handleImage} />
-        <button type="submit">{editingProduct ? "Update Product" : "Add Product"}</button>
+        <button type="submit">
+          {editingProduct ? "Update Product" : "Add Product"}
+        </button>
         {editingProduct && (
           <button type="button" className="cancel-btn" onClick={resetForm}>
             Cancel Edit
@@ -251,21 +293,32 @@ const ShopOwnerProducts = () => {
       </form>
 
       <div className="product-sections">
+        {(lowStock.length > 0 || outOfStock.length > 0) && (
+          <div className="priority-stock-section">
+            <h3>Low or Out-of-Stock Products</h3>
+            <div className="products-grid">
+              {[...lowStock, ...outOfStock].map(renderProductCard)}
+            </div>
+          </div>
+        )}
+
         {singles.length > 0 && (
           <div className="product-section">
             <h3>🌸 Single Flowers</h3>
-            <div className="products-grid">{singles.map(renderProductCard)}</div>
+            <div className="products-grid">
+              {singles.map(renderProductCard)}
+            </div>
           </div>
         )}
         {bouquets.length > 0 && (
           <div className="product-section">
             <h3>💐 Pre-made Bouquets</h3>
-            <div className="products-grid">{bouquets.map(renderProductCard)}</div>
+            <div className="products-grid">
+              {bouquets.map(renderProductCard)}
+            </div>
           </div>
         )}
-        {singles.length === 0 && bouquets.length === 0 && (
-          <p>No matching products found.</p>
-        )}
+        {filtered.length === 0 && <p>No matching products found.</p>}
       </div>
     </div>
   );
