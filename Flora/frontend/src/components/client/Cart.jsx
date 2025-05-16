@@ -8,33 +8,34 @@ import "../../assets/css/cart.css";
 import { PayPalButtons } from "@paypal/react-paypal-js";
 
 const Cart = () => {
-  const { cart, removeFromCart, updateQuantity, clearCart } =
-    useContext(CartContext);
+  const { cart, removeFromCart, updateQuantity, clearCart } = useContext(CartContext);
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
 
   const [couponCode, setCouponCode] = useState("");
   const [discount, setDiscount] = useState(0);
 
+  const [method, setMethod] = useState("pickup"); // 'pickup' or 'delivery'
+  const [date, setDate] = useState("");
+  const [time, setTime] = useState("");
+  const [address, setAddress] = useState({ street: "", apt: "", city: "" });
+  const [phone, setPhone] = useState("");
+
   const handleQuantityChange = (productId, qty) => {
     if (qty >= 1) updateQuantity(productId, qty);
   };
 
   const handleApplyCoupon = async () => {
-    const shopId = cart[0]?.shop_id; // ensure cart has one shop
-
+    const shopId = cart[0]?.shop_id;
     if (!couponCode || !shopId) {
       return toast.warn("Please enter a coupon code and ensure your cart is valid.");
     }
 
     try {
-      const res = await axios.get(
-        "http://localhost:4000/shop/coupon/validate",
-        {
-          params: { code: couponCode, shop_id: shopId },
-          withCredentials: true,
-        }
-      );
+      const res = await axios.get("http://localhost:4000/shop/coupon/validate", {
+        params: { code: couponCode, shop_id: shopId },
+        withCredentials: true,
+      });
       setDiscount(res.data.discount);
       toast.success(`Coupon applied! ${res.data.discount}% off`);
     } catch (err) {
@@ -43,11 +44,23 @@ const Cart = () => {
     }
   };
 
-  const totalPrice = cart.reduce(
-    (total, item) => total + item.price * item.cartQuantity,
-    0
-  );
+  const totalPrice = cart.reduce((total, item) => total + item.price * item.cartQuantity, 0);
   const discountedTotal = totalPrice * (1 - discount / 100);
+
+  const validateDetails = () => {
+    if (!date || !time) {
+      toast.warn("Please select a date and time.");
+      return false;
+    }
+    if (method === "delivery") {
+      const { street, apt, city } = address;
+      if (!street || !apt || !city || !phone) {
+        toast.warn("Please fill in all delivery details.");
+        return false;
+      }
+    }
+    return true;
+  };
 
   const placeOrder = async () => {
     if (!user) {
@@ -61,6 +74,8 @@ const Cart = () => {
       return;
     }
 
+    if (!validateDetails()) return;
+
     const shopId = cart[0].shop_id;
 
     try {
@@ -72,6 +87,11 @@ const Cart = () => {
           shopId,
           couponCode,
           discount,
+          method,
+          date,
+          time,
+          address: method === "delivery" ? address : null,
+          phone: method === "delivery" ? phone : null,
         },
         { withCredentials: true }
       );
@@ -102,28 +122,17 @@ const Cart = () => {
                 <div className="cart-info">
                   <h4>{item.name}</h4>
                   <p>${item.price}</p>
-
                   {item.quantity < 5 && (
-                    <p className="low-stock-alert">
-                      ⚠️ Hurry! Only {item.quantity} left in stock.
-                    </p>
+                    <p className="low-stock-alert">⚠️ Hurry! Only {item.quantity} left in stock.</p>
                   )}
-
                   <input
                     type="number"
                     value={item.cartQuantity}
                     min="1"
                     max={item.quantity}
-                    onChange={(e) =>
-                      handleQuantityChange(
-                        item.product_id,
-                        parseInt(e.target.value)
-                      )
-                    }
+                    onChange={(e) => handleQuantityChange(item.product_id, parseInt(e.target.value))}
                   />
-                  <button onClick={() => removeFromCart(item.product_id)}>
-                    Remove
-                  </button>
+                  <button onClick={() => removeFromCart(item.product_id)}>Remove</button>
                 </div>
               </div>
             ))}
@@ -140,12 +149,79 @@ const Cart = () => {
                 onChange={(e) => setCouponCode(e.target.value)}
               />
               <button onClick={handleApplyCoupon}>Apply Coupon</button>
-              {discount > 0 && (
-                <p className="discount-info">✅ {discount}% discount applied</p>
-              )}
+              {discount > 0 && <p className="discount-info">✅ {discount}% discount applied</p>}
             </div>
 
             <h3>Total After Discount: ${discountedTotal.toFixed(2)}</h3>
+
+            <div className="delivery-method">
+              <h4>Choose Method:</h4>
+              <label>
+                <input
+                  type="radio"
+                  value="pickup"
+                  checked={method === "pickup"}
+                  onChange={() => setMethod("pickup")}
+                />
+                Pickup from Shop
+              </label>
+              <label>
+                <input
+                  type="radio"
+                  value="delivery"
+                  checked={method === "delivery"}
+                  onChange={() => setMethod("delivery")}
+                />
+                Delivery to Address
+              </label>
+            </div>
+
+            <div className="date-time-section">
+              <label>
+                📅 Select Date:
+                <input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+              </label>
+              <label>
+                🕒 Select Time:
+                <input type="time" value={time} onChange={(e) => setTime(e.target.value)} />
+              </label>
+              <p className="note">
+                ⚠️ The shop will contact you to confirm the exact time and availability.
+              </p>
+            </div>
+
+            {method === "delivery" && (
+              <div className="delivery-details">
+                <label>
+                  Street:
+                  <input
+                    type="text"
+                    value={address.street}
+                    onChange={(e) => setAddress({ ...address, street: e.target.value })}
+                  />
+                </label>
+                <label>
+                  Apt Number:
+                  <input
+                    type="text"
+                    value={address.apt}
+                    onChange={(e) => setAddress({ ...address, apt: e.target.value })}
+                  />
+                </label>
+                <label>
+                  City:
+                  <input
+                    type="text"
+                    value={address.city}
+                    onChange={(e) => setAddress({ ...address, city: e.target.value })}
+                  />
+                </label>
+                <label>
+                  Phone:
+                  <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} />
+                </label>
+              </div>
+            )}
 
             <div className="paypal-checkout-wrapper">
               <PayPalButtons
@@ -153,17 +229,12 @@ const Cart = () => {
                 forceReRender={[discountedTotal]}
                 createOrder={(data, actions) => {
                   return actions.order.create({
-                    purchase_units: [
-                      {
-                        amount: {
-                          value: discountedTotal.toFixed(2),
-                        },
-                      },
-                    ],
+                    purchase_units: [{ amount: { value: discountedTotal.toFixed(2) } }],
                   });
                 }}
                 onApprove={async (data, actions) => {
                   await actions.order.capture();
+                  if (!validateDetails()) return;
 
                   const shopId = cart[0].shop_id;
                   try {
@@ -175,6 +246,11 @@ const Cart = () => {
                         shopId,
                         couponCode,
                         discount,
+                        method,
+                        date,
+                        time,
+                        address: method === "delivery" ? address : null,
+                        phone: method === "delivery" ? phone : null,
                       },
                       { withCredentials: true }
                     );
@@ -196,6 +272,9 @@ const Cart = () => {
 
             <button className="clear-btn" onClick={clearCart}>
               Clear Cart
+            </button>
+            <button className="place-order-btn" onClick={placeOrder}>
+              Place Order
             </button>
           </div>
         </div>

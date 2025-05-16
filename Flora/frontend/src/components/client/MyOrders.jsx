@@ -72,59 +72,55 @@ const MyOrders = () => {
     }));
   };
 
-  // Group products by order_id
-  const groupedOrders = orders.reduce((acc, item) => {
-    if (!acc[item.order_id]) {
-      acc[item.order_id] = {
-        orderDate: item.order_date,
-        status: item.status,
-        totalPrice: item.total_price,
-        shopId: item.shop_id,
-        shopName: item.shop_name,
-        products: [],
-      };
-    }
-    acc[item.order_id].products.push({
-      name: item.product_name,
-      image: item.product_image,
-      quantity: item.quantity,
-      price: item.item_price,
-    });
-    return acc;
-  }, {});
-
   return (
     <div className="orders-container">
       <h2>My Orders 📦</h2>
-      {Object.keys(groupedOrders).length === 0 ? (
+      {orders.length === 0 ? (
         <p>You have no orders yet!</p>
       ) : (
-        Object.entries(groupedOrders).map(([orderId, order]) => {
+        orders.map((order) => {
           const trackingSteps = getTrackingSteps(order.status);
-          const completedSteps = trackingSteps.filter(
-            (s) => s.completed
-          ).length;
+          const completedSteps = trackingSteps.filter((s) => s.completed).length;
 
           return (
-            <div key={orderId} className="order-card">
-              <h3>Order #{orderId}</h3>
-              <p>
-                <strong>Date:</strong>{" "}
-                {new Date(order.orderDate).toLocaleDateString()}
-              </p>
+            <div key={order.order_id} className="order-card">
+              <h3>Order #{order.order_id}</h3>
+              <p><strong>Date:</strong> {new Date(order.orderDate).toLocaleDateString()}</p>
               <p>
                 <strong>Status:</strong>{" "}
-                <span
-                  className={`status-badge status-${order.status
-                    .toLowerCase()
-                    .replace(/\s/g, "-")}`}
-                >
+                <span className={`status-badge status-${order.status.toLowerCase().replace(/\s/g, "-")}`}>
                   {order.status}
                 </span>
               </p>
-              <p>
-                <strong>Total:</strong> ${order.totalPrice}
-              </p>
+              {order.coupon_code && (
+                <>
+                  <p><strong>Coupon:</strong> {order.coupon_code} ({order.discount_applied}% off)</p>
+                  <p>
+                    <strong>Total Before Discount:</strong>{" "}
+                    ${(
+                      order.totalPrice /
+                      (1 - (parseFloat(order.discount_applied || 0) / 100))
+                    ).toFixed(2)}
+                  </p>
+                </>
+              )}
+              <p><strong>Total Paid:</strong> ${order.totalPrice}</p>
+              <p><strong>Tax Included:</strong> {order.tax_percent}%</p>
+
+
+              <div className="order-method-box">
+                <h4>{order.method === "delivery" ? "🚚 Delivery Details" : "🏪 Pickup Details"}</h4>
+                <p><strong>Method:</strong> {order.method}</p>
+                <p><strong>Date:</strong> {new Date(order.deliveryDate).toLocaleDateString()}</p>
+                <p><strong>Time:</strong> {order.deliveryTime || "-"}</p>
+                {order.method === "delivery" && order.address && (
+                  <>
+                    <p><strong>Address:</strong> {order.address.street}, Apt {order.address.apt}</p>
+                    <p><strong>City:</strong> {order.address.city}</p>
+                    <p><strong>Phone:</strong> {order.address.phone}</p>
+                  </>
+                )}
+              </div>
 
               <div className="order-products">
                 {order.products.map((product, index) => (
@@ -148,44 +144,35 @@ const MyOrders = () => {
                 className="track-btn"
                 onClick={() =>
                   setTrackingOrderId(
-                    trackingOrderId === orderId ? null : orderId
+                    trackingOrderId === order.order_id ? null : order.order_id
                   )
                 }
               >
-                {trackingOrderId === orderId
+                {trackingOrderId === order.order_id
                   ? "Close Tracking"
                   : "Track Shipment"}
               </button>
 
-              {trackingOrderId === orderId && (
+              {trackingOrderId === order.order_id && (
                 <div className="tracking-slider">
                   <h4>Shipment Tracking</h4>
-
                   <div className="progress-line-container">
                     <div
                       className="progress-line-fill"
                       style={{ "--step-count": completedSteps }}
                     ></div>
-
                     <div className="progress-container">
                       {trackingSteps.map((step, idx) => {
                         const isLastCompleted =
                           step.completed &&
-                          (trackingSteps[idx + 1] === undefined ||
-                            !trackingSteps[idx + 1].completed);
+                          (trackingSteps[idx + 1] === undefined || !trackingSteps[idx + 1].completed);
 
                         return (
                           <div
                             key={idx}
-                            className={`progress-step ${
-                              step.completed ? "completed" : ""
-                            }`}
+                            className={`progress-step ${step.completed ? "completed" : ""}`}
                           >
-                            <div
-                              className={`progress-dot ${
-                                isLastCompleted ? "ping" : ""
-                              }`}
-                            ></div>
+                            <div className={`progress-dot ${isLastCompleted ? "ping" : ""}`}></div>
                             <span>{step.label}</span>
                           </div>
                         );
@@ -197,14 +184,10 @@ const MyOrders = () => {
 
               {order.status === "Delivered" &&
                 (reviewedShopIds.includes(order.shopId) ? (
-                  <span className="review-submitted-badge">
-                    ✅ Review Submitted
-                  </span>
+                  <span className="review-submitted-badge">✅ Review Submitted</span>
                 ) : (
                   <button
-                    onClick={() =>
-                      openReviewModal(order.shopId, order.shopName)
-                    }
+                    onClick={() => openReviewModal(order.shopId, order.shopName)}
                     className="write-review-btn"
                   >
                     Write Review
@@ -216,12 +199,19 @@ const MyOrders = () => {
                 onClick={() =>
                   generateReceiptPDF(
                     {
-                      order_id: orderId,
+                      order_id: order.order_id,
                       order_date: order.orderDate,
                       status: order.status,
                       shop_name: order.shopName,
                       items: order.products,
                       total_price: order.totalPrice,
+                      coupon_code: order.coupon_code,
+                      discount_applied: order.discount_applied,
+                      tax_percent: order.tax_percent,
+                      method: order.method,
+                      delivery_date: order.deliveryDate,
+                      delivery_time: order.deliveryTime,
+                      address: order.address || null,
                     },
                     "client"
                   )

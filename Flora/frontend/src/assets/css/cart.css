@@ -224,3 +224,97 @@
     width: 100%;
   }
 }
+/* === Delivery & Pickup Selection === */
+.delivery-method {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background: #fff5f8;
+  border: 1px solid #f8bbd0;
+  border-radius: 8px;
+}
+
+.delivery-method h4 {
+  margin-bottom: 0.5rem;
+  color: #c2185b;
+}
+
+.delivery-method label {
+  display: block;
+  margin: 0.4rem 0;
+  font-weight: 500;
+}
+
+/* === Date & Time Picker === */
+.date-time-section {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background: #fce4ec;
+  border: 1px solid #f8bbd0;
+  border-radius: 8px;
+}
+
+.date-time-section label {
+  display: block;
+  margin: 0.5rem 0;
+  font-weight: 500;
+}
+
+.date-time-section input[type="date"],
+.date-time-section input[type="time"] {
+  padding: 0.5rem;
+  width: 100%;
+  max-width: 250px;
+  border: 1px solid #f8bbd0;
+  border-radius: 6px;
+  margin-top: 0.3rem;
+  background: #fff;
+}
+
+.note {
+  font-size: 0.9rem;
+  color: #c2185b;
+  margin-top: 0.5rem;
+  font-style: italic;
+}
+
+/* === Delivery Address Section === */
+.delivery-details {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background: #fff;
+  border: 1px solid #f8bbd0;
+  border-radius: 8px;
+}
+
+.delivery-details label {
+  display: block;
+  margin: 0.6rem 0;
+  font-weight: 500;
+}
+
+.delivery-details input {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  margin-top: 0.2rem;
+}
+
+/* === Place Order Button === */
+.place-order-btn {
+  margin-top: 1rem;
+  width: 100%;
+  padding: 0.8rem 2rem;
+  background-color: #4caf50;
+  color: white;
+  font-weight: bold;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.place-order-btn:hover {
+  background-color: #388e3c;
+}

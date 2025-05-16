@@ -41,9 +41,9 @@ app.use("/uploads", express.static("uploads", {
 app.use("/products", productsRoutes);
 // ✅ Routes
 app.use("/auth", authRoutes);
-app.use("/shop", shopRoutes);
 app.use("/orders", ordersRoutes);
 app.use("/reviews", reviewRoutes);
+app.use("/shop", shopRoutes);
 app.use("/supplier", supplierRoutes);
 app.use("/contact", contactRoutes);
 const PORT = 4000;
