@@ -9,7 +9,7 @@ const SupplierOrder = () => {
   const [minPrice, setMinPrice] = useState("");
   const [maxPrice, setMaxPrice] = useState("");
   const [typeFilter, setTypeFilter] = useState("all");
-  const [stockFilter, setStockFilter] = useState("all");
+  const [stockFilter, setStockFilter] = useState("out");
   const [filterOpen, setFilterOpen] = useState(false);
 
   useEffect(() => {
@@ -43,7 +43,7 @@ const SupplierOrder = () => {
     setMinPrice("");
     setMaxPrice("");
     setTypeFilter("all");
-    setStockFilter("all");
+    setStockFilter("out");
   };
 
   const applyFilters = () => {
@@ -119,6 +119,10 @@ const SupplierOrder = () => {
   return (
     <div className="supplier-container">
       <h2>Order Flowers from Supplier</h2>
+        <div className="stock-warning">
+          Showing only out-of-stock items by default.
+        </div>
+      
 
       <button className="filter-toggle-btn" onClick={() => setFilterOpen(true)}>
         Open Filters ☰
