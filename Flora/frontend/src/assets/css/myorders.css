@@ -1,5 +1,4 @@
-/* src/assets/css/myorders.css */
-
+/* === Orders Page === */
 .orders-container {
   padding: 3rem 2rem;
   background-color: #fff5f8;
@@ -14,6 +13,7 @@
   margin-bottom: 2rem;
 }
 
+/* === Order Card === */
 .order-card {
   background-color: #ffffff;
   border: 1px solid #f8bbd0;
@@ -33,6 +33,7 @@
   margin: 0.25rem 0;
 }
 
+/* === Status Badge === */
 .status-badge {
   display: inline-block;
   padding: 0.4rem 0.8rem;
@@ -43,22 +44,13 @@
   text-transform: capitalize;
 }
 
-.status-pending {
-  background-color: #ff9800;
-}
+.status-pending { background-color: #ff9800; }
+.status-processing { background-color: #2196f3; }
+.status-shipped { background-color: #9c27b0; }
+.status-out-for-delivery { background-color: #ff5722; }
+.status-delivered { background-color: #4caf50; }
 
-.status-processing {
-  background-color: #2196f3;
-}
-
-.status-shipped {
-  background-color: #9c27b0;
-}
-
-.status-delivered {
-  background-color: #4caf50;
-}
-
+/* === Products Grid === */
 .order-products {
   margin-top: 1rem;
   display: grid;
@@ -81,7 +73,11 @@
   object-fit: cover;
   border-radius: 8px;
 }
-.write-review-btn {
+
+/* === Buttons & Badges === */
+.write-review-btn,
+.receipt-download-btn,
+.track-btn {
   margin-top: 1rem;
   padding: 0.6rem 1.2rem;
   background-color: #c2185b;
@@ -95,10 +91,13 @@
   transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
-.write-review-btn:hover {
+.write-review-btn:hover,
+.receipt-download-btn:hover,
+.track-btn:hover {
   background-color: #ad1457;
   transform: translateY(-2px);
 }
+
 .review-submitted-badge {
   display: inline-block;
   margin-top: 1rem;
@@ -110,17 +109,162 @@
   font-size: 0.95rem;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
-.receipt-download-btn {
-  background-color: #c2185b;
-  color: white;
-  font-weight: bold;
-  padding: 0.5rem 1rem;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
+
+/* === Tracking Section === */
+.tracking-slider {
+  background-color: #fff5f8;
+  border: 1px solid #f8bbd0;
+  padding: 1rem;
   margin-top: 0.5rem;
+  border-radius: 10px;
+  animation: slideIn 0.3s ease;
 }
 
-.receipt-download-btn:hover {
-  background-color: #ad1457;
+.tracking-slider h4 {
+  color: #c2185b;
+  margin-bottom: 0.75rem;
 }
+
+/* === Tracking Progress Animation === */
+@keyframes slideIn {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* === Progress Bar Structure === */
+.progress-line-container {
+  position: relative;
+  margin-left: 1.5rem;
+}
+
+.progress-line-fill {
+  position: absolute;
+  top: 0.8rem;
+  left: 0.5rem;
+  width: 2px;
+  background: linear-gradient(to bottom, #c2185b 40%, #f8bbd0 100%);
+  background-size: 100% 200%;
+  animation: pulseLine 1.5s ease-in-out infinite;
+  z-index: 1;
+  height: calc(var(--step-count) * 25px);
+}
+
+@keyframes growLine {
+  from { height: 0; }
+  to { height: calc(var(--step-count) * 25px); }
+}
+
+/* === Steps + Dots === */
+.progress-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  position: relative;
+  z-index: 2;
+  animation: fadeSlideIn 0.5s ease both;
+}
+
+@keyframes fadeSlideIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.progress-step {
+  display: flex;
+  align-items: center;
+  position: relative;
+  padding-left: 1rem;
+  opacity: 0;
+  transform: translateX(-20px);
+  animation: slideInStep 0.4s forwards;
+}
+
+.progress-step:nth-child(1) { animation-delay: 0.1s; }
+.progress-step:nth-child(2) { animation-delay: 0.2s; }
+.progress-step:nth-child(3) { animation-delay: 0.3s; }
+.progress-step:nth-child(4) { animation-delay: 0.4s; }
+.progress-step:nth-child(5) { animation-delay: 0.5s; }
+
+@keyframes slideInStep {
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.progress-step::before {
+  content: "";
+  position: absolute;
+  left: 0.5rem;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background-color: #f8bbd0;
+  z-index: 0;
+}
+
+.progress-step:last-child::before {
+  display: none;
+}
+
+.progress-dot {
+  width: 12px;
+  height: 12px;
+  background-color: #f8bbd0;
+  border-radius: 50%;
+  margin-right: 0.5rem;
+  position: absolute;
+  left: -0.5rem;
+  top: 0.4rem;
+  transition: background-color 0.3s ease;
+  z-index: 3;
+}
+
+.progress-step.completed .progress-dot {
+  background-color: #c2185b;
+}
+
+.progress-step.completed span {
+  font-weight: 600;
+  color: #c2185b;
+  transition: color 0.3s ease;
+}
+@keyframes pulseLine {
+  0% {
+    background-position: 0% 100%;
+  }
+  50% {
+    background-position: 0% 0%;
+  }
+  100% {
+    background-position: 0% 100%;
+  }
+}
+/* Ping effect on the last active dot */
+@keyframes dotPing {
+  0% {
+    box-shadow: 0 0 0 0 rgba(194, 24, 91, 0.6);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 0 0 10px rgba(194, 24, 91, 0);
+    transform: scale(1.2);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(194, 24, 91, 0);
+    transform: scale(1);
+  }
+}
+
+.progress-dot.ping {
+  animation: dotPing 1.4s infinite;
+  background-color: #c2185b !important;
+  z-index: 4;
+}
+
