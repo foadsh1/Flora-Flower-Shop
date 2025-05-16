@@ -73,6 +73,11 @@
 .ghost-complete {
   opacity: 0.4;
 }
+.city-badge {
+  color: #888;
+  font-size: 0.9rem;
+  margin-left: 6px;
+}
 
 /* 🗂️ Shops Grid */
 .shops-grid {

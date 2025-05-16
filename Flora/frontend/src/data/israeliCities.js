@@ -30,7 +30,8 @@ const israeliCities = [
   "Acre",
   "Dimona",
   "Safed",
-  "Sakhnin"
+  "Sakhnin",
+  "Nesher",
 ];
 
 export default israeliCities;

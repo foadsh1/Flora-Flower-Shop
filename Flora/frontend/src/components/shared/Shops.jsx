@@ -54,7 +54,12 @@ const Shops = () => {
       console.error("Failed to load reviews", err);
     }
   };
-
+  const findCityInLocation = (location) => {
+    const loc = location.toLowerCase();
+    return israeliCities.find((city) =>
+      loc.includes(city.toLowerCase())
+    );
+  };
   const closeReviewsModal = () => {
     setShowReviewsModal(false);
     setSelectedShop(null);
@@ -65,9 +70,11 @@ const Shops = () => {
     .filter((shop) => {
       const nameMatch = shop.shop_name.toLowerCase().includes(search.toLowerCase());
       const locationMatch = shop.location.toLowerCase().includes(search.toLowerCase());
+      const cityMatchInSearch =
+        findCityInLocation(shop.location)?.toLowerCase().includes(search.toLowerCase()) || false;
+      const shopCity = findCityInLocation(shop.location) || "";
       const cityMatch =
-        selectedCity === "" ||
-        shop.location.toLowerCase() === selectedCity.toLowerCase();
+        selectedCity === "" || shopCity.toLowerCase() === selectedCity.toLowerCase();
 
       if (filter === "top") {
         return (nameMatch || locationMatch) &&
@@ -75,7 +82,7 @@ const Shops = () => {
           ratings[shop.shop_id]?.avg >= 4.5;
       }
 
-      return (nameMatch || locationMatch) && cityMatch;
+      return (nameMatch || locationMatch || cityMatchInSearch) && cityMatch;
     })
     .sort((a, b) => {
       const r1 = ratings[a.shop_id]?.avg || 0;
@@ -164,7 +171,12 @@ const Shops = () => {
                   <span className="top-rated-badge">🌟 Top Rated</span>
                 )}
               </h3>
-              <p>📍{shop.location}</p>
+              <p>
+                📍{shop.location}
+                {findCityInLocation(shop.location) && (
+                  <span className="city-badge"> • {findCityInLocation(shop.location)}</span>
+                )}
+              </p>
               <button
                 className="view-map-btn"
                 onClick={() => {
