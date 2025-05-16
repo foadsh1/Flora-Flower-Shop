@@ -17,7 +17,7 @@ import CustomizeBouquet from "./components/client/customize/CustomizeBouquet";
 import SupplierOrder from "./components/owner/SupplierOrder";
 import ContactUs from "./components/shared/ContactUs";
 import ViewMessages from "./components/shared/ViewMessages";
-
+import ProductForm from "./components/owner/ProductForm";
 const routes = [
   { path: "/", element: <Home /> },
   { path: "/shops", element: <Shops /> },
@@ -36,6 +36,8 @@ const routes = [
   { path: "/owner/profile", element: <ShopOwnerProfile /> },
   { path: "/admin", element: <AdminUsers /> },
   { path: "/admin/messages", element: <AdminMessages /> }, // ✅ NEW
+  { path: "/owner/products/new", element: <ProductForm /> }, // ✅ New product
+  { path: "/owner/products/edit/:id", element: <ProductForm /> },
   { path: "/contact-admin", element: <ContactUs /> },
   { path: "/my-messages", element: <ViewMessages /> },
   { path: "*", element: <h2>404 - Page Not Found</h2> },

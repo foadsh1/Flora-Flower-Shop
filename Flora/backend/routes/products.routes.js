@@ -97,7 +97,40 @@ router.get("/mine", (req, res) => {
     }
   );
 });
+// ✅ Get single product by ID (for editing)
+router.get("/:id", (req, res) => {
+  const user = req.session?.user;
+  const productId = req.params.id;
 
+  if (!user || user.role !== "shopowner") {
+    return res.status(403).json({ error: "Unauthorized" });
+  }
+
+  // Get the shop_id of the logged-in user
+  db.query(
+    "SELECT shop_id FROM shops WHERE user_id = ?",
+    [user.user_id],
+    (err, results) => {
+      if (err || results.length === 0) {
+        return res.status(400).json({ error: "Shop not found" });
+      }
+
+      const shop_id = results[0].shop_id;
+
+      // Ensure product belongs to that shop
+      db.query(
+        "SELECT * FROM products WHERE product_id = ? AND shop_id = ?",
+        [productId, shop_id],
+        (err, results) => {
+          if (err) return res.status(500).json({ error: "Failed to fetch product" });
+          if (results.length === 0) return res.status(404).json({ error: "Product not found" });
+
+          res.json({ product: results[0] });
+        }
+      );
+    }
+  );
+});
 // ✅ Update a product
 router.patch("/:id", upload.single("image"), (req, res) => {
   const { name, description, base_price, quantity, type } = req.body;

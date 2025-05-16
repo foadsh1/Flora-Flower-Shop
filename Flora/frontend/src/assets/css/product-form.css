@@ -1,0 +1,70 @@
+.products-form-container {
+  max-width: 600px;
+  margin: 3rem auto;
+  padding: 2rem;
+  background-color: #fff5f8;
+  border: 1px solid #f8bbd0;
+  border-radius: 14px;
+  box-shadow: 0 4px 14px rgba(194, 24, 91, 0.1);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.product-form h3 {
+  text-align: center;
+  margin-bottom: 1.5rem;
+  color: #c2185b;
+  font-size: 1.6rem;
+}
+
+.product-form input,
+.product-form textarea,
+.product-form select {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  margin-bottom: 1.2rem;
+  border: 1px solid #f8bbd0;
+  border-radius: 8px;
+  background-color: #fff;
+  transition: border-color 0.2s ease;
+}
+
+.product-form input[type="file"] {
+  padding: 0;
+  border: none;
+  background: none;
+}
+
+.product-form input:focus,
+.product-form textarea:focus,
+.product-form select:focus {
+  outline: none;
+  border-color: #c2185b;
+}
+
+.product-form button {
+  width: 100%;
+  padding: 0.75rem;
+  font-size: 1rem;
+  font-weight: bold;
+  border: none;
+  border-radius: 8px;
+  background-color: #c2185b;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.product-form button:hover {
+  background-color: #ad1457;
+  transform: translateY(-1px);
+}
+
+.product-form .cancel-btn {
+  background-color: #f44336;
+  margin-top: 0.5rem;
+}
+
+.product-form .cancel-btn:hover {
+  background-color: #d32f2f;
+}
