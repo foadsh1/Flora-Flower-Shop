@@ -410,5 +410,56 @@ router.get("/coupon/validate", async (req, res) => {
     return res.status(500).json({ error: "Server error" });
   }
 });
+// POST /shop/send-coupon-message
+router.post("/send-coupon-message", (req, res) => {
+  const { coupon_id, message, client_id } = req.body;
+  const shop_id = req.session.user?.user_id;
+
+  if (!shop_id) return res.status(403).json({ error: "Unauthorized" });
+
+  if (!coupon_id || !message || message.trim() === "") {
+    return res.status(400).json({ error: "Coupon and message are required" });
+  }
+
+  const insertMessage = (cid) => {
+    return new Promise((resolve, reject) => {
+      db.query(
+        `INSERT INTO coupon_messages (coupon_id, client_id, message, sent_at, is_read)
+         VALUES (?, ?, ?, NOW(), 0)`,
+        [coupon_id, cid, message.trim()],
+        (err) => {
+          if (err) return reject(err);
+          resolve();
+        }
+      );
+    });
+  };
+
+  if (!client_id) {
+    // Send to all clients
+    db.query(
+      "SELECT user_id FROM users WHERE role = 'client' AND status = 'active'",
+      async (err, clients) => {
+        if (err) return res.status(500).json({ error: "Database error" });
+        try {
+          await Promise.all(clients.map((c) => insertMessage(c.user_id)));
+          res.json({ message: "Coupon sent to all active clients" });
+        } catch (e) {
+          console.error("❌ Failed to send to all clients:", e);
+          res.status(500).json({ error: "Failed to send to all clients" });
+        }
+      }
+    );
+  } else {
+    // Send to one client
+    insertMessage(client_id)
+      .then(() => res.json({ message: "Coupon sent to selected client" }))
+      .catch((err) => {
+        console.error("❌ Failed to send to client:", err);
+        res.status(500).json({ error: "Failed to send message" });
+      });
+  }
+});
+
 
 module.exports = router;

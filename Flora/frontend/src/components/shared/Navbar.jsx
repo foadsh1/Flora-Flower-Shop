@@ -9,6 +9,7 @@ const Navbar = () => {
   const { user, logout, loading } = useContext(AuthContext);
   const [unreadMessages, setUnreadMessages] = useState(0);
   const [unreadWarnings, setUnreadWarnings] = useState(0);
+  const [unreadCoupons, setUnreadCoupons] = useState(0);
   const navigate = useNavigate();
 
   const handleLogout = async () => {
@@ -38,19 +39,21 @@ const Navbar = () => {
         .then((res) => {
           setUnreadMessages(res.data.unreadMessages || 0);
           setUnreadWarnings(res.data.unreadWarnings || 0);
+          setUnreadCoupons(res.data.unreadCoupons || 0);
         })
         .catch(() => {
           setUnreadMessages(0);
           setUnreadWarnings(0);
+          setUnreadCoupons(0);
         });
     }
   }, [user]);
 
-  const totalUnread = unreadMessages + unreadWarnings;
-  const tooltipText = `${unreadMessages} message${
-    unreadMessages !== 1 ? "s" : ""
-  }, ${unreadWarnings} warning${unreadWarnings !== 1 ? "s" : ""}`;
-
+  const totalUnread = unreadMessages + unreadWarnings + unreadCoupons;
+  const tooltipText =
+    `${unreadMessages} message${unreadMessages !== 1 ? "s" : ""}, ` +
+    `${unreadWarnings} warning${unreadWarnings !== 1 ? "s" : ""}, ` +
+    `${unreadCoupons} coupon${unreadCoupons !== 1 ? "s" : ""}`;
   if (loading) return null;
 
   return (

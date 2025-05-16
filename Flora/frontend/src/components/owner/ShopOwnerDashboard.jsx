@@ -40,15 +40,29 @@ const ShopOwnerDashboard = () => {
     expires_at: "",
   });
   const [showCouponSlider, setShowCouponSlider] = useState(false);
+  const [sendData, setSendData] = useState({
+    coupon_id: "",
+    message: "",
+    selectedClients: [], // array of client IDs
+  });
+  const [clients, setClients] = useState([]);
 
 
   useEffect(() => {
     fetchOrders();
   }, []);
   useEffect(() => {
-    if (showCouponSlider) fetchCoupons();
+    if (showCouponSlider) {
+      fetchCoupons();
+      axios
+        .get("http://localhost:5000/admin/users", { withCredentials: true })
+        .then((res) => {
+          const onlyClients = res.data.users.filter((u) => u.role === "client");
+          setClients(onlyClients);
+        })
+        .catch(() => toast.error("Failed to load clients"));
+    }
   }, [showCouponSlider]);
-
   useEffect(() => {
     axios
       .get("http://localhost:5000/shop/mine", { withCredentials: true })
@@ -118,6 +132,34 @@ const ShopOwnerDashboard = () => {
       })
       .catch(() => toast.error("Failed to update status"));
   };
+  const sendCouponMessage = () => {
+    const { coupon_id, message, selectedClients } = sendData;
+
+    if (!coupon_id || !message.trim()) {
+      return toast.warn("Please select a coupon and write a message.");
+    }
+
+    const body = {
+      coupon_id,
+      message,
+      client_id: selectedClients.length === 1 ? selectedClients[0] : null,
+      client_ids: selectedClients.length > 1 ? selectedClients : null,
+    };
+
+    axios
+      .post("http://localhost:5000/shop/send-coupon-message", body, {
+        withCredentials: true,
+      })
+      .then((res) => {
+        toast.success(res.data.message || "Message sent!");
+        setSendData({ coupon_id: "", message: "", selectedClients: [] });
+      })
+      .catch((err) => {
+        console.error("Send failed:", err);
+        toast.error("Failed to send coupon message.");
+      });
+  };
+  
 
   const fetchAnalytics = () => {
     axios
@@ -447,6 +489,97 @@ const ShopOwnerDashboard = () => {
               ))}
             </tbody>
           </table>
+          <h4>Send Coupon with Message</h4>
+          <div className="coupon-send-form">
+            <select
+              value={sendData.coupon_id}
+              onChange={(e) =>
+                setSendData((prev) => ({ ...prev, coupon_id: e.target.value }))
+              }
+            >
+              <option value="">Select Coupon</option>
+              {coupons.map((c) => (
+                <option key={c.coupon_id} value={c.coupon_id}>
+                  {c.code} ({c.discount_percent}%)
+                </option>
+              ))}
+            </select>
+
+            <textarea
+              placeholder="Enter your message"
+              value={sendData.message}
+              onChange={(e) =>
+                setSendData((prev) => ({ ...prev, message: e.target.value }))
+              }
+            />
+
+            <div className="multi-select-wrapper">
+              <label>Select Clients (optional)</label>
+              <input
+                type="text"
+                placeholder="Search client by name"
+                onChange={(e) => {
+                  const search = e.target.value.toLowerCase();
+                  const filtered = clients.filter((c) =>
+                    c.username.toLowerCase().includes(search)
+                  );
+                  setClients(filtered);
+                }}
+              />
+              <div className="client-checkboxes">
+                {clients.map((client) => (
+                  <label key={client.user_id} className="client-item">
+                    <input
+                      type="checkbox"
+                      value={client.user_id}
+                      checked={sendData.selectedClients.includes(
+                        client.user_id
+                      )}
+                      onChange={(e) => {
+                        const cid = parseInt(e.target.value);
+                        setSendData((prev) => {
+                          const selected = prev.selectedClients.includes(cid)
+                            ? prev.selectedClients.filter((id) => id !== cid)
+                            : [...prev.selectedClients, cid];
+                          return { ...prev, selectedClients: selected };
+                        });
+                      }}
+                    />
+                    {client.username}
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            <div className="send-actions">
+              <button onClick={sendCouponMessage}>Send to Selected</button>
+              <button
+                onClick={() =>
+                  axios
+                    .post(
+                      "http://localhost:5000/shop/send-coupon-message",
+                      {
+                        coupon_id: sendData.coupon_id,
+                        message: sendData.message,
+                        client_id: null,
+                      },
+                      { withCredentials: true }
+                    )
+                    .then((res) => {
+                      toast.success("Sent to all clients!");
+                      setSendData({
+                        coupon_id: "",
+                        message: "",
+                        selectedClients: [],
+                      });
+                    })
+                    .catch(() => toast.error("Failed to send to all"))
+                }
+              >
+                Send to All Clients
+              </button>
+            </div>
+          </div>
         </div>
       )}
 

@@ -68,13 +68,12 @@ router.patch("/admin/messages/:id/reply", async (req, res) => {
   }
 });
 
-// 🔔 Combined unread count for messages + warnings
+// 🔔 Combined unread count for messages + warnings + coupons
 router.get("/unread-count", async (req, res) => {
   const user = req.session?.user;
   if (!user) return res.status(403).json({ error: "Unauthorized" });
 
   try {
-    // unread messages
     const [[{ msgCount }]] = await db
       .promise()
       .query(
@@ -83,7 +82,6 @@ router.get("/unread-count", async (req, res) => {
         [user.user_id]
       );
 
-    // unread warnings
     const [[{ warnCount }]] = await db
       .promise()
       .query(
@@ -92,16 +90,26 @@ router.get("/unread-count", async (req, res) => {
         [user.user_id]
       );
 
+    const [[{ couponCount }]] = await db
+      .promise()
+      .query(
+        `SELECT COUNT(*) AS couponCount FROM coupon_messages
+         WHERE client_id = ? AND is_read = 0`,
+        [user.user_id]
+      );
+
     res.json({
       unreadMessages: msgCount,
       unreadWarnings: warnCount,
-      totalUnread: msgCount + warnCount,
+      unreadCoupons: couponCount,
+      totalUnread: msgCount + warnCount + couponCount,
     });
   } catch (err) {
     console.error("❌ Failed to fetch unread counts:", err);
     res.status(500).json({ error: "Failed to count unread items" });
   }
 });
+
 // 🔔 Count unread user messages (for admin only)
 router.get("/admin/unread-count", async (req, res) => {
   const user = req.session?.user;
@@ -195,22 +203,72 @@ router.get("/my-warnings", async (req, res) => {
     const [warnings] = await db
       .promise()
       .query(
-        `SELECT * FROM warnings
+        `SELECT warning_id, reason, issued_at, is_read
+         FROM warnings
          WHERE user_id = ?
          ORDER BY issued_at DESC`,
         [user.user_id]
       );
 
+    res.json({ warnings });
+
+    // 🔄 Mark as read AFTER sending
+    await db
+      .promise()
+      .query(`UPDATE warnings SET is_read = 1 WHERE user_id = ?`, [
+        user.user_id,
+      ]);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch warnings" });
+  }
+});
+
+// 📬 Get coupon messages for client (with shop name)
+router.get("/coupon-messages", async (req, res) => {
+  const user = req.session?.user;
+  if (!user || user.role !== "client") {
+    return res.status(403).json({ error: "Unauthorized" });
+  }
+
+  try {
+    const [messages] = await db.promise().query(
+      `SELECT cm.message_id, cm.message, cm.sent_at,cm.is_read, c.code, c.discount_percent,c.expires_at, s.shop_name
+         FROM coupon_messages cm
+         JOIN coupons c ON cm.coupon_id = c.coupon_id
+         JOIN shops s ON c.shop_id = s.shop_id
+         WHERE cm.client_id = ?
+         ORDER BY cm.sent_at DESC`,
+      [user.user_id]
+    );
+
+    res.json({ messages });
+  } catch (err) {
+    console.error("❌ Failed to fetch coupon messages:", err);
+    res.status(500).json({ error: "Failed to load coupon messages" });
+  }
+});
+
+// ✅ Mark coupon messages as read
+router.patch("/coupon-messages/mark-read", async (req, res) => {
+  const user = req.session?.user;
+  if (!user || user.role !== "client") {
+    return res.status(403).json({ error: "Unauthorized" });
+  }
+
+  try {
     await db
       .promise()
       .query(
-        `UPDATE warnings SET is_read = 1 WHERE user_id = ?`,
+        `UPDATE coupon_messages
+         SET is_read = 1
+         WHERE client_id = ? AND is_read = 0`,
         [user.user_id]
       );
 
-    res.json({ warnings });
+    res.json({ message: "Coupon messages marked as read" });
   } catch (err) {
-    res.status(500).json({ error: "Failed to fetch warnings" });
+    console.error("❌ Failed to mark coupon messages as read:", err);
+    res.status(500).json({ error: "Failed to update read status" });
   }
 });
 
