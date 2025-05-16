@@ -106,6 +106,15 @@
     width: 100%;
   }
 }
+.shop-link {
+  color: #c2185b;
+  font-weight: bold;
+  text-decoration: underline;
+}
+
+.shop-link:hover {
+  color: #ad1457;
+}
 /* === Order Card === */
 .order-card {
   background-color: #ffffff;

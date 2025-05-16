@@ -3,6 +3,7 @@ import axios from "axios";
 import ReviewModal from "./ReviewModal";
 import { generateReceiptPDF } from "../utils/generateReceiptCanvas";
 import "../../assets/css/myorders.css";
+import { Link } from "react-router-dom";
 
 const MyOrders = () => {
   const [orders, setOrders] = useState([]);
@@ -162,7 +163,12 @@ const MyOrders = () => {
           return (
             <div key={order.order_id} className="order-card">
               <h3>Order #{order.order_id}</h3>
-              <p><strong>Shop:</strong> {order.shopName}</p>
+              <p>
+                <strong>Shop:</strong>{" "}
+                <Link to={`/shops/${order.shopId}`} className="shop-link">
+                  {order.shopName}
+                </Link>
+              </p>
               <p><strong>Date:</strong> {new Date(order.orderDate).toLocaleDateString()}</p>
               <p><strong>Status:</strong>{" "}
                 <span className={`status-badge status-${order.status.toLowerCase().replace(/\s/g, "-")}`}>
