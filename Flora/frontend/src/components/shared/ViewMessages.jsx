@@ -1,18 +1,19 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState,useContext } from "react";
 import axios from "axios";
 import "../../assets/css/messages.css";
-
+import { AuthContext } from "../context/AuthContext";
 const ViewMessages = () => {
   const [tab, setTab] = useState("admin");
   const [messages, setMessages] = useState([]);
   const [warnings, setWarnings] = useState([]);
   const [couponMessages, setCouponMessages] = useState([]);
-
+  const { user } = useContext(AuthContext);
   const [hasUnreadMessages, setHasUnreadMessages] = useState(false);
   const [hasUnreadWarnings, setHasUnreadWarnings] = useState(false);
   const [hasUnreadCoupons, setHasUnreadCoupons] = useState(false);
 
   useEffect(() => {
+    if (!user) return;
     axios
       .get("http://localhost:5000/contact/messages/my-replies", {
         withCredentials: true,
@@ -42,7 +43,7 @@ const ViewMessages = () => {
         setCouponMessages(coupons);
         setHasUnreadCoupons(coupons.some((c) => c.is_read === 0));
       });
-  }, []);
+  }, [user]);
 
   const markAdminMessagesRead = () => {
     axios.patch(
@@ -90,17 +91,19 @@ const ViewMessages = () => {
           ⚠️ Warnings{" "}
           {hasUnreadWarnings && <span className="tab-bell shake">🔔</span>}
         </button>
-        <button
-          className={tab === "coupons" ? "active" : ""}
-          onClick={() => {
-            setTab("coupons");
-            setHasUnreadCoupons(false);
-            markCouponMessagesRead();
-          }}
-        >
-          🎟️ Coupons{" "}
-          {hasUnreadCoupons && <span className="tab-bell shake">🔔</span>}
-        </button>
+        {user?.role === "client" && (
+          <button
+            className={tab === "coupons" ? "active" : ""}
+            onClick={() => {
+              setTab("coupons");
+              setHasUnreadCoupons(false);
+              markCouponMessagesRead();
+            }}
+          >
+            🎟️ Coupons{" "}
+            {hasUnreadCoupons && <span className="tab-bell shake">🔔</span>}
+          </button>
+        )}
       </div>
 
       {/* Admin Replies */}
@@ -157,8 +160,7 @@ const ViewMessages = () => {
         </div>
       )}
 
-      {/* Coupon Messages */}
-      {tab === "coupons" && (
+      {tab === "coupons" && user?.role === "client" && (
         <div>
           {couponMessages.length === 0 ? (
             <p>No coupon messages yet.</p>
