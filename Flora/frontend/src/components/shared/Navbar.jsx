@@ -58,9 +58,14 @@ const Navbar = () => {
 
   return (
     <nav className="navbar">
-      <Link to="/" className="logo">
-        <img src={logo} alt="Flora Logo" />
-      </Link>
+      <div className="logo-welcome">
+        <Link to="/" className="logo">
+          <img src={logo} alt="Flora Logo" />
+        </Link>
+        {user && (
+          <span className="welcome-message">Welcome, {user.username}!</span>
+        )}
+      </div>
 
       <Link to="/shops" className="explore-btn">
         Explore Shops

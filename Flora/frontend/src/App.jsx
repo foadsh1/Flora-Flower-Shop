@@ -10,16 +10,16 @@ import "./assets/css/app.css";
 const App = () => {
   return (
     <>
-        <Navbar />
-        <ToastContainer position="bottom-right" />
-        <div className="main-content">
-          <Routes>
-            {routes.map((r, i) => (
-              <Route key={i} path={r.path} element={r.element} />
-            ))}
-          </Routes>
-        </div>
-        <Footer />
+      <ToastContainer position="bottom-right" />
+      <Navbar />
+      <div className="main-content">
+        <Routes>
+          {routes.map((r, i) => (
+            <Route key={i} path={r.path} element={r.element} />
+          ))}
+        </Routes>
+      </div>
+      <Footer />
     </>
   );
 };

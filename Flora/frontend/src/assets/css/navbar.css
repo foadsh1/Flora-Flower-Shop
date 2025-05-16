@@ -171,3 +171,15 @@
     margin-bottom: 0.5rem;
   }
 }
+.logo-welcome {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.welcome-message {
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: #c2185b;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
