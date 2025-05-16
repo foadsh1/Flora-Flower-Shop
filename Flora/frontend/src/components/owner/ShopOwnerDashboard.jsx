@@ -32,6 +32,8 @@ const ShopOwnerDashboard = () => {
   const [flowerLimit, setFlowerLimit] = useState(5);
   const [availableYears, setAvailableYears] = useState([]);
   const [compare, setCompare] = useState(false);
+  const [showClientList, setShowClientList] = useState(false);
+  const [allClients, setAllClients] = useState([]);
   const revenueChartRef = useRef();
   const [coupons, setCoupons] = useState([]);
   const [newCoupon, setNewCoupon] = useState({
@@ -58,7 +60,8 @@ const ShopOwnerDashboard = () => {
         .get("http://localhost:5000/admin/users", { withCredentials: true })
         .then((res) => {
           const onlyClients = res.data.users.filter((u) => u.role === "client");
-          setClients(onlyClients);
+          setClients(onlyClients); // filtered list for display
+          setAllClients(onlyClients); // full original list for search
         })
         .catch(() => toast.error("Failed to load clients"));
     }
@@ -514,41 +517,49 @@ const ShopOwnerDashboard = () => {
             />
 
             <div className="multi-select-wrapper">
-              <label>Select Clients (optional)</label>
+              <button
+                type="button"
+                onClick={() => setShowClientList(!showClientList)}
+                className="client-toggle-btn"
+              >
+                {showClientList ? "Hide Client List ▲" : "Show Client List ▼"}
+              </button>
               <input
                 type="text"
                 placeholder="Search client by name"
                 onChange={(e) => {
                   const search = e.target.value.toLowerCase();
-                  const filtered = clients.filter((c) =>
+                  const filtered = allClients.filter((c) =>
                     c.username.toLowerCase().includes(search)
                   );
                   setClients(filtered);
                 }}
               />
-              <div className="client-checkboxes">
-                {clients.map((client) => (
-                  <label key={client.user_id} className="client-item">
-                    <input
-                      type="checkbox"
-                      value={client.user_id}
-                      checked={sendData.selectedClients.includes(
-                        client.user_id
-                      )}
-                      onChange={(e) => {
-                        const cid = parseInt(e.target.value);
-                        setSendData((prev) => {
-                          const selected = prev.selectedClients.includes(cid)
-                            ? prev.selectedClients.filter((id) => id !== cid)
-                            : [...prev.selectedClients, cid];
-                          return { ...prev, selectedClients: selected };
-                        });
-                      }}
-                    />
-                    {client.username}
-                  </label>
-                ))}
-              </div>
+              {showClientList && (
+                <div className="client-checkboxes">
+                  {clients.map((client) => (
+                    <label key={client.user_id} className="client-item">
+                      <input
+                        type="checkbox"
+                        value={client.user_id}
+                        checked={sendData.selectedClients.includes(
+                          client.user_id
+                        )}
+                        onChange={(e) => {
+                          const cid = parseInt(e.target.value);
+                          setSendData((prev) => {
+                            const selected = prev.selectedClients.includes(cid)
+                              ? prev.selectedClients.filter((id) => id !== cid)
+                              : [...prev.selectedClients, cid];
+                            return { ...prev, selectedClients: selected };
+                          });
+                        }}
+                      />
+                      {client.username}
+                    </label>
+                  ))}
+                </div>
+              )}
             </div>
 
             <div className="send-actions">

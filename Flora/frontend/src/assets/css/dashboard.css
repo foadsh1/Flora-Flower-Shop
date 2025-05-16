@@ -400,7 +400,7 @@
 .coupon-send-form {
   margin-top: 1rem;
   background: #fff0f5;
-  padding: 1rem;
+  padding: 1.5rem;
   border-radius: 10px;
   border: 1px solid #f8bbd0;
   display: flex;
@@ -418,26 +418,6 @@
   width: 100%;
 }
 
-.multi-select-wrapper {
-  border: 1px solid #f8bbd0;
-  padding: 0.6rem;
-  border-radius: 6px;
-  background-color: #fff8fb;
-}
-
-.client-checkboxes {
-  max-height: 150px;
-  overflow-y: auto;
-  margin-top: 0.5rem;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  gap: 4px;
-}
-
-.client-item {
-  font-size: 0.95rem;
-}
-
 .send-actions {
   display: flex;
   gap: 1rem;
@@ -452,3 +432,60 @@
   border-radius: 6px;
   cursor: pointer;
 }
+/* Enhancing the search input inside the coupon client filter */
+.multi-select-wrapper input[type="text"] {
+  width: 100%;
+  padding: 8px 5px;
+  margin: 10px 0;
+  border: 1px solid #f8bbd0;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  background-color: #fff;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.multi-select-wrapper input[type="text"]:focus {
+  border-color: #c2185b;
+  outline: none;
+  box-shadow: 0 0 5px rgba(194, 24, 91, 0.3);
+}
+
+/* Label checkboxes in neat grid */
+.client-checkboxes {
+  max-height: 180px;
+  overflow-y: auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 8px;
+  padding: 6px;
+  background-color: #fffafc;
+  border: 1px solid #f8bbd0;
+  border-radius: 6px;
+  margin-bottom: 1rem;
+}
+
+.client-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.92rem;
+  color: #333;
+}
+
+/* Toggle tab button styling */
+.client-toggle-btn {
+  background: #fff0f5;
+  color: #c2185b;
+  border: 1px solid #f8bbd0;
+  padding: 6px 12px;
+  border-radius: 6px;
+  margin: 0.4rem 0;
+  cursor: pointer;
+  font-size: 0.95rem;
+  transition: background-color 0.2s ease;
+}
+
+.client-toggle-btn:hover {
+  background-color: #fde6ee;
+}
+
