@@ -125,3 +125,98 @@
   background-color: #9e9e9e;
   color: white;
 }
+/* Right-side filter drawer */
+.filter-drawer {
+  position: fixed;
+  top: 0;
+  right: -280px;
+  width: 260px;
+  height: 100vh;
+  background: #fff5f8;
+  padding: 1.5rem;
+  box-shadow: -3px 0 8px rgba(0, 0, 0, 0.1);
+  transition: right 0.3s ease-in-out;
+  z-index: 1000;
+}
+.filter-drawer.open {
+  right: 0;
+}
+.filter-drawer input,
+.filter-drawer select {
+  display: block;
+  width: 100%;
+  margin: 0.5rem 0;
+  padding: 0.5rem;
+}
+.filter-toggle-btn {
+  margin-bottom: 1rem;
+  padding: 0.5rem 1rem;
+  background: #c2185b;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.place-one-btn {
+  padding: 0.4rem 0.7rem;
+  background: #c2185b;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  color: white;
+}
+.filter-drawer {
+  position: fixed;
+  top: 0;
+  right: -280px;
+  width: 260px;
+  height: 100vh;
+  background: #fff5f8;
+  padding: 1.5rem;
+  box-shadow: -3px 0 8px rgba(0, 0, 0, 0.1);
+  transition: right 0.3s ease-in-out;
+  z-index: 1000;
+}
+.filter-drawer.open {
+  right: 0;
+}
+.filter-drawer input,
+.filter-drawer select {
+  display: block;
+  width: 100%;
+  margin: 0.5rem 0;
+  padding: 0.5rem;
+  border-radius: 6px;
+  border: 1px solid #f8bbd0;
+}
+.filter-toggle-btn {
+  margin-bottom: 1rem;
+  padding: 0.5rem 1rem;
+  background: #c2185b;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.reset-filters {
+  margin-top: 1rem;
+  width: 100%;
+  background: #f8bbd0;
+  color: #333;
+  border: none;
+  padding: 0.6rem;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.filter-drawer-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.close-drawer {
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  color: #c2185b;
+}

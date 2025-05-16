@@ -10,6 +10,7 @@ const SupplierOrder = () => {
   const [maxPrice, setMaxPrice] = useState("");
   const [typeFilter, setTypeFilter] = useState("all");
   const [stockFilter, setStockFilter] = useState("all");
+  const [filterOpen, setFilterOpen] = useState(false);
 
   useEffect(() => {
     fetchFlowers();
@@ -37,6 +38,14 @@ const SupplierOrder = () => {
     setFlowers(updated);
   };
 
+  const resetFilters = () => {
+    setSearch("");
+    setMinPrice("");
+    setMaxPrice("");
+    setTypeFilter("all");
+    setStockFilter("all");
+  };
+
   const applyFilters = () => {
     return flowers
       .filter((f) => f.name.toLowerCase().includes(search.toLowerCase()))
@@ -60,7 +69,7 @@ const SupplierOrder = () => {
       });
   };
 
-  const handlePlaceOrder = () => {
+  const handlePlaceOrderAll = () => {
     const selectedItems = flowers.filter((f) => f.restockQuantity > 0);
     if (selectedItems.length === 0) {
       toast.warning("Please select at least one item to restock.");
@@ -83,13 +92,46 @@ const SupplierOrder = () => {
       });
   };
 
+  const handlePlaceOrderSingle = (flower) => {
+    if (flower.restockQuantity <= 0) {
+      toast.warning("Please enter a restock quantity greater than 0.");
+      return;
+    }
+
+    axios
+      .post(
+        "http://localhost:4000/supplier/order",
+        { items: [flower] },
+        { withCredentials: true }
+      )
+      .then(() => {
+        toast.success(`Order placed for ${flower.name}`);
+        fetchFlowers();
+      })
+      .catch((err) => {
+        console.error("Order error", err);
+        toast.error("Failed to place order.");
+      });
+  };
+
   const filtered = applyFilters();
 
   return (
     <div className="supplier-container">
       <h2>Order Flowers from Supplier</h2>
 
-      <div className="filter-bar">
+      <button className="filter-toggle-btn" onClick={() => setFilterOpen(true)}>
+        Open Filters ☰
+      </button>
+
+      <div className={`filter-drawer ${filterOpen ? "open" : ""}`}>
+        <div className="filter-drawer-header">
+          <h3>Filters</h3>
+          <button className="close-drawer" onClick={() => setFilterOpen(false)}>
+            ✖
+          </button>
+        </div>
+
         <input
           type="text"
           placeholder="Search by name..."
@@ -124,6 +166,10 @@ const SupplierOrder = () => {
           <option value="low">Low Stock</option>
           <option value="out">Out of Stock</option>
         </select>
+
+        <button className="reset-filters" onClick={resetFilters}>
+          Reset Filters
+        </button>
       </div>
 
       {filtered.length === 0 ? (
@@ -136,6 +182,7 @@ const SupplierOrder = () => {
               <th>Name</th>
               <th>Current Qty</th>
               <th>Restock Amount</th>
+              <th>Action</th>
             </tr>
           </thead>
           <tbody>
@@ -154,9 +201,9 @@ const SupplierOrder = () => {
                 <td>
                   {flower.quantity}
                   {flower.quantity === 0 ? (
-                    <span className="sold-out-badge"> ❌ Sold Out</span>
+                    <span className="sold-out-badge">❌ Sold Out</span>
                   ) : flower.quantity < 5 ? (
-                    <span className="low-stock-badge"> ⚠️ Low Stock</span>
+                    <span className="low-stock-badge">⚠️ Low Stock</span>
                   ) : null}
                 </td>
                 <td>
@@ -167,14 +214,22 @@ const SupplierOrder = () => {
                     onChange={(e) => handleQuantityChange(idx, e.target.value)}
                   />
                 </td>
+                <td>
+                  <button
+                    className="place-one-btn"
+                    onClick={() => handlePlaceOrderSingle(flower)}
+                  >
+                    Place Order
+                  </button>
+                </td>
               </tr>
             ))}
           </tbody>
         </table>
       )}
 
-      <button className="place-order-btn" onClick={handlePlaceOrder}>
-        Place Supplier Order
+      <button className="place-order-btn" onClick={handlePlaceOrderAll}>
+        Place All Orders
       </button>
     </div>
   );
