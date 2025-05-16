@@ -6,16 +6,31 @@ import "../../assets/css/myorders.css";
 
 const MyOrders = () => {
   const [orders, setOrders] = useState([]);
+  const [filteredOrders, setFilteredOrders] = useState([]);
   const [reviewedShopIds, setReviewedShopIds] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [reviewShopId, setReviewShopId] = useState(null);
   const [reviewShopName, setReviewShopName] = useState("");
   const [trackingOrderId, setTrackingOrderId] = useState(null);
+  const [filterOpen, setFilterOpen] = useState(false);
+
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [shopSearch, setShopSearch] = useState("");
+
+  useEffect(() => {
+    fetchOrders();
+    fetchMyReviews();
+  }, []);
 
   const fetchOrders = () => {
     axios
       .get("http://localhost:4000/orders/mine", { withCredentials: true })
-      .then((res) => setOrders(res.data.orders))
+      .then((res) => {
+        setOrders(res.data.orders);
+        setFilteredOrders(res.data.orders);
+      })
       .catch((err) => console.error("Failed to fetch orders", err));
   };
 
@@ -30,11 +45,6 @@ const MyOrders = () => {
       console.error("Failed to fetch reviews", err);
     }
   };
-
-  useEffect(() => {
-    fetchOrders();
-    fetchMyReviews();
-  }, []);
 
   const openReviewModal = (shopId, shopName) => {
     setReviewShopId(shopId);
@@ -56,38 +66,105 @@ const MyOrders = () => {
       { label: "📍 Out for Delivery", status: "Out for Delivery" },
       { label: "✅ Delivered to Your Address", status: "Delivered" },
     ];
-
-    const statusOrder = [
-      "Pending",
-      "Processing",
-      "Shipped",
-      "Out for Delivery",
-      "Delivered",
-    ];
+    const statusOrder = steps.map((s) => s.status);
     const currentIndex = statusOrder.indexOf(status);
-
     return steps.map((step, idx) => ({
       ...step,
       completed: idx <= currentIndex,
     }));
   };
 
+  const applyFilters = () => {
+    let filtered = [...orders];
+    if (statusFilter !== "all") {
+      filtered = filtered.filter((o) => o.status === statusFilter);
+    }
+    if (startDate) {
+      filtered = filtered.filter((o) => new Date(o.orderDate) >= new Date(startDate));
+    }
+    if (endDate) {
+      filtered = filtered.filter((o) => new Date(o.orderDate) <= new Date(endDate));
+    }
+    if (shopSearch) {
+      filtered = filtered.filter((o) =>
+        o.shopName.toLowerCase().includes(shopSearch.toLowerCase())
+      );
+    }
+    setFilteredOrders(filtered);
+  };
+
+  const resetFilters = () => {
+    setStatusFilter("all");
+    setStartDate("");
+    setEndDate("");
+    setShopSearch("");
+    setFilteredOrders(orders);
+  };
+
   return (
     <div className="orders-container">
       <h2>My Orders 📦</h2>
-      {orders.length === 0 ? (
-        <p>You have no orders yet!</p>
+      <div className="filter-container">
+
+        <button className="filter-toggle-btn" onClick={() => setFilterOpen(true)}>
+          Open Filters ☰
+        </button>
+
+        <div className={`filter-drawer ${filterOpen ? "open" : ""}`}>
+          <button className="close-btn" onClick={() => setFilterOpen(false)}>✖</button>
+
+          <label>
+            Status:
+            <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
+              <option value="all">All</option>
+              <option value="Pending">Pending</option>
+              <option value="Processing">Processing</option>
+              <option value="Shipped">Shipped</option>
+              <option value="Out for Delivery">Out for Delivery</option>
+              <option value="Delivered">Delivered</option>
+            </select>
+          </label>
+
+          <label>
+            From Date:
+            <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
+          </label>
+
+          <label>
+            To Date:
+            <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
+          </label>
+
+          <label>
+            Shop Name:
+            <input
+              type="text"
+              value={shopSearch}
+              onChange={(e) => setShopSearch(e.target.value)}
+              placeholder="Search by shop name"
+            />
+          </label>
+
+          <div className="filter-buttons">
+            <button onClick={applyFilters}>Apply Filters</button>
+            <button className="reset-filters" onClick={resetFilters}>Reset</button>
+          </div>
+        </div>
+      </div>
+
+      {filteredOrders.length === 0 ? (
+        <p>You have no orders yet.</p>
       ) : (
-        orders.map((order) => {
+        filteredOrders.map((order) => {
           const trackingSteps = getTrackingSteps(order.status);
           const completedSteps = trackingSteps.filter((s) => s.completed).length;
 
           return (
             <div key={order.order_id} className="order-card">
               <h3>Order #{order.order_id}</h3>
+              <p><strong>Shop:</strong> {order.shopName}</p>
               <p><strong>Date:</strong> {new Date(order.orderDate).toLocaleDateString()}</p>
-              <p>
-                <strong>Status:</strong>{" "}
+              <p><strong>Status:</strong>{" "}
                 <span className={`status-badge status-${order.status.toLowerCase().replace(/\s/g, "-")}`}>
                   {order.status}
                 </span>
@@ -95,18 +172,15 @@ const MyOrders = () => {
               {order.coupon_code && (
                 <>
                   <p><strong>Coupon:</strong> {order.coupon_code} ({order.discount_applied}% off)</p>
-                  <p>
-                    <strong>Total Before Discount:</strong>{" "}
+                  <p><strong>Total Before Discount:</strong>{" "}
                     ${(
-                      order.totalPrice /
-                      (1 - (parseFloat(order.discount_applied || 0) / 100))
+                      order.totalPrice / (1 - parseFloat(order.discount_applied || 0) / 100)
                     ).toFixed(2)}
                   </p>
                 </>
               )}
               <p><strong>Total Paid:</strong> ${order.totalPrice}</p>
               <p><strong>Tax Included:</strong> {order.tax_percent}%</p>
-
 
               <div className="order-method-box">
                 <h4>{order.method === "delivery" ? "🚚 Delivery Details" : "🏪 Pickup Details"}</h4>
@@ -143,30 +217,21 @@ const MyOrders = () => {
               <button
                 className="track-btn"
                 onClick={() =>
-                  setTrackingOrderId(
-                    trackingOrderId === order.order_id ? null : order.order_id
-                  )
+                  setTrackingOrderId(trackingOrderId === order.order_id ? null : order.order_id)
                 }
               >
-                {trackingOrderId === order.order_id
-                  ? "Close Tracking"
-                  : "Track Shipment"}
+                {trackingOrderId === order.order_id ? "Close Tracking" : "Track Shipment"}
               </button>
 
               {trackingOrderId === order.order_id && (
                 <div className="tracking-slider">
                   <h4>Shipment Tracking</h4>
                   <div className="progress-line-container">
-                    <div
-                      className="progress-line-fill"
-                      style={{ "--step-count": completedSteps }}
-                    ></div>
+                    <div className="progress-line-fill" style={{ "--step-count": completedSteps }}></div>
                     <div className="progress-container">
                       {trackingSteps.map((step, idx) => {
                         const isLastCompleted =
-                          step.completed &&
-                          (trackingSteps[idx + 1] === undefined || !trackingSteps[idx + 1].completed);
-
+                          step.completed && (!trackingSteps[idx + 1] || !trackingSteps[idx + 1].completed);
                         return (
                           <div
                             key={idx}

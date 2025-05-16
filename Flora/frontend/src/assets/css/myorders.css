@@ -13,6 +13,99 @@
   margin-bottom: 2rem;
 }
 
+/* === Slide-In Filter Drawer from Right === */
+.filter-drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 320px;
+  height: 100%;
+  background-color: #fff;
+  border-left: 2px solid #f8bbd0;
+  box-shadow: -4px 0 10px rgba(0, 0, 0, 0.1);
+  padding: 2rem 1.5rem;
+  z-index: 1000;
+  transform: translateX(100%);
+  transition: transform 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.filter-drawer.open {
+  transform: translateX(0);
+}
+
+/* Close button */
+.filter-drawer .close-btn {
+  background: none;
+  border: none;
+  color: #c2185b;
+  font-size: 1.5rem;
+  align-self: flex-end;
+  cursor: pointer;
+}
+
+/* Labels and Inputs */
+.filter-drawer label {
+  display: flex;
+  flex-direction: column;
+  font-weight: bold;
+  color: #c2185b;
+  font-size: 0.95rem;
+}
+
+.filter-drawer input,
+.filter-drawer select {
+  margin-top: 4px;
+  padding: 0.5rem;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+/* Buttons inside drawer - closer to inputs */
+.filter-buttons {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+  justify-content: flex-start;
+}
+
+.filter-buttons button {
+  padding: 0.5rem 1.2rem;
+  border: none;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+  font-size: 0.95rem;
+}
+
+.filter-buttons button:first-of-type {
+  background-color: #c2185b;
+  color: white;
+}
+
+.filter-buttons .reset-filters {
+  background-color: #888;
+  color: white;
+}
+
+/* Fix drawer on small screens */
+@media (max-width: 768px) {
+  .filter-drawer {
+    grid-template-columns: 1fr;
+    padding: 1rem;
+  }
+
+  .filter-buttons {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .filter-toggle-btn {
+    width: 100%;
+  }
+}
 /* === Order Card === */
 .order-card {
   background-color: #ffffff;
@@ -44,13 +137,27 @@
   text-transform: capitalize;
 }
 
-.status-pending { background-color: #ff9800; }
-.status-processing { background-color: #2196f3; }
-.status-shipped { background-color: #9c27b0; }
-.status-out-for-delivery { background-color: #ff5722; }
-.status-delivered { background-color: #4caf50; }
+.status-pending {
+  background-color: #ff9800;
+}
 
-/* === Products Grid === */
+.status-processing {
+  background-color: #2196f3;
+}
+
+.status-shipped {
+  background-color: #9c27b0;
+}
+
+.status-out-for-delivery {
+  background-color: #ff5722;
+}
+
+.status-delivered {
+  background-color: #4caf50;
+}
+
+/* === Product Grid === */
 .order-products {
   margin-top: 1rem;
   display: grid;
@@ -74,7 +181,7 @@
   border-radius: 8px;
 }
 
-/* === Buttons & Badges === */
+/* === Buttons === */
 .write-review-btn,
 .receipt-download-btn,
 .track-btn {
@@ -87,7 +194,6 @@
   border: none;
   border-radius: 8px;
   cursor: pointer;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
@@ -107,10 +213,24 @@
   border-radius: 8px;
   font-weight: bold;
   font-size: 0.95rem;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-/* === Tracking Section === */
+/* === Order Method Box === */
+.order-method-box {
+  background: #fff5f8;
+  border: 1px solid #f8bbd0;
+  border-radius: 10px;
+  padding: 1rem;
+  margin-top: 1rem;
+}
+
+.order-method-box h4 {
+  color: #c2185b;
+  margin-bottom: 0.5rem;
+  font-size: 1.1rem;
+}
+
+/* === Tracking Styles === */
 .tracking-slider {
   background-color: #fff5f8;
   border: 1px solid #f8bbd0;
@@ -120,24 +240,18 @@
   animation: slideIn 0.3s ease;
 }
 
-.tracking-slider h4 {
-  color: #c2185b;
-  margin-bottom: 0.75rem;
-}
-
-/* === Tracking Progress Animation === */
 @keyframes slideIn {
   from {
     transform: translateY(20px);
     opacity: 0;
   }
+
   to {
     transform: translateY(0);
     opacity: 1;
   }
 }
 
-/* === Progress Bar Structure === */
 .progress-line-container {
   position: relative;
   margin-left: 1.5rem;
@@ -155,24 +269,26 @@
   height: calc(var(--step-count) * 25px);
 }
 
-@keyframes growLine {
-  from { height: 0; }
-  to { height: calc(var(--step-count) * 25px); }
+@keyframes pulseLine {
+  0% {
+    background-position: 0% 100%;
+  }
+
+  50% {
+    background-position: 0% 0%;
+  }
+
+  100% {
+    background-position: 0% 100%;
+  }
 }
 
-/* === Steps + Dots === */
 .progress-container {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
   position: relative;
   z-index: 2;
-  animation: fadeSlideIn 0.5s ease both;
-}
-
-@keyframes fadeSlideIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
 }
 
 .progress-step {
@@ -185,12 +301,6 @@
   animation: slideInStep 0.4s forwards;
 }
 
-.progress-step:nth-child(1) { animation-delay: 0.1s; }
-.progress-step:nth-child(2) { animation-delay: 0.2s; }
-.progress-step:nth-child(3) { animation-delay: 0.3s; }
-.progress-step:nth-child(4) { animation-delay: 0.4s; }
-.progress-step:nth-child(5) { animation-delay: 0.5s; }
-
 @keyframes slideInStep {
   to {
     opacity: 1;
@@ -198,19 +308,24 @@
   }
 }
 
-.progress-step::before {
-  content: "";
-  position: absolute;
-  left: 0.5rem;
-  top: 0;
-  bottom: 0;
-  width: 2px;
-  background-color: #f8bbd0;
-  z-index: 0;
+.progress-step:nth-child(1) {
+  animation-delay: 0.1s;
 }
 
-.progress-step:last-child::before {
-  display: none;
+.progress-step:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.progress-step:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+.progress-step:nth-child(4) {
+  animation-delay: 0.4s;
+}
+
+.progress-step:nth-child(5) {
+  animation-delay: 0.5s;
 }
 
 .progress-dot {
@@ -218,7 +333,6 @@
   height: 12px;
   background-color: #f8bbd0;
   border-radius: 50%;
-  margin-right: 0.5rem;
   position: absolute;
   left: -0.5rem;
   top: 0.4rem;
@@ -235,32 +349,6 @@
   color: #c2185b;
   transition: color 0.3s ease;
 }
-@keyframes pulseLine {
-  0% {
-    background-position: 0% 100%;
-  }
-  50% {
-    background-position: 0% 0%;
-  }
-  100% {
-    background-position: 0% 100%;
-  }
-}
-/* Ping effect on the last active dot */
-@keyframes dotPing {
-  0% {
-    box-shadow: 0 0 0 0 rgba(194, 24, 91, 0.6);
-    transform: scale(1);
-  }
-  50% {
-    box-shadow: 0 0 0 10px rgba(194, 24, 91, 0);
-    transform: scale(1.2);
-  }
-  100% {
-    box-shadow: 0 0 0 0 rgba(194, 24, 91, 0);
-    transform: scale(1);
-  }
-}
 
 .progress-dot.ping {
   animation: dotPing 1.4s infinite;
@@ -268,23 +356,20 @@
   z-index: 4;
 }
 
-/* === Delivery / Pickup Details Box === */
-.order-method-box {
-  background-color: #fff0f5;
-  border: 1px solid #f8bbd0;
-  padding: 1rem;
-  border-radius: 10px;
-  margin: 1rem 0;
-  font-size: 0.95rem;
+@keyframes dotPing {
+  0% {
+    box-shadow: 0 0 0 0 rgba(194, 24, 91, 0.6);
+    transform: scale(1);
+  }
+
+  50% {
+    box-shadow: 0 0 0 10px rgba(194, 24, 91, 0);
+    transform: scale(1.2);
+  }
+
+  100% {
+    box-shadow: 0 0 0 0 rgba(194, 24, 91, 0);
+    transform: scale(1);
+  }
 }
 
-.order-method-box h4 {
-  margin-bottom: 0.5rem;
-  color: #c2185b;
-  font-size: 1.1rem;
-}
-
-.order-method-box p {
-  margin: 0.3rem 0;
-  color: #444;
-}
