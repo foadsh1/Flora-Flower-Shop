@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
 import "react-toastify/dist/ReactToastify.css";
 import "../../assets/css/admin.css";
 
@@ -9,6 +11,9 @@ const AdminUsers = () => {
   const [tax, setTax] = useState("");
   const [newTax, setNewTax] = useState("");
   const [updatedAt, setUpdatedAt] = useState(null);
+  const [roleFilter, setRoleFilter] = useState("all");
+  const [searchName, setSearchName] = useState("");
+  const [showFilters, setShowFilters] = useState(false);
 
   useEffect(() => {
     fetchUsers();
@@ -89,10 +94,77 @@ const AdminUsers = () => {
     }
   };
 
+  const resetFilters = () => {
+    setSearchName("");
+    setRoleFilter("all");
+    setShowFilters(false);
+  };
+
+  const exportToExcel = () => {
+    const exportData = filteredUsers.map((user, index) => ({
+      "#": index + 1,
+      Username: user.username,
+      Email: user.email,
+      Role: user.role,
+      Status: user.status,
+      Warnings: user.warnings || 0,
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(exportData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Users");
+
+    const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
+    const file = new Blob([excelBuffer], { type: "application/octet-stream" });
+    saveAs(file, `AdminUsers_${new Date().toISOString().slice(0, 10)}.xlsx`);
+  };
+
+  const filteredUsers = users.filter((u) => {
+    const nameMatch = u.username.toLowerCase().includes(searchName.toLowerCase());
+    const roleMatch = roleFilter === "all" || u.role === roleFilter || u.status === roleFilter;
+    return nameMatch && roleMatch;
+  });
+
   return (
     <div className="admin-container">
       <ToastContainer />
       <h2>User Management</h2>
+
+      <div className="admin-actions-bar">
+        <button onClick={() => setShowFilters(!showFilters)} className="filter-toggle-btn">
+          {showFilters ? "Close Filters ✖" : "Open Filters ☰"}
+        </button>
+
+        <button onClick={exportToExcel} className="export-btn">
+          📥 Export to Excel
+        </button>
+      </div>
+
+      {showFilters && (
+        <div className="filter-bar">
+          <input
+            className="filter-input"
+            type="text"
+            placeholder="Search by name..."
+            value={searchName}
+            onChange={(e) => setSearchName(e.target.value)}
+          />
+          <select
+            className="filter-select"
+            value={roleFilter}
+            onChange={(e) => setRoleFilter(e.target.value)}
+          >
+            <option value="all">All</option>
+            <option value="client">Client</option>
+            <option value="shopowner">Shopowner</option>
+            <option value="admin">Admin</option>
+            <option value="active">Active</option>
+            <option value="unactive">Unactive</option>
+          </select>
+          <button onClick={resetFilters} className="reset-filters-btn">Reset</button>
+        </div>
+      )}
+
       <table className="admin-table">
         <thead>
           <tr>
@@ -106,7 +178,7 @@ const AdminUsers = () => {
           </tr>
         </thead>
         <tbody>
-          {users.map((u, index) => (
+          {filteredUsers.map((u, index) => (
             <tr key={u.user_id}>
               <td>{index + 1}</td>
               <td>{u.username}</td>
@@ -117,9 +189,7 @@ const AdminUsers = () => {
               <td>
                 <select
                   value={u.status}
-                  onChange={(e) =>
-                    handleStatusChange(u.user_id, e.target.value)
-                  }
+                  onChange={(e) => handleStatusChange(u.user_id, e.target.value)}
                 >
                   <option value="active">active</option>
                   <option value="unactive">unactive</option>

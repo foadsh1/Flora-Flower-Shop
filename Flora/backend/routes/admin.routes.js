@@ -2,10 +2,17 @@ const express = require("express");
 const db = require("../models/db");
 const router = express.Router();
 
-// ✅ Get all users
+// ✅ Get all users with warnings count
 router.get("/users", async (req, res) => {
   try {
-    const [users] = await db.promise().query("SELECT * FROM users");
+    const [users] = await db.promise().query(`
+      SELECT 
+        u.user_id, u.username, u.email, u.role, u.status,
+        COUNT(w.warning_id) AS warnings
+      FROM users u
+      LEFT JOIN warnings w ON u.user_id = w.user_id
+      GROUP BY u.user_id
+    `);
     res.json({ users });
   } catch (err) {
     console.error("❌ Failed to fetch users:", err);

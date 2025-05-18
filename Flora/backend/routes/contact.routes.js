@@ -170,26 +170,39 @@ router.get("/messages/my-replies", async (req, res) => {
   }
 });
 
-// ⚠️ Admin issues warning
+/// ⚠️ Admin issues warning and auto-deactivates after 3
 router.post("/warnings", async (req, res) => {
   const { user_id, reason } = req.body;
-  try {
-    await db
-      .promise()
-      .query(
-        "INSERT INTO warnings (user_id, reason, is_read) VALUES (?, ?, 0)",
-        [user_id, reason]
-      );
 
-    const [[{ count }]] = await db
-      .promise()
-      .query(
-        "SELECT COUNT(*) AS count FROM warnings WHERE user_id = ?",
+  try {
+    const conn = db.promise();
+
+    // Insert new warning
+    await conn.query(
+      "INSERT INTO warnings (user_id, reason, is_read) VALUES (?, ?, 0)",
+      [user_id, reason]
+    );
+
+    // Count total warnings
+    const [[{ count }]] = await conn.query(
+      "SELECT COUNT(*) AS count FROM warnings WHERE user_id = ?",
+      [user_id]
+    );
+
+    // If 3 or more warnings, set user to 'unactive'
+    if (count >= 3) {
+      await conn.query(
+        "UPDATE users SET status = 'unactive' WHERE user_id = ?",
         [user_id]
       );
+    }
 
-    res.json({ message: "Warning added", warningCount: count });
+    res.json({
+      message: `Warning added${count >= 3 ? " and user deactivated" : ""}`,
+      warningCount: count,
+    });
   } catch (err) {
+    console.error("❌ Failed to add warning:", err);
     res.status(500).json({ error: "Failed to add warning" });
   }
 });

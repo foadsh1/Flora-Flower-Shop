@@ -1,54 +1,165 @@
 .admin-container {
-  max-width: 1000px;
+  max-width: 1100px;
   margin: 2rem auto;
   padding: 2rem;
   background-color: #fff5f7;
   border-radius: 12px;
-  box-shadow: 0 0 8px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 0 10px rgba(194, 24, 91, 0.1);
+  font-family: 'Segoe UI', sans-serif;
 }
 
 .admin-container h2 {
   text-align: center;
   color: #c2185b;
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
 }
 
 .admin-table {
   width: 100%;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(194, 24, 91, 0.1);
+  background-color: white;
 }
 
 .admin-table th,
 .admin-table td {
-  padding: 0.8rem;
-  border: 1px solid #ddd;
+  padding: 1rem;
+  border-bottom: 1px solid #f8bbd0;
   text-align: left;
+  font-size: 0.95rem;
 }
 
 .admin-table th {
   background-color: #fce4ec;
   color: #c2185b;
+  font-weight: bold;
+  text-transform: uppercase;
+  font-size: 0.95rem;
 }
 
-.success {
-  color: green;
-  text-align: center;
-  margin-bottom: 1rem;
+.admin-table tbody tr:hover {
+  background-color: #fff0f5;
 }
+
+.admin-table td select {
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  background-color: #fff;
+  color: #333;
+}
+
 .admin-table td button {
-  padding: 5px 10px;
-  border-radius: 5px;
+  padding: 6px 12px;
+  border-radius: 6px;
   border: none;
   background-color: #c2185b;
   color: white;
   cursor: pointer;
   font-size: 0.9rem;
-  transition: background 0.3s;
+  margin-top: 6px;
+  transition: background 0.3s ease;
 }
 
 .admin-table td button:hover {
   background-color: #a0154d;
 }
+
+/* Export + Filter Toggle */
+.filter-toggle-btn,
+.export-btn {
+  background-color: #c2185b;
+  color: white;
+  padding: 8px 16px;
+  font-weight: bold;
+  font-size: 1rem;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  margin-right: 1rem;
+  margin-bottom: 1rem;
+  transition: background-color 0.3s ease;
+}
+
+.filter-toggle-btn:hover,
+.export-btn:hover {
+  background-color: #a01547;
+}
+
+/* Filter Bar */
+.filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin: 1rem 0;
+  padding: 1rem;
+  background-color: #fff0f5;
+  border: 1px solid #f8bbd0;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(194, 24, 91, 0.1);
+}
+
+.filter-input {
+  flex: 1;
+  padding: 10px 14px;
+  font-size: 1rem;
+  border: 1px solid #f8bbd0;
+  border-radius: 8px;
+  background-color: #fff;
+  transition: border 0.3s ease;
+}
+
+.filter-input:focus {
+  outline: none;
+  border-color: #c2185b;
+  box-shadow: 0 0 0 2px rgba(194, 24, 91, 0.2);
+}
+
+.filter-select {
+  padding: 10px 14px;
+  font-size: 1rem;
+  border: 1px solid #f8bbd0;
+  border-radius: 8px;
+  background-color: #ffffff;
+  color: #c2185b;
+  cursor: pointer;
+}
+
+.reset-filters-btn {
+  background-color: #888;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-weight: bold;
+  border: none;
+  cursor: pointer;
+}
+
+.reset-filters-btn:hover {
+  background-color: #666;
+}
+
+/* Warn button */
+.warn-btn {
+  background-color: #ffc107;
+  color: #000;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  margin-top: 6px;
+}
+
+.warn-btn:disabled {
+  background-color: #eee;
+  color: #aaa;
+  cursor: not-allowed;
+}
+
 /* Tax Form */
 .tax-form {
   margin-top: 2rem;
@@ -56,7 +167,7 @@
   border: 1px solid #f8bbd0;
   border-radius: 12px;
   padding: 1.5rem;
-  max-width: 400px;
+  max-width: 420px;
   box-shadow: 0 4px 12px rgba(194, 24, 91, 0.1);
 }
 
@@ -91,97 +202,49 @@
 .tax-form button:hover {
   background-color: #ad1457;
 }
-.warn-btn {
-  background-color: #ffc107;
-  color: #000;
-  border: none;
-  padding: 6px 10px;
-  margin-top: 6px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-weight: bold;
-}
 
-.warn-btn:disabled {
-  background-color: #eee;
-  color: #aaa;
-  cursor: not-allowed;
+.success {
+  color: green;
+  text-align: center;
+  margin-bottom: 1rem;
 }
-.admin-reply-btn {
-  padding: 8px 16px;
-  background-color: #c2185b;
+.export-btn {
+  background-color: #4caf50;
   color: white;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
   font-weight: bold;
-  transition: background-color 0.2s ease-in-out;
-}
-
-.admin-reply-btn:hover {
-  background-color: #a01547;
-}
-.reply-button {
-  margin-top: 0.5rem;
-  padding: 6px 12px;
-  background-color: #c2185b;
-  color: white;
+  padding: 0.6rem 1.2rem;
   border: none;
-  border-radius: 6px;
+  border-radius: 8px;
   cursor: pointer;
-  font-size: 0.9rem;
+  font-size: 1rem;
+  transition: background-color 0.3s ease;
+  margin-bottom: 1rem;
 }
 
-.reply-button:disabled {
-  background-color: #ccc;
-  cursor: not-allowed;
+.export-btn:hover {
+  background-color: #388e3c;
 }
-/* Filter Bar */
-.filter-bar {
+.admin-actions-bar {
   display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-start;
+  justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
   gap: 1rem;
-  margin: 1.5rem 0;
-  padding: 1rem;
-  background-color: #fff0f5;
-  border: 1px solid #f8bbd0;
-  border-radius: 10px;
-  box-shadow: 0 2px 8px rgba(194, 24, 91, 0.08);
+  margin-bottom: 1.5rem;
 }
 
-/* Search Input */
-.filter-input {
-  flex: 1;
-  padding: 10px 14px;
-  font-size: 1rem;
-  border: 1px solid #f8bbd0;
+.export-btn {
+  background-color: #4caf50;
+  color: white;
+  font-weight: bold;
+  padding: 0.6rem 1.2rem;
+  border: none;
   border-radius: 8px;
-  background-color: #fff;
-  transition: border 0.3s ease;
-}
-
-.filter-input:focus {
-  outline: none;
-  border-color: #c2185b;
-  box-shadow: 0 0 0 2px rgba(194, 24, 91, 0.2);
-}
-
-/* Role Select */
-.filter-select {
-  padding: 10px 14px;
-  font-size: 1rem;
-  border: 1px solid #f8bbd0;
-  border-radius: 8px;
-  background-color: #ffffff;
-  color: #c2185b;
   cursor: pointer;
-  transition: border 0.3s ease;
+  font-size: 1rem;
+  transition: background-color 0.3s ease;
 }
 
-.filter-select:focus {
-  outline: none;
-  border-color: #c2185b;
-  box-shadow: 0 0 0 2px rgba(194, 24, 91, 0.2);
+.export-btn:hover {
+  background-color: #388e3c;
 }

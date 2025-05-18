@@ -72,7 +72,7 @@ router.post("/signin", (req, res) => {
       if (user.status === "unactive") {
         return res
           .status(401)
-          .json({ error: "Account is inactive. Contact admin." });
+          .json({ error: "Account is inactive. Contact admin at Admin@flora.com" });
       }
 
       try {

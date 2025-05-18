@@ -147,7 +147,6 @@ const ViewMessages = () => {
         </div>
       )}
 
-      {/* Warnings */}
       {tab === "warnings" && (
         <div>
           {warnings.length === 0 ? (
@@ -155,6 +154,19 @@ const ViewMessages = () => {
           ) : (
             <div className="warning-box">
               <h3>⚠️ You have {warnings.length} warning(s)</h3>
+
+              {warnings.length < 3 && (
+                <p className="notice-warning">
+                  🚨 If you receive 3 warnings, your account will be <strong>deactivated automatically</strong>.
+                </p>
+              )}
+
+              {warnings.length >= 3 && (
+                <p className="danger-warning">
+                  🚫 You have received 3 warnings. Your account has been <strong>deactivated</strong>.
+                </p>
+              )}
+
               <ul>
                 {warnings.map((w, i) => (
                   <li key={i}>
