@@ -107,7 +107,7 @@
   transform: scale(1.1);
   border-color: #c2185b;
 }
-.export-btn {
+.export-btn,.reset-btn {
   margin-top: 1rem;
   background-color: #c2185b;
   color: white;
@@ -122,3 +122,12 @@
   background-color: #a3154a;
 }
 
+.preview-buttons {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+.reset-btn {
+  background-color: #888;
+  color: white;
+}

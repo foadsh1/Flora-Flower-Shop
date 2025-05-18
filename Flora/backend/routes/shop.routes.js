@@ -23,28 +23,47 @@ router.post("/create", upload.single("shop_image"), (req, res) => {
     return res.status(403).json({ error: "Unauthorized" });
   }
 
-  const { shop_name, description, working_hours } = req.body;
+  const {
+    shop_name,
+    description,
+    working_hours,
+    phone,
+    location
+  } = req.body;
+
   const shop_image = req.file ? req.file.filename : null;
   const user_id = req.session.user.user_id;
 
-  // Fetch phone + address from users table
-  db.query("SELECT phone, address FROM users WHERE user_id = ?", [user_id], (err, userResults) => {
-    if (err || userResults.length === 0) {
-      return res.status(500).json({ error: "User lookup failed" });
-    }
+  // Step 1: Insert shop using provided location and phone
+  const insertShopSQL = `
+    INSERT INTO shops (shop_name, location, description, shop_image, phone, working_hours, user_id)
+    VALUES (?, ?, ?, ?, ?, ?, ?)
+  `;
 
-    const { phone, address } = userResults[0];
-
-    db.query(
-      `INSERT INTO shops (shop_name, location, description, shop_image, phone, working_hours, user_id)
-       VALUES (?, ?, ?, ?, ?, ?, ?)`,
-      [shop_name, address, description, shop_image, phone, working_hours, user_id],
-      (err) => {
-        if (err) return res.status(500).json({ error: "Database error" });
-        res.status(201).json({ message: "Shop created successfully" });
+  db.query(
+    insertShopSQL,
+    [shop_name, location, description, shop_image, phone, working_hours, user_id],
+    (err) => {
+      if (err) {
+        console.error("❌ Shop insert error:", err);
+        return res.status(500).json({ error: "Failed to create shop" });
       }
-    );
-  });
+
+      // Step 2: Sync phone and location to users table
+      const updateUserSQL = `
+        UPDATE users SET phone = ?, address = ? WHERE user_id = ?
+      `;
+
+      db.query(updateUserSQL, [phone, location, user_id], (err) => {
+        if (err) {
+          console.error("❌ User sync error:", err);
+          return res.status(500).json({ error: "Shop created but failed to sync user info" });
+        }
+
+        res.status(201).json({ message: "Shop created and user info synced successfully" });
+      });
+    }
+  );
 });
 router.get("/all", (req, res) => {
   db.query("SELECT * FROM shops", (err, results) => {
@@ -104,7 +123,7 @@ router.get("/my-orders", (req, res) => {
     res.json({ orders: results });
   });
 });
-// ✅ PATCH /shop/update
+/// ✅ PATCH /shop/update
 router.patch("/update", upload.single("shop_image"), (req, res) => {
   const { shop_name, location, description, phone, working_hours } = req.body;
   const shop_image = req.file ? req.file.filename : null;
@@ -112,23 +131,32 @@ router.patch("/update", upload.single("shop_image"), (req, res) => {
 
   if (!user_id) return res.status(403).json({ error: "Unauthorized" });
 
-  let sql = `
-  UPDATE shops
-  SET shop_name = ?, location = ?, description = ?, phone = ?, working_hours = ?
-  ${shop_image ? ", shop_image = ?" : ""}
-  WHERE user_id = ?
-`;
+  let shopSql = `
+    UPDATE shops
+    SET shop_name = ?, location = ?, description = ?, phone = ?, working_hours = ?
+    ${shop_image ? ", shop_image = ?" : ""}
+    WHERE user_id = ?
+  `;
 
-  const values = shop_image
+  const shopValues = shop_image
     ? [shop_name, location, description, phone, working_hours, shop_image, user_id]
     : [shop_name, location, description, phone, working_hours, user_id];
 
+  db.query(shopSql, shopValues, (err) => {
+    if (err) return res.status(500).json({ error: "Shop update failed" });
 
-  db.query(sql, values, (err) => {
-    if (err) return res.status(500).json({ error: "Update failed" });
-    return res.json({ message: "Shop updated successfully" });
+    // ✅ Sync phone and location to users table
+    db.query(
+      `UPDATE users SET phone = ?, address = ? WHERE user_id = ?`,
+      [phone, location, user_id],
+      (err2) => {
+        if (err2) return res.status(500).json({ error: "User sync failed" });
+        return res.json({ message: "Shop and user profile updated successfully" });
+      }
+    );
   });
 });
+
 // ✅ GET all products of a specific shop
 router.get("/:id/products", (req, res) => {
   const shop_id = req.params.id;

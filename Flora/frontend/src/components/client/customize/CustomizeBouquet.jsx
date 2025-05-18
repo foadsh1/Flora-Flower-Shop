@@ -116,11 +116,16 @@ const CustomizeBouquet = () => {
               bouquet={bouquet}
               setBouquet={setBouquet}
               handleRemove={handleRemove}
-              exporting={exporting} // ✅ pass down
+              exporting={exporting}
             />
-            <button onClick={exportAsImage} className="export-btn">
-              📸 Export as Image
-            </button>
+            <div className="preview-buttons">
+              <button onClick={exportAsImage} className="export-btn">
+                📸 Export as Image
+              </button>
+              <button onClick={() => { setBouquet([]); setWrapper(null); }} className="reset-btn">
+                🔄 Reset Bouquet
+              </button>
+            </div>
           </div>
         </div>
       </div>

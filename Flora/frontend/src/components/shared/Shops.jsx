@@ -69,7 +69,7 @@ const Shops = () => {
   const filteredShops = shops
     .filter((shop) => {
       const nameMatch = shop.shop_name.toLowerCase().includes(search.toLowerCase());
-      const locationMatch = shop.location.toLowerCase().includes(search.toLowerCase());
+      const locationMatch = (shop.location||"").toLowerCase().includes(search.toLowerCase());
       const cityMatchInSearch =
         findCityInLocation(shop.location)?.toLowerCase().includes(search.toLowerCase()) || false;
       const shopCity = findCityInLocation(shop.location) || "";
