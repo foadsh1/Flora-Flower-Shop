@@ -1,18 +1,21 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 import "react-toastify/dist/ReactToastify.css";
 import "../../assets/css/admin.css";
+import { AuthContext } from "../context/AuthContext";
 
 const AdminUsers = () => {
+  const { user: loggedInUser } = useContext(AuthContext);
   const [users, setUsers] = useState([]);
   const [tax, setTax] = useState("");
   const [newTax, setNewTax] = useState("");
   const [updatedAt, setUpdatedAt] = useState(null);
   const [roleFilter, setRoleFilter] = useState("all");
   const [searchName, setSearchName] = useState("");
+  const [searchEmail, setSearchEmail] = useState("");
   const [showFilters, setShowFilters] = useState(false);
 
   useEffect(() => {
@@ -96,6 +99,7 @@ const AdminUsers = () => {
 
   const resetFilters = () => {
     setSearchName("");
+    setSearchEmail("");
     setRoleFilter("all");
     setShowFilters(false);
   };
@@ -119,11 +123,19 @@ const AdminUsers = () => {
     saveAs(file, `AdminUsers_${new Date().toISOString().slice(0, 10)}.xlsx`);
   };
 
-  const filteredUsers = users.filter((u) => {
-    const nameMatch = u.username.toLowerCase().includes(searchName.toLowerCase());
-    const roleMatch = roleFilter === "all" || u.role === roleFilter || u.status === roleFilter;
-    return nameMatch && roleMatch;
-  });
+  const filteredUsers = users
+    .filter((u) => {
+      const nameMatch = u.username.toLowerCase().includes(searchName.toLowerCase());
+      const emailMatch = u.email.toLowerCase().includes(searchEmail.toLowerCase());
+      const roleMatch =
+        roleFilter === "all" || u.role === roleFilter || u.status === roleFilter;
+      return nameMatch && emailMatch && roleMatch;
+    })
+    .sort((a, b) => {
+      if (a.user_id === loggedInUser?.user_id) return -1;
+      if (b.user_id === loggedInUser?.user_id) return 1;
+      return 0;
+    });
 
   return (
     <div className="admin-container">
@@ -134,7 +146,6 @@ const AdminUsers = () => {
         <button onClick={() => setShowFilters(!showFilters)} className="filter-toggle-btn">
           {showFilters ? "Close Filters ✖" : "Open Filters ☰"}
         </button>
-
         <button onClick={exportToExcel} className="export-btn">
           📥 Export to Excel
         </button>
@@ -149,6 +160,13 @@ const AdminUsers = () => {
             value={searchName}
             onChange={(e) => setSearchName(e.target.value)}
           />
+          <input
+            className="filter-input"
+            type="text"
+            placeholder="Search by email..."
+            value={searchEmail}
+            onChange={(e) => setSearchEmail(e.target.value)}
+          />
           <select
             className="filter-select"
             value={roleFilter}
@@ -161,7 +179,9 @@ const AdminUsers = () => {
             <option value="active">Active</option>
             <option value="unactive">Unactive</option>
           </select>
-          <button onClick={resetFilters} className="reset-filters-btn">Reset</button>
+          <button onClick={resetFilters} className="reset-filters-btn">
+            Reset
+          </button>
         </div>
       )}
 
@@ -178,32 +198,46 @@ const AdminUsers = () => {
           </tr>
         </thead>
         <tbody>
-          {filteredUsers.map((u, index) => (
-            <tr key={u.user_id}>
-              <td>{index + 1}</td>
-              <td>{u.username}</td>
-              <td>{u.email}</td>
-              <td>{u.role}</td>
-              <td>{u.status}</td>
-              <td>{u.warnings || 0}</td>
-              <td>
-                <select
-                  value={u.status}
-                  onChange={(e) => handleStatusChange(u.user_id, e.target.value)}
-                >
-                  <option value="active">active</option>
-                  <option value="unactive">unactive</option>
-                </select>
-                <button
-                  className="warn-btn"
-                  disabled={u.warnings >= 3}
-                  onClick={() => issueWarning(u.user_id)}
-                >
-                  ⚠️ Warn
-                </button>
-              </td>
-            </tr>
-          ))}
+          {filteredUsers.map((u, index) => {
+            const isCurrentAdmin = u.user_id === loggedInUser?.user_id;
+            return (
+              <tr key={u.user_id} style={isCurrentAdmin ? { backgroundColor: "pink" } : {}}>
+                <td>{index + 1}</td>
+                <td>
+                  {u.username}{" "}
+                  {isCurrentAdmin && <span className="admin-badge">🛡️ You</span>}
+                </td>
+                <td>{u.email}</td>
+                <td>{u.role}</td>
+                <td>{u.status}</td>
+                <td>{u.warnings || 0}</td>
+                <td>
+                  {isCurrentAdmin ? (
+                    <>
+                      <span style={{ color: "#888" }}>—</span>
+                    </>
+                  ) : (
+                    <>
+                      <select
+                        value={u.status}
+                        onChange={(e) => handleStatusChange(u.user_id, e.target.value)}
+                      >
+                        <option value="active">active</option>
+                        <option value="unactive">unactive</option>
+                      </select>
+                      <button
+                        className="warn-btn"
+                        disabled={u.warnings >= 3}
+                        onClick={() => issueWarning(u.user_id)}
+                      >
+                        ⚠️ Warn
+                      </button>
+                    </>
+                  )}
+                </td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
 

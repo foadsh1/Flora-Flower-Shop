@@ -48,6 +48,14 @@ const ShopOwnerDashboard = () => {
     selectedClients: [], // array of client IDs
   });
   const [clients, setClients] = useState([]);
+  const [filters, setFilters] = useState({
+    orderId: "",
+    clientName: "",
+    status: "",
+    fromDate: "",
+    toDate: "",
+  });
+  const [showFilters, setShowFilters] = useState(false);
 
 
   useEffect(() => {
@@ -83,7 +91,7 @@ const ShopOwnerDashboard = () => {
       .catch(() => setAvailableYears([2023, 2024, 2025]));
   }, []);
 
-  
+
   const fetchOrders = () => {
     axios
       .get("http://localhost:4000/shop/my-orders", { withCredentials: true })
@@ -162,7 +170,7 @@ const ShopOwnerDashboard = () => {
         toast.error("Failed to send coupon message.");
       });
   };
-  
+
 
   const fetchAnalytics = () => {
     axios
@@ -258,6 +266,74 @@ const ShopOwnerDashboard = () => {
   return (
     <div className="dashboard-container">
       <h2>Shop Orders</h2>
+      <button
+        className="toggle-filters-btn"
+        onClick={() => setShowFilters(!showFilters)}
+      >
+        {showFilters ? "Hide Filters ▲" : "🔍 Show Filters ▼"}
+      </button>
+
+      {showFilters && (
+        <div className="filter-bar">
+          <input
+            type="text"
+            placeholder="Order ID"
+            value={filters.orderId}
+            onChange={(e) =>
+              setFilters((prev) => ({ ...prev, orderId: e.target.value }))
+            }
+          />
+          <input
+            type="text"
+            placeholder="Client Name"
+            value={filters.clientName}
+            onChange={(e) =>
+              setFilters((prev) => ({ ...prev, clientName: e.target.value }))
+            }
+          />
+          <select
+            value={filters.status}
+            onChange={(e) =>
+              setFilters((prev) => ({ ...prev, status: e.target.value }))
+            }
+          >
+            <option value="">All Statuses</option>
+            <option value="Pending">Pending</option>
+            <option value="Processing">Processing</option>
+            <option value="Shipped">Shipped</option>
+            <option value="Out for Delivery">Out for Delivery</option>
+            <option value="Delivered">Delivered</option>
+          </select>
+          <input
+            type="date"
+            value={filters.fromDate}
+            onChange={(e) =>
+              setFilters((prev) => ({ ...prev, fromDate: e.target.value }))
+            }
+          />
+          <input
+            type="date"
+            value={filters.toDate}
+            onChange={(e) =>
+              setFilters((prev) => ({ ...prev, toDate: e.target.value }))
+            }
+          />
+          <button
+            onClick={() =>
+              setFilters({
+                orderId: "",
+                clientName: "",
+                status: "",
+                fromDate: "",
+                toDate: "",
+              })
+            }
+          >
+            Reset
+          </button>
+          <button onClick={() => setShowFilters(false)}>Close Filters</button>
+        </div>
+      )}
       <table className="dashboard-table">
         <thead>
           <tr>
@@ -275,7 +351,27 @@ const ShopOwnerDashboard = () => {
               <td colSpan="6">No orders yet.</td>
             </tr>
           ) : (
-            orders.map((order) => (
+              orders
+                .filter((order) => {
+                  const matchOrderId =
+                    filters.orderId === "" ||
+                    order.order_id.toString().includes(filters.orderId);
+                  const matchClient =
+                    filters.clientName === "" ||
+                    order.client_name.toLowerCase().includes(filters.clientName.toLowerCase());
+                  const matchStatus =
+                    filters.status === "" || order.status === filters.status;
+                  const matchFromDate =
+                    filters.fromDate === "" ||
+                    new Date(order.order_date) >= new Date(filters.fromDate);
+                  const matchToDate =
+                    filters.toDate === "" ||
+                    new Date(order.order_date) <= new Date(filters.toDate);
+                  return (
+                    matchOrderId && matchClient && matchStatus && matchFromDate && matchToDate
+                  );
+                })
+                .map((order) => ( 
               <React.Fragment key={order.order_id}>
                 <tr>
                   <td>{order.order_id}</td>
