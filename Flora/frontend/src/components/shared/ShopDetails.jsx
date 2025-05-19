@@ -122,7 +122,9 @@ const ShopDetails = () => {
   return (
     <div className="shop-details-container">
       <div className="shop-header">
-        <button className="back-btn" onClick={() => navigate(-1)}>← Back</button>
+        <button className="back-btn" onClick={() => navigate(-1)}>
+          ← Back
+        </button>
         <h2>Shop Flower Collection</h2>
       </div>
 
@@ -138,7 +140,9 @@ const ShopDetails = () => {
             </div>
           )}
           <div className="shop-contact-box">
-            <p><strong>📍 Location:</strong> {shopInfo.location}</p>
+            <p>
+              <strong>📍 Location:</strong> {shopInfo.location}
+            </p>
             <button
               className="view-map-btn"
               onClick={() => {
@@ -148,20 +152,32 @@ const ShopDetails = () => {
             >
               Show Location in Maps
             </button>
-            <p><strong>📞 Phone:</strong> {shopInfo.phone || "Not available"}</p>
-            <p><strong>🕒 Hours:</strong> {shopInfo.working_hours || "Not specified"}</p>
+            <p>
+              <strong>📞 Phone:</strong> {shopInfo.phone || "Not available"}
+            </p>
+            <p>
+              <strong>🕒 Hours:</strong>{" "}
+              {shopInfo.working_hours || "Not specified"}
+            </p>
           </div>
         </>
       )}
 
-      <button className="toggle-filters-btn" onClick={() => setShowFilters(true)}>
+      <button
+        className="toggle-filters-btn"
+        onClick={() => setShowFilters(true)}
+      >
         🔍 Filters
       </button>
-      {showFilters && <div className="filter-overlay" onClick={() => setShowFilters(false)} />}
+      {showFilters && (
+        <div className="filter-overlay" onClick={() => setShowFilters(false)} />
+      )}
       <div className={`filter-slider ${showFilters ? "open" : ""}`}>
         <div className="filter-header">
           <h3>Filters</h3>
-          <button className="close-btn" onClick={() => setShowFilters(false)}>❌</button>
+          <button className="close-btn" onClick={() => setShowFilters(false)}>
+            ❌
+          </button>
         </div>
         <input
           type="text"
@@ -188,36 +204,50 @@ const ShopDetails = () => {
           <option value="all">All Types</option>
           <option value="single">Single Flowers</option>
           <option value="bouquet">Bouquets</option>
-          <option value="vase">Vases</option> 
+          <option value="vase">Vases</option>
         </select>
-        <button className="reset-btn" onClick={resetFilters}>Reset Filters</button>
+        <button className="reset-btn" onClick={resetFilters}>
+          Reset Filters
+        </button>
       </div>
 
       <div className="product-sections">
-        {singles.length > 0 && (
-          <div className="product-section">
-            <h3>🌸 Single Flowers</h3>
-            <div className="products-grid">{singles.map(renderProductCard)}</div>
-          </div>
-        )}
+        {/* 💐 Bouquets First */}
         {bouquets.length > 0 && (
           <div className="product-section">
             <h3>💐 Pre-made Bouquets</h3>
-            <div className="products-grid">{bouquets.map(renderProductCard)}</div>
+            <div className="products-grid">
+              {bouquets.map(renderProductCard)}
+            </div>
           </div>
         )}
+
+        {/* 🌸 Single Flowers Second */}
+        {singles.length > 0 && (
+          <div className="product-section">
+            <h3>🌸 Single Flowers</h3>
+            <div className="products-grid">
+              {singles.map(renderProductCard)}
+            </div>
+          </div>
+        )}
+
+        {/* 🏺 Vases Last */}
         {vases.length > 0 && (
           <div className="product-section">
             <h3>🏺 Decorative Vases</h3>
             <div className="products-grid">{vases.map(renderProductCard)}</div>
           </div>
         )}
-        {singles.length === 0 && bouquets.length === 0 && vases.length === 0 && (
-          <p>No matching products found.</p>
-        )}
+
+        {singles.length === 0 &&
+          bouquets.length === 0 &&
+          vases.length === 0 && <p>No matching products found.</p>}
         {showMap && (
           <div className="map-slider">
-            <button className="close-map-btn" onClick={() => setShowMap(false)}>✖</button>
+            <button className="close-map-btn" onClick={() => setShowMap(false)}>
+              ✖
+            </button>
             <h3>Map: {mapCity}</h3>
             <iframe
               title="Map Preview"
@@ -226,7 +256,9 @@ const ShopDetails = () => {
               style={{ border: "0", borderRadius: "12px" }}
               loading="lazy"
               allowFullScreen
-              src={`https://www.google.com/maps?q=${encodeURIComponent(mapCity)}&output=embed`}
+              src={`https://www.google.com/maps?q=${encodeURIComponent(
+                mapCity
+              )}&output=embed`}
             ></iframe>
           </div>
         )}

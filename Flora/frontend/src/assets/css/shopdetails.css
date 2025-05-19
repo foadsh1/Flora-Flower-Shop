@@ -1,7 +1,7 @@
 /* src/assets/css/shopdetails.css */
 
 .shop-details-container {
-  padding: 3rem 2rem;
+  padding: 3rem 2rem 6rem;
   background: linear-gradient(to bottom right, #fff7fa, #fff0f5);
   min-height: 100vh;
   text-align: center;
@@ -19,8 +19,8 @@
 .products-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 2rem;
-  padding: 0 2rem;
+  gap: 4rem;
+  padding: 0 1rem;
   justify-items: center;
 }
 
@@ -179,22 +179,50 @@
 .back-btn:hover {
   background-color: #a3154b;
 }
+.product-sections {
+  display: flex;
+  flex-direction: column;
+  gap: 4rem;
+  margin-top: 2rem;
+}
+
 .product-section {
-  margin-bottom: 3rem;
+  padding: 2rem 1rem;
+  background: #ffffff;
+  border: 2px solid #f8bbd0;
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(194, 24, 91, 0.08);
+  transition: all 0.3s ease;
 }
 
 .product-section h3 {
-  font-size: 1.6rem;
+  font-size: 1.8rem;
   color: #c2185b;
   text-align: center;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.8rem;
   border-bottom: 2px solid #f8bbd0;
-  padding-bottom: 0.5rem;
+  padding-bottom: 0.6rem;
+}
+.product-section:nth-child(odd) {
+  background-color: #fff0f5;
 }
 
-.product-sections {
-  display: grid;
-  gap: 3rem;
+.product-section:nth-child(even) {
+  background-color: #fff7fa;
+}
+.product-section {
+  animation: fadeInUp 0.5s ease both;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 .filter-panel {
   display: flex;

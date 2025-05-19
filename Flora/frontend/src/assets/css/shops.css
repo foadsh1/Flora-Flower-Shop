@@ -10,6 +10,8 @@
   color: #c2185b;
   text-align: center;
   margin-bottom: 2rem;
+  max-width: 1440px;
+  margin: 0 auto;
 }
 
 /* 🔍 Search Controls */
@@ -56,6 +58,12 @@
   pointer-events: none;
   z-index: 3;
 }
+.view-shop-btn:focus,
+.view-reviews-btn:focus,
+.view-map-btn:focus {
+  outline: 2px solid #f48fb1;
+  outline-offset: 2px;
+}
 
 /* 🔮 Ghost */
 .ghost-text {
@@ -84,7 +92,7 @@
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   gap: 2rem;
-  padding: 0 20rem;
+  padding: 0 2rem;
   justify-items: center;
 }
 
@@ -111,6 +119,7 @@
 
 .shop-image {
   width: 100%;
+  max-width: 280px;
   height: 180px;
   object-fit: cover;
   border-radius: 12px;
@@ -163,7 +172,12 @@
   transform: translateY(0) scale(0.98);
   box-shadow: 0 2px 6px rgba(194, 24, 91, 0.1);
 }
-
+.view-shop-btn,
+.view-reviews-btn,
+.view-map-btn {
+  width: 100%; /* 🆕 Make them stack and full-width on small screens */
+  max-width: 220px;
+}
 /* ⭐ Rating */
 .shop-rating {
   margin: 0.5rem 0;
@@ -357,5 +371,30 @@
 
   .shop-card {
     max-width: 100%;
+  }
+}
+@media (min-width: 1200px) {
+  .shops-grid {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    padding: 0 4rem;
+  }
+}
+@media (max-width: 480px) {
+  .shops-container h2 {
+    font-size: 2rem;
+  }
+
+  .shop-card {
+    padding: 1rem;
+    box-shadow: none;
+  }
+
+  .shop-card p {
+    font-size: 0.85rem;
+  }
+
+  .shop-image {
+    height: 160px;
+    object-fit: cover;
   }
 }
