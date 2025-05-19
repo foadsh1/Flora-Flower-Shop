@@ -81,6 +81,7 @@ const ProductForm = () => {
         <select name="type" value={form.type} onChange={handleChange} required>
           <option value="single">🌸 Single Flower</option>
           <option value="bouquet">💐 Pre-made Bouquet</option>
+          <option value="vase">🏺 Decorative Vase</option> 
         </select>
         <input
           type="text"

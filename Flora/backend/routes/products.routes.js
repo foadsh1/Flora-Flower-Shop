@@ -37,11 +37,10 @@ router.post("/", upload.single("image"), (req, res) => {
       });
   }
 
-  // ✅ Validate type
-  if (!["single", "bouquet"].includes(type)) {
+  if (!["single", "bouquet", "vase"].includes(type)) {
     return res
       .status(400)
-      .json({ error: "Invalid product type. Must be 'single' or 'bouquet'." });
+      .json({ error: "Invalid product type. Must be 'single', 'bouquet', or 'vase'." });
   }
 
   // Get shop_id
@@ -156,10 +155,10 @@ router.patch("/:id", upload.single("image"), (req, res) => {
   }
 
   // ✅ Validate type
-  if (!["single", "bouquet"].includes(type)) {
+  if (!["single", "bouquet", "vase"].includes(type)) {
     return res
       .status(400)
-      .json({ error: "Invalid product type. Must be 'single' or 'bouquet'." });
+      .json({ error: "Invalid product type. Must be 'single', 'bouquet', or 'vase'." });
   }
 
   let sql = `

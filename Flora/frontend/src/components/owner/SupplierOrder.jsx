@@ -161,6 +161,7 @@ const SupplierOrder = () => {
           <option value="all">All Types</option>
           <option value="single">Single Flowers</option>
           <option value="bouquet">Bouquets</option>
+          <option value="vase">Vases</option> 
         </select>
         <select
           value={stockFilter}

@@ -82,7 +82,7 @@ const ShopOwnerProducts = () => {
   const inStock = filtered.filter((p) => p.quantity >= 5);
   const singles = inStock.filter((p) => p.type === "single");
   const bouquets = inStock.filter((p) => p.type === "bouquet");
-
+  const vases = inStock.filter((p) => p.type === "vase");
   const renderProductRow = (product) => (
     <tr key={product.product_id}>
       <td>
@@ -186,6 +186,7 @@ const ShopOwnerProducts = () => {
             <option value="all">All Types</option>
             <option value="single">Single Flowers</option>
             <option value="bouquet">Bouquets</option>
+            <option value="vase">Vases</option> 
           </select>
         </label>
 
@@ -272,6 +273,28 @@ const ShopOwnerProducts = () => {
               </tr>
             </thead>
             <tbody>{bouquets.map(renderProductRow)}</tbody>
+          </table>
+        </div>
+      )}
+      {/* Vases */}
+      {vases.length > 0 && (
+        <div className="product-section">
+          <h3>🏺 Decorative Vases</h3>
+          <table className="products-table">
+            <thead>
+              <tr>
+                <th>Image</th>
+                <th>Name</th>
+                <th>Type</th>
+                <th>Description</th>
+                <th>Base Price</th>
+                <th>Final Price</th>
+                <th>Quantity</th>
+                <th>Restock</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>{vases.map(renderProductRow)}</tbody>
           </table>
         </div>
       )}

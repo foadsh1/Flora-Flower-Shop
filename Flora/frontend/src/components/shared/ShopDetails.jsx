@@ -61,7 +61,7 @@ const ShopDetails = () => {
   const filtered = applyFilters();
   const singles = filtered.filter((p) => p.type === "single");
   const bouquets = filtered.filter((p) => p.type === "bouquet");
-
+  const vases = filtered.filter((p) => p.type === "vase");
   if (loading) return <div className="loading">Loading flowers...</div>;
 
   const renderProductCard = (product) => {
@@ -188,6 +188,7 @@ const ShopDetails = () => {
           <option value="all">All Types</option>
           <option value="single">Single Flowers</option>
           <option value="bouquet">Bouquets</option>
+          <option value="vase">Vases</option> 
         </select>
         <button className="reset-btn" onClick={resetFilters}>Reset Filters</button>
       </div>
@@ -205,7 +206,13 @@ const ShopDetails = () => {
             <div className="products-grid">{bouquets.map(renderProductCard)}</div>
           </div>
         )}
-        {singles.length === 0 && bouquets.length === 0 && (
+        {vases.length > 0 && (
+          <div className="product-section">
+            <h3>🏺 Decorative Vases</h3>
+            <div className="products-grid">{vases.map(renderProductCard)}</div>
+          </div>
+        )}
+        {singles.length === 0 && bouquets.length === 0 && vases.length === 0 && (
           <p>No matching products found.</p>
         )}
         {showMap && (

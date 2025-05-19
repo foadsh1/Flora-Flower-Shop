@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { CartContext } from "../context/CartContext";
 import { AuthContext } from "../context/AuthContext";
@@ -14,12 +14,39 @@ const Cart = () => {
 
   const [couponCode, setCouponCode] = useState("");
   const [discount, setDiscount] = useState(0);
-
-  const [method, setMethod] = useState("pickup"); // 'pickup' or 'delivery'
+  const [method, setMethod] = useState("pickup");
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
   const [address, setAddress] = useState({ street: "", apt: "", city: "" });
   const [phone, setPhone] = useState("");
+  const [workingHours, setWorkingHours] = useState({});
+
+  const parseWorkingHoursText = (raw) => {
+    if (!raw) return {};
+    const [daysPart, hoursPart] = raw.trim().split(/\s(?=\d{2}:\d{2}–\d{2}:\d{2})/);
+    const [open, close] = hoursPart.split("–");
+    const days = daysPart.split(",").map((d) => d.trim());
+    const allDays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+    const schedule = {};
+    allDays.forEach((day) => {
+      schedule[day] = days.includes(day) ? { open, close } : null;
+    });
+    return schedule;
+  };
+
+  useEffect(() => {
+    const shopId = cart[0]?.shop_id;
+    if (!shopId) return;
+    axios
+      .get("http://localhost:4000/shop/all", { withCredentials: true })
+      .then((res) => {
+        const shop = res.data.shops.find((s) => s.shop_id === shopId);
+        if (shop?.working_hours) {
+          setWorkingHours(parseWorkingHoursText(shop.working_hours));
+        }
+      })
+      .catch(() => toast.error("Failed to load shop info"));
+  }, [cart]);
 
   const handleQuantityChange = (productId, qty) => {
     if (qty >= 1) updateQuantity(productId, qty);
@@ -27,10 +54,7 @@ const Cart = () => {
 
   const handleApplyCoupon = async () => {
     const shopId = cart[0]?.shop_id;
-    if (!couponCode || !shopId) {
-      return toast.warn("Please enter a coupon code and ensure your cart is valid.");
-    }
-
+    if (!couponCode || !shopId) return toast.warn("Enter a coupon and ensure your cart is valid.");
     try {
       const res = await axios.get("http://localhost:4000/shop/coupon/validate", {
         params: { code: couponCode, shop_id: shopId },
@@ -40,7 +64,7 @@ const Cart = () => {
       toast.success(`Coupon applied! ${res.data.discount}% off`);
     } catch (err) {
       setDiscount(0);
-      toast.error(err.response?.data?.error || "Coupon is not valid for this shop.");
+      toast.error(err.response?.data?.error || "Coupon is not valid.");
     }
   };
 
@@ -68,16 +92,10 @@ const Cart = () => {
       navigate("/login");
       return;
     }
-
-    if (cart.length === 0) {
-      toast.warn("Your cart is empty.");
-      return;
-    }
-
+    if (cart.length === 0) return toast.warn("Your cart is empty.");
     if (!validateDetails()) return;
 
     const shopId = cart[0].shop_id;
-
     try {
       await axios.post(
         "http://localhost:4000/orders/place",
@@ -100,8 +118,30 @@ const Cart = () => {
       navigate("/profile");
     } catch (err) {
       console.error("Order failed:", err);
-      toast.error("Failed to place order. Try again.");
+      toast.error("Failed to place order.");
     }
+  };
+
+  const getMinTime = () => {
+    if (!date) return "00:00";
+    const selected = new Date(date);
+    const weekday = selected.toLocaleDateString("en", { weekday: "long" });
+    const today = new Date();
+    const isToday = date === today.toISOString().split("T")[0];
+    if (!workingHours[weekday]) return "23:59";
+    if (isToday) {
+      const now = new Date();
+      const currentTime = now.toTimeString().slice(0, 5);
+      return currentTime > workingHours[weekday].open ? currentTime : workingHours[weekday].open;
+    }
+    return workingHours[weekday].open;
+  };
+
+  const getMaxTime = () => {
+    if (!date) return "23:59";
+    const selected = new Date(date);
+    const weekday = selected.toLocaleDateString("en", { weekday: "long" });
+    return workingHours[weekday]?.close || "23:59";
   };
 
   return (
@@ -123,7 +163,7 @@ const Cart = () => {
                   <h4>{item.name}</h4>
                   <p>${item.price}</p>
                   {item.quantity < 5 && (
-                    <p className="low-stock-alert">⚠️ Hurry! Only {item.quantity} left in stock.</p>
+                    <p className="low-stock-alert">⚠️ Only {item.quantity} left!</p>
                   )}
                   <input
                     type="number"
@@ -163,7 +203,7 @@ const Cart = () => {
                   checked={method === "pickup"}
                   onChange={() => setMethod("pickup")}
                 />
-                Pickup from Shop
+                Pickup
               </label>
               <label>
                 <input
@@ -172,53 +212,72 @@ const Cart = () => {
                   checked={method === "delivery"}
                   onChange={() => setMethod("delivery")}
                 />
-                Delivery to Address
+                Delivery
               </label>
             </div>
 
             <div className="date-time-section">
               <label>
                 📅 Select Date:
-                <input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+                <input
+                  type="date"
+                  value={date}
+                  min={new Date().toISOString().split("T")[0]}
+                  onChange={(e) => {
+                    const picked = new Date(e.target.value);
+                    const weekday = picked.toLocaleDateString("en", { weekday: "long" });
+                    if (!workingHours[weekday]) {
+                      toast.warn(`${weekday} is a closed day for this shop.`);
+                      setDate("");
+                      return;
+                    }
+                    setDate(e.target.value);
+                  }}
+                />
               </label>
+              <p className="note">🕒 Time must be during shop hours and not in the past.</p>
               <label>
                 🕒 Select Time:
-                <input type="time" value={time} onChange={(e) => setTime(e.target.value)} />
+                <input
+                  type="time"
+                  value={time}
+                  min={getMinTime()}
+                  max={getMaxTime()}
+                  onChange={(e) => setTime(e.target.value)}
+                />
               </label>
-              <p className="note">
-                ⚠️ The shop will contact you to confirm the exact time and availability.
-              </p>
+              <p className="note">⚠️ Shop will contact you to confirm the time.</p>
             </div>
 
             {method === "delivery" && (
               <div className="delivery-details">
-                <label>
-                  Street:
+                <label>Street:
                   <input
                     type="text"
                     value={address.street}
                     onChange={(e) => setAddress({ ...address, street: e.target.value })}
                   />
                 </label>
-                <label>
-                  Apt Number:
+                <label>Apt Number:
                   <input
                     type="text"
                     value={address.apt}
                     onChange={(e) => setAddress({ ...address, apt: e.target.value })}
                   />
                 </label>
-                <label>
-                  City:
+                <label>City:
                   <input
                     type="text"
                     value={address.city}
                     onChange={(e) => setAddress({ ...address, city: e.target.value })}
                   />
                 </label>
-                <label>
-                  Phone:
-                  <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} />
+                <label>Phone:
+                  <input
+                    type="tel"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                  />
                 </label>
               </div>
             )}
@@ -235,7 +294,6 @@ const Cart = () => {
                 onApprove={async (data, actions) => {
                   await actions.order.capture();
                   if (!validateDetails()) return;
-
                   const shopId = cart[0].shop_id;
                   try {
                     await axios.post(
@@ -254,28 +312,24 @@ const Cart = () => {
                       },
                       { withCredentials: true }
                     );
-                    toast.success("Order placed and paid via PayPal! 🌸");
+                    toast.success("Order placed via PayPal!");
                     clearCart();
                     navigate("/profile");
                   } catch (err) {
-                    console.error("Order placement failed:", err);
+                    console.error("Order failed after payment:", err);
                     toast.error("Payment succeeded, but order failed.");
                   }
                 }}
                 onCancel={() => toast.info("Payment was cancelled.")}
                 onError={(err) => {
                   console.error("PayPal error:", err);
-                  toast.error("Payment failed. Please try again.");
+                  toast.error("Payment failed. Try again.");
                 }}
               />
             </div>
 
-            <button className="clear-btn" onClick={clearCart}>
-              Clear Cart
-            </button>
-            <button className="place-order-btn" onClick={placeOrder}>
-              Place Order
-            </button>
+            <button className="clear-btn" onClick={clearCart}>Clear Cart</button>
+            <button className="place-order-btn" onClick={placeOrder}>Place Order</button>
           </div>
         </div>
       )}
