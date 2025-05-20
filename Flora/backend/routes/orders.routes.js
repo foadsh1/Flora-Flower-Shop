@@ -2,7 +2,7 @@ const express = require("express");
 const db = require("../models/db");
 const router = express.Router();
 const { jsPDF } = require("jspdf");
-const { generateReceiptPDF } = require("../../frontend/src/components/utils/generateReceiptCanvas");
+const { generateReceiptPDF } = require("../utils/generateReceiptPDF");
 const { sendReceiptEmail } = require("../../frontend/src/components/utils/mailer");
 router.post("/place", async (req, res) => {
   const {
@@ -127,6 +127,9 @@ router.post("/place", async (req, res) => {
         price: item.price,
       })),
     };
+    if (receiptData.address && phone) {
+      receiptData.address.phone = phone;
+    }
 
     await generateReceiptPDF(receiptData, "client", doc);
     const pdfBuffer = doc.output("arraybuffer");

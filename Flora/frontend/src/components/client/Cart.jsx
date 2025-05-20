@@ -314,7 +314,7 @@ const Cart = () => {
                     );
                     toast.success("Order placed via PayPal!");
                     clearCart();
-                    navigate("/profile");
+                    navigate("/my-orders");
                   } catch (err) {
                     console.error("Order failed after payment:", err);
                     toast.error("Payment succeeded, but order failed.");
