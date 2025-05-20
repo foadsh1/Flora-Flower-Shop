@@ -1,8 +1,9 @@
 const express = require("express");
 const db = require("../models/db");
 const router = express.Router();
-
-// ✅ Place a new order
+const { jsPDF } = require("jspdf");
+const { generateReceiptPDF } = require("../../frontend/src/components/utils/generateReceiptCanvas");
+const { sendReceiptEmail } = require("../../frontend/src/components/utils/mailer");
 router.post("/place", async (req, res) => {
   const {
     cart,
@@ -17,8 +18,8 @@ router.post("/place", async (req, res) => {
     phone,
   } = req.body;
 
-  const client_id = req.session?.user?.user_id;
-  if (!client_id) return res.status(403).json({ error: "Unauthorized" });
+  const client = req.session?.user;
+  if (!client) return res.status(403).json({ error: "Unauthorized" });
 
   try {
     const [[{ value: taxPercentStr }]] = await db
@@ -26,7 +27,7 @@ router.post("/place", async (req, res) => {
       .query("SELECT value FROM settings WHERE key_name = 'tax_percent'");
     const taxPercent = parseFloat(taxPercentStr) || 17;
 
-    // Step 1: Validate stock
+    // ✅ Step 1: Validate stock
     for (const item of cart) {
       const [[product]] = await db
         .promise()
@@ -41,7 +42,7 @@ router.post("/place", async (req, res) => {
       }
     }
 
-    // Step 2: Optional coupon validation
+    // ✅ Step 2: Validate coupon (if any)
     if (couponCode) {
       const [couponResults] = await db
         .promise()
@@ -57,14 +58,14 @@ router.post("/place", async (req, res) => {
       }
     }
 
-    // Step 3: Insert order
+    // ✅ Step 3: Insert order
     const [orderResult] = await db.promise().query(
       `INSERT INTO orders (
         client_id, shop_id, total_price, coupon_code, discount_applied, tax_percent,
         method, delivery_date, delivery_time, address_street, address_apt, address_city, phone
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
-        client_id,
+        client.user_id,
         shopId,
         totalPrice,
         couponCode || null,
@@ -82,7 +83,7 @@ router.post("/place", async (req, res) => {
 
     const order_id = orderResult.insertId;
 
-    // Step 4: Insert order items
+    // ✅ Step 4: Insert order items
     const itemsValues = cart.map((item) => [
       order_id,
       item.product_id,
@@ -93,7 +94,7 @@ router.post("/place", async (req, res) => {
       .promise()
       .query("INSERT INTO order_items (order_id, product_id, quantity, price) VALUES ?", [itemsValues]);
 
-    // Step 5: Update product stock
+    // ✅ Step 5: Update stock
     for (const item of cart) {
       await db
         .promise()
@@ -103,12 +104,48 @@ router.post("/place", async (req, res) => {
         ]);
     }
 
-    res.json({ message: "Order placed successfully!" });
+    // ✅ Step 6: Generate PDF and send email
+    const doc = new jsPDF({ unit: "pt", format: "a4" });
+
+    const receiptData = {
+      order_id,
+      order_date: new Date(),
+      status: "Paid",
+      method,
+      address: method === "delivery" ? address : null,
+      delivery_date: date,
+      delivery_time: time,
+      coupon_code: couponCode,
+      discount_applied: discount,
+      total_price: totalPrice,
+      tax_percent: taxPercent,
+      shop_name: "Flora Flower Shop", // optional: you could also query actual shop_name
+      client_name: client.username,
+      items: cart.map((item) => ({
+        name: item.name,
+        quantity: item.cartQuantity,
+        price: item.price,
+      })),
+    };
+
+    await generateReceiptPDF(receiptData, "client", doc);
+    const pdfBuffer = doc.output("arraybuffer");
+
+    await sendReceiptEmail({
+      to: client.email,
+      subject: `Your Flora Order #${order_id} Receipt`,
+      html: "<p>Thank you for your order with Flora 🌸<br/>Your receipt is attached.</p>",
+      attachmentBuffer: Buffer.from(pdfBuffer),
+      filename: `Flora_Receipt_${order_id}.pdf`,
+    });
+
+    return res.json({ message: "Order placed successfully and receipt sent!" });
   } catch (err) {
     console.error("❌ Error placing order:", err);
-    res.status(500).json({ error: "Something went wrong while placing your order" });
+    return res.status(500).json({ error: "Something went wrong while placing your order" });
   }
 });
+
 
 // ✅ Get all orders of the logged-in client
 router.get("/mine", (req, res) => {

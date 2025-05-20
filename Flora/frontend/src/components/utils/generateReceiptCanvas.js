@@ -1,8 +1,7 @@
 import jsPDF from "jspdf";
-import logo from "../../assets/images/logo.png";
 
-export const generateReceiptPDF = async (data, role = "client") => {
-  const doc = new jsPDF({ unit: "pt", format: "a4" });
+export const generateReceiptPDF = async (data, role = "client", docInstance = null) => {
+  const doc = docInstance || new jsPDF({ unit: "pt", format: "a4" });
   const margin = 40;
   let y = margin;
 
@@ -13,14 +12,17 @@ export const generateReceiptPDF = async (data, role = "client") => {
   const taxIncluded = total * (taxPercent / (100 + taxPercent));
 
   // 🌸 Header
-  const img = new Image();
-  img.src = logo;
-  await new Promise((resolve) => {
-    img.onload = () => {
-      doc.addImage(img, "PNG", 500, 10, 70, 50);
-      resolve();
-    };
-  });
+  // 🛠️ Only add logo if running in the browser (frontend)
+  if (!docInstance && typeof window !== "undefined") {
+    const img = new Image();
+    img.src = require("../../assets/images/logo.png"); // Webpack handles it in React
+    await new Promise((resolve) => {
+      img.onload = () => {
+        doc.addImage(img, "PNG", 500, 10, 70, 50);
+        resolve();
+      };
+    });
+  }
 
   doc.setFont("helvetica", "bold");
   doc.setFontSize(22);
@@ -170,6 +172,10 @@ export const generateReceiptPDF = async (data, role = "client") => {
   doc.text("Thank you for choosing Flora!", margin, y);
   doc.text("This is an automatically generated receipt. No signature required.", margin, y + 12);
 
-  // 📥 Save PDF
-  doc.save(`Flora_Order_${data.order_id}_Receipt.pdf`);
+  // 📥 Save or return doc
+  if (docInstance) {
+    return doc; // backend mode
+  } else {
+    doc.save(`Flora_Order_${data.order_id}_Receipt.pdf`); // frontend mode
+  }
 };
