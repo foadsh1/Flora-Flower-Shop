@@ -3,7 +3,8 @@ import axios from "axios";
 import "../../assets/css/products.css";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
-
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
 const ShopOwnerProducts = () => {
   const [products, setProducts] = useState([]);
   const [search, setSearch] = useState("");
@@ -13,6 +14,7 @@ const ShopOwnerProducts = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [stockFilter, setStockFilter] = useState("all");
   const [message, setMessage] = useState("");
+  const [selectedExportSection, setSelectedExportSection] = useState("");
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -54,7 +56,111 @@ const ShopOwnerProducts = () => {
       console.error("Delete failed:", err);
     }
   };
+  const exportToExcel = (title, items) => {
+    const data = items.map((p) => ({
+      Name: p.name,
+      Type: p.type,
+      Description: p.description,
+      "Base Price": p.base_price,
+      "Final Price": p.price,
+      Quantity: p.quantity,
+    }));
 
+    const worksheet = XLSX.utils.json_to_sheet(data);
+    const workbook = XLSX.utils.book_new();
+
+    // ✅ Clean sheet name of forbidden characters
+    const safeSheetName = title.replace(/[:\\/?*[\]]/g, "").substring(0, 31); // Excel sheet names max 31 characters
+
+    XLSX.utils.book_append_sheet(workbook, worksheet, safeSheetName);
+
+    const buffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
+    const blob = new Blob([buffer], { type: "application/octet-stream" });
+    saveAs(blob, `${safeSheetName.replace(/\s+/g, "_")}.xlsx`);
+  };
+  
+
+  // Download all
+  const handleDownloadAll = () => {
+    const wb = XLSX.utils.book_new();
+    const wsData = [];
+
+    const addSection = (label, list) => {
+      if (list.length === 0) return;
+
+      wsData.push([label]); // Section header
+      wsData.push([]); // spacer
+
+      wsData.push([
+        "Name", "Type", "Description", "Base Price", "Final Price", "Quantity"
+      ]);
+
+      list.forEach((p) => {
+        wsData.push([
+          p.name,
+          p.type,
+          p.description,
+          p.base_price,
+          p.price,
+          p.quantity,
+        ]);
+      });
+
+      wsData.push([]); // Spacer after section
+    };
+
+    addSection("⚠️ Low / Out-of-Stock", [...lowStock, ...outOfStock]);
+    addSection("🌸 Single Flowers", singles);
+    addSection("💐 Pre-made Bouquets", bouquets);
+    addSection("🏺 Decorative Vases", vases);
+
+    const worksheet = XLSX.utils.aoa_to_sheet(wsData);
+    XLSX.utils.book_append_sheet(wb, worksheet, "All_Products");
+
+    const excelBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+    const data = new Blob([excelBuffer], { type: "application/octet-stream" });
+    saveAs(data, `My_Products_${new Date().toISOString().split("T")[0]}.xlsx`);
+  };
+  const handleDownloadSection = (section) => {
+    let title = "";
+    let items = [];
+
+    if (!section) return;
+
+    if (section === "all") {
+      handleDownloadAll();
+      return;
+    }
+
+    switch (section) {
+      case "low":
+        title = "Low_Or_Out_Of_Stock";
+        items = [...lowStock, ...outOfStock];
+        break;
+      case "single":
+        title = "Single_Flowers";
+        items = singles;
+        break;
+      case "bouquet":
+        title = "Bouquets";
+        items = bouquets;
+        break;
+      case "vase":
+        title = "Vases";
+        items = vases;
+        break;
+      default:
+        return;
+    }
+
+    if (items.length === 0) {
+      toast.info(`No products found in "${title}"`);
+      return;
+    }
+
+    exportToExcel(title, items);
+  };
+  
   const applyFilters = () => {
     return products.filter((product) => {
       const nameMatch = product.name
@@ -147,6 +253,29 @@ const ShopOwnerProducts = () => {
         >
           🔍 Filters
         </button>
+        <div className="export-dropdown">
+          <select
+            value={selectedExportSection}
+            onChange={(e) => setSelectedExportSection(e.target.value)}
+            className="excel-select"
+          >
+            <option value="">📥 Select Excel Section</option>
+            <option value="all">📦 All Products (with Sections)</option>
+            <option value="low">⚠️ Low / Out-of-Stock</option>
+            <option value="single">🌸 Single Flowers</option>
+            <option value="bouquet">💐 Bouquets</option>
+            <option value="vase">🏺 Vases</option>
+          </select>
+
+          <button
+            className="excel-btn"
+            onClick={() => handleDownloadSection(selectedExportSection)}
+            disabled={!selectedExportSection}
+          >
+            Download Excel
+          </button>
+        </div>
+
       </div>
 
       {showFilters && (
