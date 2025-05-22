@@ -318,3 +318,72 @@
 .place-order-btn:hover {
   background-color: #388e3c;
 }
+/* Wrapper for consistent layout */
+.datepicker-wrapper {
+  margin-top: 0.5rem;
+  margin-bottom: 1rem;
+  display: block;
+}
+
+/* Input field styling */
+.custom-datepicker {
+  width: 100%;
+  padding: 10px 12px;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background-color: #fff;
+  color: #333;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  transition: border 0.2s ease-in-out;
+}
+
+.custom-datepicker:focus {
+  border-color: #c2185b;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(194, 24, 91, 0.2);
+}
+
+/* Label styling */
+.date-label {
+  display: block;
+  font-weight: 500;
+  font-size: 0.95rem;
+  margin-bottom: 0.5rem;
+  color: #333;
+}
+.datepicker-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 1rem;
+}
+
+.custom-datepicker {
+  width: 100%;
+  padding: 10px 12px;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background-color: #fff;
+  color: #333;
+  transition: border 0.2s ease-in-out;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.custom-datepicker:focus {
+  border-color: #c2185b;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(194, 24, 91, 0.2);
+}
+
+.date-label {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 0.5rem;
+}
+
+.react-datepicker-popper {
+  z-index: 9999 !important; /* ensure above PayPal and other components */
+}

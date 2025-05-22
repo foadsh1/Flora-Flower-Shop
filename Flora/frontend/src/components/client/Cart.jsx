@@ -6,7 +6,12 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import "../../assets/css/cart.css";
 import { PayPalButtons } from "@paypal/react-paypal-js";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import { registerLocale } from "react-datepicker";
+import he from "date-fns/locale/he";
 
+registerLocale("he", he);
 const Cart = () => {
   const { cart, removeFromCart, updateQuantity, clearCart } = useContext(CartContext);
   const { user } = useContext(AuthContext);
@@ -163,16 +168,25 @@ const Cart = () => {
                   <h4>{item.name}</h4>
                   <p>${item.price}</p>
                   {item.quantity < 5 && (
-                    <p className="low-stock-alert">⚠️ Only {item.quantity} left!</p>
+                    <p className="low-stock-alert">
+                      ⚠️ Only {item.quantity} left!
+                    </p>
                   )}
                   <input
                     type="number"
                     value={item.cartQuantity}
                     min="1"
                     max={item.quantity}
-                    onChange={(e) => handleQuantityChange(item.product_id, parseInt(e.target.value))}
+                    onChange={(e) =>
+                      handleQuantityChange(
+                        item.product_id,
+                        parseInt(e.target.value)
+                      )
+                    }
                   />
-                  <button onClick={() => removeFromCart(item.product_id)}>Remove</button>
+                  <button onClick={() => removeFromCart(item.product_id)}>
+                    Remove
+                  </button>
                 </div>
               </div>
             ))}
@@ -189,90 +203,96 @@ const Cart = () => {
                 onChange={(e) => setCouponCode(e.target.value)}
               />
               <button onClick={handleApplyCoupon}>Apply Coupon</button>
-              {discount > 0 && <p className="discount-info">✅ {discount}% discount applied</p>}
+              {discount > 0 && (
+                <p className="discount-info">✅ {discount}% discount applied</p>
+              )}
             </div>
 
             <h3>Total After Discount: ${discountedTotal.toFixed(2)}</h3>
 
             <div className="delivery-method">
               <h4>Choose Method:</h4>
-              <label>
-                <input
-                  type="radio"
-                  value="pickup"
-                  checked={method === "pickup"}
-                  onChange={() => setMethod("pickup")}
-                />
-                Pickup
-              </label>
-              <label>
-                <input
-                  type="radio"
-                  value="delivery"
-                  checked={method === "delivery"}
-                  onChange={() => setMethod("delivery")}
-                />
-                Delivery
-              </label>
-            </div>
-
-            <div className="date-time-section">
-              <label>
+              <label className="date-label">
                 📅 Select Date:
-                <input
-                  type="date"
-                  value={date}
-                  min={new Date().toISOString().split("T")[0]}
-                  onChange={(e) => {
-                    const picked = new Date(e.target.value);
-                    const weekday = picked.toLocaleDateString("en", { weekday: "long" });
+                <DatePicker
+                  selected={date ? new Date(date) : null}
+                  onChange={(d) => {
+                    const weekday = d.toLocaleDateString("en", {
+                      weekday: "long",
+                    });
                     if (!workingHours[weekday]) {
                       toast.warn(`${weekday} is a closed day for this shop.`);
                       setDate("");
                       return;
                     }
-                    setDate(e.target.value);
+                    setDate(d.toISOString().split("T")[0]);
                   }}
+                  dateFormat="dd/MM/yyyy"
+                  minDate={new Date()}
+                  locale="en"
+                  placeholderText="Select a date"
+                  className="custom-datepicker"
+                  wrapperClassName="datepicker-wrapper"
                 />
               </label>
-              <p className="note">🕒 Time must be during shop hours and not in the past.</p>
-              <label>
+
+              <label className="date-label">
                 🕒 Select Time:
-                <input
-                  type="time"
-                  value={time}
-                  min={getMinTime()}
-                  max={getMaxTime()}
-                  onChange={(e) => setTime(e.target.value)}
+                <DatePicker
+                  selected={time ? new Date(`2020-01-01T${time}`) : null}
+                  onChange={(d) => setTime(d.toTimeString().slice(0, 5))}
+                  showTimeSelect
+                  showTimeSelectOnly
+                  timeIntervals={1} // ✅ allow every minute
+                  timeFormat="HH:mm"
+                  dateFormat="HH:mm"
+                  timeCaption="Time"
+                  placeholderText="Select time"
+                  className="custom-datepicker"
+                  wrapperClassName="datepicker-wrapper"
+                  
                 />
               </label>
-              <p className="note">⚠️ Shop will contact you to confirm the time.</p>
+
+              <p className="note">
+                ⚠️ Shop will contact you to confirm the time.
+              </p>
             </div>
 
             {method === "delivery" && (
               <div className="delivery-details">
-                <label>Street:
+                <label>
+                  Street:
                   <input
                     type="text"
                     value={address.street}
-                    onChange={(e) => setAddress({ ...address, street: e.target.value })}
+                    onChange={(e) =>
+                      setAddress({ ...address, street: e.target.value })
+                    }
                   />
                 </label>
-                <label>Apt Number:
+                <label>
+                  Apt Number:
                   <input
                     type="text"
                     value={address.apt}
-                    onChange={(e) => setAddress({ ...address, apt: e.target.value })}
+                    onChange={(e) =>
+                      setAddress({ ...address, apt: e.target.value })
+                    }
                   />
                 </label>
-                <label>City:
+                <label>
+                  City:
                   <input
                     type="text"
                     value={address.city}
-                    onChange={(e) => setAddress({ ...address, city: e.target.value })}
+                    onChange={(e) =>
+                      setAddress({ ...address, city: e.target.value })
+                    }
                   />
                 </label>
-                <label>Phone:
+                <label>
+                  Phone:
                   <input
                     type="tel"
                     value={phone}
@@ -288,7 +308,9 @@ const Cart = () => {
                 forceReRender={[discountedTotal]}
                 createOrder={(data, actions) => {
                   return actions.order.create({
-                    purchase_units: [{ amount: { value: discountedTotal.toFixed(2) } }],
+                    purchase_units: [
+                      { amount: { value: discountedTotal.toFixed(2) } },
+                    ],
                   });
                 }}
                 onApprove={async (data, actions) => {
@@ -328,8 +350,12 @@ const Cart = () => {
               />
             </div>
 
-            <button className="clear-btn" onClick={clearCart}>Clear Cart</button>
-            <button className="place-order-btn" onClick={placeOrder}>Place Order</button>
+            <button className="clear-btn" onClick={clearCart}>
+              Clear Cart
+            </button>
+            <button className="place-order-btn" onClick={placeOrder}>
+              Place Order
+            </button>
           </div>
         </div>
       )}
