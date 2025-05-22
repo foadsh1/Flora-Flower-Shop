@@ -19,7 +19,7 @@ const Cart = () => {
 
   const [couponCode, setCouponCode] = useState("");
   const [discount, setDiscount] = useState(0);
-  const [method, setMethod] = useState("pickup");
+  const [method] = useState("pickup");
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
   const [address, setAddress] = useState({ street: "", apt: "", city: "" });
@@ -125,28 +125,6 @@ const Cart = () => {
       console.error("Order failed:", err);
       toast.error("Failed to place order.");
     }
-  };
-
-  const getMinTime = () => {
-    if (!date) return "00:00";
-    const selected = new Date(date);
-    const weekday = selected.toLocaleDateString("en", { weekday: "long" });
-    const today = new Date();
-    const isToday = date === today.toISOString().split("T")[0];
-    if (!workingHours[weekday]) return "23:59";
-    if (isToday) {
-      const now = new Date();
-      const currentTime = now.toTimeString().slice(0, 5);
-      return currentTime > workingHours[weekday].open ? currentTime : workingHours[weekday].open;
-    }
-    return workingHours[weekday].open;
-  };
-
-  const getMaxTime = () => {
-    if (!date) return "23:59";
-    const selected = new Date(date);
-    const weekday = selected.toLocaleDateString("en", { weekday: "long" });
-    return workingHours[weekday]?.close || "23:59";
   };
 
   return (

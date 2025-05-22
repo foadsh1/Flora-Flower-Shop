@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useCallback, useEffect, useState, useRef } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
 import "../../assets/css/dashboard.css";
@@ -172,7 +172,7 @@ const ShopOwnerDashboard = () => {
   };
 
 
-  const fetchAnalytics = () => {
+  const fetchAnalytics = useCallback(() => {
     axios
       .get("http://localhost:4000/shop/analytics", {
         params: {
@@ -189,10 +189,11 @@ const ShopOwnerDashboard = () => {
         setMonthlyRevenue(res.data.monthlyRevenue);
       })
       .catch((err) => console.error("Failed to load analytics", err));
-  };
+  }, [startDate, endDate, year1, year2, flowerLimit]);
+
   useEffect(() => {
     fetchAnalytics();
-  }, [startDate, endDate, year1, year2, flowerLimit]);
+  }, [fetchAnalytics]);
   const handleDownloadChart = () => {
     if (!revenueChartRef.current) return;
     html2canvas(revenueChartRef.current).then((canvas) => {
